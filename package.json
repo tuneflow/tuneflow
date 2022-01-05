@@ -1,0 +1,73 @@
+{
+  "name": "tuneflow",
+  "version": "0.0.1",
+  "description": "Programmable, pluggable music arrangement",
+  "main": "src/index.ts",
+  "scripts": {
+    "lint": "gts lint",
+    "lint:fix": "eslint --fix --ext .js,.ts",
+    "lint-staged": "lint-staged",
+    "lint-staged:ts": "eslint --ext .js,.ts",
+    "lint:tsc": "vue-tsc --noEmit --skipLibCheck",
+    "prepare": "husky install",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/panacea123/tuneflow.git"
+  },
+  "keywords": [
+    "music",
+    "arrangement",
+    "programmable",
+    "plugin"
+  ],
+  "author": "Matthew Zeng",
+  "license": "MIT",
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint-staged;npm run lint:tsc;"
+    }
+  },
+  "lint-staged": {
+    "**/*.{js,ts}": [
+      "git add",
+      "prettier --write",
+      "git add",
+      "eslint --ext .js,.ts",
+      "npm run lint-staged:ts --"
+    ]
+  },
+  "dependencies": {
+    "underscore": "^1.13.2",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.1.0",
+    "@typescript-eslint/parser": "^4.1.0",
+    "@vue/cli-plugin-eslint": "^5.0.0-0",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "@vue/test-utils": "^2.0.0-0",
+    "@types/jest": "^27.4.0",
+    "@types/underscore": "^1.11.4",
+    "eslint": "^7.25.0",
+    "eslint-config-prettier": "^8.0.0",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-jest": "^24.3.6",
+    "eslint-plugin-markdown": "^2.0.0",
+    "eslint-plugin-no-explicit-type-exports": "^0.12.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "eslint-plugin-vue": "^7.1.0",
+    "husky": "^7.0.2",
+    "jest": "^27.3.1",
+    "lint-staged": "^11.1.2",
+    "prettier": "^2.4.1",
+    "semver": "^7.3.5",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.4.3",
+    "vite": "^2.6.0",
+    "vue-tsc": "^0.29.6",
+    "ts-jest": "^27.1.2"
+  }
+}
