@@ -1,6 +1,6 @@
 {
   "name": "tuneflow",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Programmable, pluggable music arrangement",
   "main": "src/index.ts",
   "scripts": {
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitee.com/panacea123/tuneflow.git"
+    "url": "https://gitee.com/andantei/tuneflow.git"
   },
   "keywords": [
     "music",
