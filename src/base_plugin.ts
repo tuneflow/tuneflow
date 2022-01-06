@@ -32,6 +32,20 @@ export class BasePlugin {
   }
 
   /**
+   * The display name of the provider.
+   */
+  static providerDisplayName(): string {
+    throw new Error('providerDisplayName() should be overwritten.');
+  }
+
+  /**
+   * The display name of the plugin.
+   */
+  static pluginDisplayName(): string {
+    throw new Error('pluginDisplayName() should be overwritten.');
+  }
+
+  /**
    * Provider a list of their class names.
    *
    * You get the output of these plugins as the input of @run method of this plugin.
@@ -67,6 +81,11 @@ export class BasePlugin {
     return `${this.providerId()}.${this.pluginId()}`;
   }
 
+  /**
+   * DO NOT overwrite this method.
+   * @final
+   * @returns The universal unique identifier for this artifact.
+   */
   public static getPrefixedArtifactId(artifactId: string) {
     return `${this.id()}.${artifactId}`;
   }

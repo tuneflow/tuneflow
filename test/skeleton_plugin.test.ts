@@ -2,6 +2,22 @@ import { Pipeline, Song, BasePlugin } from '../src';
 
 describe('Skeleton Tuneflow', () => {
   class SkeletonPlugin extends BasePlugin {
+    static providerId(): string {
+      return 'andantei';
+    }
+
+    static pluginId(): string {
+      return 'test-skeleton';
+    }
+
+    static providerDisplayName(): string {
+      return 'Andantei';
+    }
+
+    static pluginDisplayName(): string {
+      return 'Test Skeleton';
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async run(song: Song, inputs: any[]): Promise<{ [artifactId: string]: any } | void> {
       song.createTrack();
@@ -10,14 +26,17 @@ describe('Skeleton Tuneflow', () => {
 
   it('finishes correctly', async () => {
     const song = new Song();
+    song.createTempoChange({
+      ticks: 0,
+      bpm: 120,
+    });
+    song.setResolution(480);
     const track = song.createTrack();
     track.createNote({
       pitch: 64,
       velocity: 80,
       startTick: 0,
-      startTime: 0.0,
       endTick: 10,
-      endTime: 1.0,
     });
     const pipeline = new Pipeline();
     pipeline.addPluginAt(new SkeletonPlugin(), 0);

@@ -10,6 +10,11 @@ export class Pipeline {
     this.plugins.splice(index, 0, plugin);
   }
 
+  /** Gets all plugins in execution order. */
+  getPlugins(): BasePlugin[] {
+    return this.plugins;
+  }
+
   /**
    * Runs the pipeline and modifies the song.
    * @param song

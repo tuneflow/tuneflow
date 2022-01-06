@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { lt as lowerThan } from 'binary-search-bounds';
 
 /**
  * Information about how an instrument should be played.
@@ -44,31 +45,23 @@ export class Note {
   private pitch: number;
   private velocity: number;
   private startTick: number;
-  private startTime: number;
   private endTick: number;
-  private endTime: number;
 
   constructor({
     pitch,
     velocity,
     startTick,
-    startTime,
     endTick,
-    endTime,
   }: {
     pitch: number;
     velocity: number;
     startTick: number;
-    startTime: number;
     endTick: number;
-    endTime: number;
   }) {
     this.pitch = pitch;
     this.velocity = velocity;
     this.startTick = startTick;
-    this.startTime = startTime;
     this.endTick = endTick;
-    this.endTime = endTime;
   }
 
   getPitch() {
@@ -83,16 +76,8 @@ export class Note {
     return this.startTick;
   }
 
-  getStartTime() {
-    return this.startTime;
-  }
-
   getEndTick() {
     return this.endTick;
-  }
-
-  getEndTime() {
-    return this.endTime;
   }
 }
 
@@ -182,9 +167,7 @@ export class Track {
     pitch,
     velocity,
     startTick,
-    startTime,
     endTick,
-    endTime,
   }: {
     /** An integer value between 0 - 127 */
     pitch: number;
@@ -192,20 +175,14 @@ export class Track {
     velocity: number;
     /** An integer value indicating the start tick. */
     startTick: number;
-    /** A float value indicating the start time in seconds. */
-    startTime: number;
     /** An integer value indicating the end tick. */
     endTick: number;
-    /** A float value indicating the end time in seconds. */
-    endTime: number;
   }) {
     const note = new Note({
       pitch,
       velocity,
       startTick,
-      startTime,
       endTick,
-      endTime,
     });
     this.notes.push(note);
     return note;
@@ -217,8 +194,6 @@ export class Track {
 
   /**
    * Adds a suggested instrument and returns it.
-   * @param program
-   * @param isDrum
    * @returns
    */
   createSuggestedInstrument({
@@ -298,7 +273,7 @@ export class TempoEvent {
     ticks: number;
     /** The new tempo in BPM(Beats-per-minute) format. */
     bpm: number;
-    /** The time in seconds at which this event happens. */
+    /** The time at which this event happens. */
     time: number;
   }) {
     this.ticks = ticks;
@@ -310,23 +285,16 @@ export class TempoEvent {
     return this.ticks;
   }
 
-  /**
-   *
-   * @param ticks The tick at which this event happens.
-   */
-  setTicks(ticks: number) {
-    this.ticks = ticks;
-  }
-
   getBpm(): number {
     return this.bpm;
   }
 
   /**
-   *
+   * In most cases you don't need to (and shouldn't) call this method.
+   * To update the BPM of a tempo event, call `updateTempo` from the `Song` instance.
    * @param bpm The new tempo in BPM(Beats-per-minute) format.
    */
-  setBpm(bpm: number) {
+  setBpmInternal(bpm: number) {
     this.bpm = bpm;
   }
 
@@ -335,10 +303,10 @@ export class TempoEvent {
   }
 
   /**
-   *
-   * @param time The time in seconds at which this event happens.
+   * In most cases you don't need to (and shouldn't) call this method.
+   * @param time The time at which this event happens.
    */
-  setTime(time: number) {
+  setTimeInternal(time: number) {
     this.time = time;
   }
 }
@@ -445,26 +413,30 @@ export class Song {
 
   /**
    * Adds a tempo change event into the song and returns it.
-   * @param ticks
-   * @param bpm
-   * @param time
    * @returns
    */
   createTempoChange({
     ticks,
     bpm,
-    time,
   }: {
     /** The tick at which this event happens. */
     ticks: number;
     /** The new tempo in BPM(Beats-per-minute) format. */
     bpm: number;
-    /** The time in seconds at which this event happens. */
-    time: number;
   }): TempoEvent {
-    const tempoChange = new TempoEvent({ ticks, bpm, time });
+    if (this.tempos.length === 0 && ticks !== 0) {
+      throw new Error('The first tempo event must be at tick 0');
+    }
+    // Calculate time BEFORE the new tempo event is inserted.
+    const tempoChange = new TempoEvent({ ticks, bpm, time: this.tickToSeconds(ticks) });
     this.tempos.push(tempoChange);
+    this.retimingTempoEvents();
     return tempoChange;
+  }
+
+  updateTempo(tempoEvent: TempoEvent, newBPM: number) {
+    tempoEvent.setBpmInternal(newBPM);
+    this.retimingTempoEvents();
   }
 
   getTimeSignatures(): TimeSignatureEvent[] {
@@ -506,13 +478,62 @@ export class Song {
    * @returns Total duration of the song in seconds.
    */
   getDuration() {
-    let duration = 0.0;
-    for (const track of this.tracks) {
-      if (track.getNotes().length == 0) {
-        continue;
-      }
-      duration = Math.max(duration, track.getNotes()[track.getNotes().length - 1].getEndTime());
+    return this.tickToSeconds(this.getLastTick());
+  }
+
+  tickToSeconds(tick: number) {
+    if (tick === 0) {
+      return 0;
     }
-    return duration;
+    const baseTempoIndex = lowerThan(
+      this.getTempoChanges(),
+      // @ts-ignore
+      { getTicks: () => tick },
+      (a, b) => a.getTicks() - b.getTicks(),
+    );
+    if (baseTempoIndex == -1) {
+      return -1;
+    }
+    const baseTempoChange = this.getTempoChanges()[baseTempoIndex];
+    const ticksDelta = tick - baseTempoChange.getTicks();
+    const ticksPerSecondSinceLastTempoChange = Song.tempoBPMToTicksPerSecond(
+      baseTempoChange.getBpm() as number,
+      this.getResolution(),
+    );
+    return baseTempoChange.getTime() + ticksDelta / ticksPerSecondSinceLastTempoChange;
+  }
+
+  secondsToTick(seconds: number) {
+    const baseTempoIndex = lowerThan(
+      this.getTempoChanges(),
+      // @ts-ignore
+      { getTime: () => timeInSeconds },
+      (a, b) => a.getTime() - b.getTime(),
+    );
+    if (baseTempoIndex == -1) {
+      return -1;
+    }
+    const baseTempoChange = this.getTempoChanges()[baseTempoIndex];
+    const timeDelta = seconds - baseTempoChange.getTime();
+    const ticksPerSecondSinceLastTempoChange = Song.tempoBPMToTicksPerSecond(
+      baseTempoChange.getBpm(),
+      this.getResolution(),
+    );
+    return Math.round(baseTempoChange.getTicks() + timeDelta * ticksPerSecondSinceLastTempoChange);
+  }
+
+  private static tempoBPMToTicksPerSecond(tempoBPM: number, ticksPerBeat: number) {
+    return (tempoBPM * ticksPerBeat) / 60;
+  }
+
+  /**
+   * Recalculate all tempo event time.
+   */
+  private retimingTempoEvents() {
+    this.tempos.sort((a, b) => a.getTicks() - b.getTicks());
+    // Re-calculate all tempo event time.
+    for (const tempoEvent of this.tempos) {
+      tempoEvent.setTimeInternal(this.tickToSeconds(tempoEvent.getTicks()));
+    }
   }
 }
