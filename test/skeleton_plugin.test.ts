@@ -1,7 +1,7 @@
-import { Pipeline, Song, BasePlugin } from '../src';
+import { TuneflowPipeline, Song, TuneflowPlugin } from '../src';
 
 describe('Skeleton Tuneflow', () => {
-  class SkeletonPlugin extends BasePlugin {
+  class SkeletonPlugin extends TuneflowPlugin {
     static providerId(): string {
       return 'andantei';
     }
@@ -38,7 +38,7 @@ describe('Skeleton Tuneflow', () => {
       startTick: 0,
       endTick: 10,
     });
-    const pipeline = new Pipeline();
+    const pipeline = new TuneflowPipeline();
     pipeline.addPluginAt(new SkeletonPlugin(), 0);
     expect(song.getTracks().length).toBe(1);
     await pipeline.run(song);

@@ -1,7 +1,8 @@
+import type { ParamDescriptor, LabelText } from './descriptors';
 import type { Song } from './models/song';
 
 export interface ArtifactDescriptor {
-  plugin: typeof BasePlugin;
+  plugin: typeof TuneflowPlugin;
   artifactId: string;
 }
 
@@ -10,7 +11,9 @@ export interface ArtifactDescriptor {
  *
  * All plugins should be a sub-class of this plugin in order to run in the pipeline.
  */
-export class BasePlugin {
+export class TuneflowPlugin {
+  protected paramsResult: { [paramName: string]: any } = {};
+
   /**
    * The unique id to identify the plugin provider.
    *
@@ -34,24 +37,37 @@ export class BasePlugin {
   /**
    * The display name of the provider.
    */
-  static providerDisplayName(): string {
+  static providerDisplayName(): LabelText {
     throw new Error('providerDisplayName() should be overwritten.');
   }
 
   /**
    * The display name of the plugin.
    */
-  static pluginDisplayName(): string {
+  static pluginDisplayName(): LabelText {
     throw new Error('pluginDisplayName() should be overwritten.');
   }
 
   /**
-   * Provider a list of their class names.
+   * Specify params to get from user input.
+   *
+   * Param input widgets will be displayed on the UI, and the inputs will be collected and fed into @run method.
+   *
+   * If you don't need any param, return `{}`;
+   */
+  params(): { [paramName: string]: ParamDescriptor } {
+    return {};
+  }
+
+  /**
+   * Provide a key-value map of results from other plugins.
    *
    * You get the output of these plugins as the input of @run method of this plugin.
+   *
+   * If you don't need any input, return `{}`;
    */
-  inputs(): ArtifactDescriptor[] {
-    return [];
+  inputs(): { [inputName: string]: ArtifactDescriptor } {
+    return {};
   }
 
   /**
@@ -64,13 +80,20 @@ export class BasePlugin {
    *
    * @param song The song that is being processed. You can directly modify the song
    * by calling its methods.
-   * @param inputs The inputs specified by the `inputs` method.
+   * @param inputs The results collected from the plugins specified by the `inputs` method.
+   * @param params The results collected from user input specified by the `params` method.
    *
    */
-  // eslint-disable-next-line
-  async run(song: Song, inputs: any[]): Promise<{ [artifactId: string]: any } | void> {}
+  async run(
+    // eslint-disable-next-line
+    song: Song,
+    // eslint-disable-next-line
+    inputs: { [inputName: string]: any },
+    // eslint-disable-next-line
+    params: { [paramName: string]: any },
+  ): Promise<{ [artifactId: string]: any } | void> {}
 
-  // ============ INTERNAL BELOW ================
+  // ============ PUBLIC NO OVERWRITE ================
 
   /**
    * DO NOT overwrite this method.
@@ -88,5 +111,25 @@ export class BasePlugin {
    */
   public static getPrefixedArtifactId(artifactId: string) {
     return `${this.id()}.${artifactId}`;
+  }
+
+  // ============ INTERNAL BELOW ================
+
+  /**
+   * DO NOT overwrite this method.
+   *
+   * The host of the pipeline should call this method to set params for the plugins before running the pipeline.
+   * @final
+   */
+  public setParamsInternal(params: { [paramName: string]: any }) {
+    this.paramsResult = params;
+  }
+
+  /**
+   * DO NOT overwrite this method.
+   * @final
+   */
+  public getParamsInternal() {
+    return this.paramsResult;
   }
 }

@@ -1,17 +1,17 @@
 import * as _ from 'underscore';
-import type { ArtifactDescriptor, BasePlugin } from './base_plugin';
+import type { ArtifactDescriptor, TuneflowPlugin } from './base_plugin';
 import type { Song } from './models/song';
 
-export class Pipeline {
-  private plugins: BasePlugin[] = [];
+export class TuneflowPipeline {
+  private plugins: TuneflowPlugin[] = [];
 
   /** Inserts a plugin at index. */
-  addPluginAt(plugin: BasePlugin, index: number) {
+  addPluginAt(plugin: TuneflowPlugin, index: number) {
     this.plugins.splice(index, 0, plugin);
   }
 
   /** Gets all plugins in execution order. */
-  getPlugins(): BasePlugin[] {
+  getPlugins(): TuneflowPlugin[] {
     return this.plugins;
   }
 
@@ -23,16 +23,17 @@ export class Pipeline {
     const artifactStore: { [key: string]: any } = {};
 
     for (const plugin of this.plugins) {
-      const inputs = [];
-      for (const input of plugin.inputs()) {
+      const inputs: { [inputName: string]: any } = {};
+      for (const inputName of _.keys(plugin.inputs())) {
+        const input = plugin.inputs()[inputName];
         const artifactId = this.getArtifactId(input);
         const artifact = artifactStore[artifactId];
         if (artifact === undefined) {
           throw new Error(`Missing required artifact ${artifactId}`);
         }
-        inputs.push(artifact);
+        inputs[inputName] = artifact;
       }
-      const outputArtifacts = await plugin.run(song, inputs);
+      const outputArtifacts = await plugin.run(song, inputs, plugin.getParamsInternal());
       if (
         outputArtifacts !== undefined &&
         outputArtifacts !== null // This check is necessary as typeof null === 'object'
@@ -40,7 +41,7 @@ export class Pipeline {
         if (typeof outputArtifacts !== 'object') {
           throw new Error(
             `Output artifacts by plugin ${(
-              plugin.constructor as typeof BasePlugin
+              plugin.constructor as typeof TuneflowPlugin
             ).id()} is not a key-value map.`,
           );
         }
