@@ -101,10 +101,7 @@ export class TuneflowPlugin {
    */
   public static create() {
     const plugin = new this();
-    for (const key of _.keys(plugin.params())) {
-      const paramDescriptor = plugin.params()[key];
-      plugin.paramsResult[key] = paramDescriptor.defaultValue;
-    }
+    plugin.resetParamsInternal();
     return plugin;
   }
 
@@ -144,5 +141,12 @@ export class TuneflowPlugin {
    */
   public getParamsInternal() {
     return this.paramsResult;
+  }
+
+  public resetParamsInternal() {
+    for (const key of _.keys(this.params())) {
+      const paramDescriptor = this.params()[key];
+      this.paramsResult[key] = paramDescriptor.defaultValue;
+    }
   }
 }
