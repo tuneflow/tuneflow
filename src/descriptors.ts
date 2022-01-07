@@ -8,14 +8,12 @@ export interface SliderWidgetConfig {
   minValue: number;
   maxValue: number;
   step: number;
-  defaultValue: number;
 }
 
 export interface InputWidgetConfig {
   minValue: number;
   maxValue: number;
   step: number;
-  defaultValue: number;
 }
 
 export interface SelectOptionConfig {
@@ -24,7 +22,6 @@ export interface SelectOptionConfig {
 }
 
 export interface SelectWidgetConfig {
-  defaultValue: number;
   options: SelectOptionConfig[];
 }
 
@@ -41,6 +38,9 @@ export enum WidgetType {
 export interface ParamDescriptor {
   /** The name to display on the UI. */
   displayName: LabelText;
+
+  /** The default value of the param. */
+  defaultValue: any;
 
   /** Configuration of the widget to display on the UI. */
   widget: WidgetDescriptor;

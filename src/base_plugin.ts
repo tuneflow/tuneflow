@@ -1,5 +1,6 @@
 import type { ParamDescriptor, LabelText } from './descriptors';
 import type { Song } from './models/song';
+import * as _ from 'underscore';
 
 export interface ArtifactDescriptor {
   plugin: typeof TuneflowPlugin;
@@ -94,6 +95,18 @@ export class TuneflowPlugin {
   ): Promise<{ [artifactId: string]: any } | void> {}
 
   // ============ PUBLIC NO OVERWRITE ================
+
+  /**
+   * Creates a plugin instance and initializes it.
+   */
+  public static create() {
+    const plugin = new this();
+    for (const key of _.keys(plugin.params())) {
+      const paramDescriptor = plugin.params()[key];
+      plugin.paramsResult[key] = paramDescriptor.defaultValue;
+    }
+    return plugin;
+  }
 
   /**
    * DO NOT overwrite this method.

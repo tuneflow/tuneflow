@@ -5,9 +5,19 @@ import type { Song } from './models/song';
 export class TuneflowPipeline {
   private plugins: TuneflowPlugin[] = [];
 
+  /** Inserts a plugin to the end. */
+  addPlugin(plugin: TuneflowPlugin) {
+    this.plugins.push(plugin);
+  }
+
   /** Inserts a plugin at index. */
   addPluginAt(plugin: TuneflowPlugin, index: number) {
     this.plugins.splice(index, 0, plugin);
+  }
+
+  /** Removes a plugin from the plugin list. */
+  removePlugin(plugin: TuneflowPlugin) {
+    this.plugins.splice(this.plugins.indexOf(plugin), 1);
   }
 
   /** Gets all plugins in execution order. */
