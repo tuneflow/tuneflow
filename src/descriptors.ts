@@ -8,6 +8,7 @@ export interface SliderWidgetConfig {
   minValue: number;
   maxValue: number;
   step: number;
+  unit?: string;
 }
 
 export interface InputWidgetConfig {
