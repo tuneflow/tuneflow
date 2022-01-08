@@ -58,9 +58,12 @@ export interface ParamDescriptor {
   /** The name to display on the UI. */
   displayName: LabelText;
 
+  /** Configuration of the widget to display on the UI. */
+  widget: WidgetDescriptor;
+
   /** The default value of the param. */
   defaultValue?: any;
 
-  /** Configuration of the widget to display on the UI. */
-  widget: WidgetDescriptor;
+  /** Explaining what this parameter is for. */
+  description?: LabelText;
 }
