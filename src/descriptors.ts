@@ -26,14 +26,32 @@ export interface SelectWidgetConfig {
   options: SelectOptionConfig[];
 }
 
+export interface TrackSelectorWidgetConfig {
+  multiSelection?: boolean;
+}
+
+export interface PitchWidgetConfig {
+  minAllowedPitch?: number;
+  maxAllowedPitch?: number;
+}
+
 export interface WidgetDescriptor {
   type: WidgetType;
-  config: SliderWidgetConfig | InputWidgetConfig | SelectWidgetConfig;
+  config:
+    | SliderWidgetConfig
+    | InputWidgetConfig
+    | SelectWidgetConfig
+    | TrackSelectorWidgetConfig
+    | PitchWidgetConfig;
 }
 
 export enum WidgetType {
   Slider = 1,
   Input = 2,
+  /** A widget that selects one or more track(s). */
+  TrackSelector = 3,
+  /** A widget that selects a pitch. */
+  Pitch = 4,
 }
 
 export interface ParamDescriptor {
@@ -41,7 +59,7 @@ export interface ParamDescriptor {
   displayName: LabelText;
 
   /** The default value of the param. */
-  defaultValue: any;
+  defaultValue?: any;
 
   /** Configuration of the widget to display on the UI. */
   widget: WidgetDescriptor;
