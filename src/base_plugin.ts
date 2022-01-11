@@ -15,9 +15,7 @@ type RunParameters = { [paramName: string]: any };
  * All plugins should be a sub-class of this plugin in order to run in the pipeline.
  */
 export class TuneflowPlugin {
-  enabledInternal = true;
-  manualApplyInternal = false;
-
+  private enabledInternal = true;
   private paramsResultInternal: RunParameters = {};
   private generatedTrackIdsInternal: string[] = [];
 
@@ -173,6 +171,7 @@ export class TuneflowPlugin {
    */
   public setParamsInternal(params: { [paramName: string]: any }) {
     this.paramsResultInternal = params;
+    this.maybeSyncEnabledWithParamsReadiness();
   }
 
   /**
@@ -194,6 +193,7 @@ export class TuneflowPlugin {
       const paramDescriptor = this.params()[key];
       this.paramsResultInternal[key] = paramDescriptor.defaultValue;
     }
+    this.maybeSyncEnabledWithParamsReadiness();
   }
 
   /**
@@ -204,13 +204,31 @@ export class TuneflowPlugin {
    */
   public resetInternal() {
     this.resetParamsInternal();
-    if (this.songAccess().createTrack || this.songAccess().removeTrack) {
+    if (this.shouldManualEnableInternal()) {
       this.enabledInternal = false;
-      this.manualApplyInternal = true;
     }
+  }
+
+  /**
+   * DO NOT overwrite this method.
+   *
+   * Whether this plugin should be enabled by clicking the apply button manually.
+   */
+  public shouldManualEnableInternal() {
+    return this.songAccess().createTrack || this.songAccess().removeTrack;
   }
 
   public setEnabledInternal(enabled: boolean) {
     this.enabledInternal = enabled;
+  }
+
+  /**
+   * If the plugin is manually enabled, and params are not ready,
+   * the plugin should be disabled.
+   */
+  private maybeSyncEnabledWithParamsReadiness() {
+    if (this.shouldManualEnableInternal() && !this.hasAllParamsSet()) {
+      this.setEnabledInternal(false);
+    }
   }
 }

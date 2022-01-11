@@ -36,6 +36,7 @@ export class TuneflowPipeline {
     for (const plugin of this.plugins) {
       // @ts-ignore
       song.setPluginContextInternal(plugin);
+      // @ts-ignore
       if (!plugin.enabledInternal) {
         continue;
       }
