@@ -28,22 +28,41 @@ export class TuneflowPipeline {
   /**
    * Runs the pipeline and modifies the song.
    * @param song
+   * @returns Whether the flow has been successfully completed.
    */
-  async run(song: Song) {
+  async run(song: Song): Promise<boolean> {
     const artifactStore: { [key: string]: any } = {};
 
     for (const plugin of this.plugins) {
+      // @ts-ignore
+      song.setPluginContextInternal(plugin);
+      if (!plugin.enabledInternal) {
+        continue;
+      }
       const inputs: { [inputName: string]: any } = {};
       for (const inputName of _.keys(plugin.inputs())) {
         const input = plugin.inputs()[inputName];
         const artifactId = this.getArtifactId(input);
         const artifact = artifactStore[artifactId];
         if (artifact === undefined) {
-          throw new Error(`Missing required artifact ${artifactId}`);
+          console.error(`Missing required artifact ${artifactId}`);
+          return false;
         }
         inputs[inputName] = artifact;
       }
-      const outputArtifacts = await plugin.run(song, inputs, plugin.getParamsInternal());
+      if (!plugin.hasAllParamsSet()) {
+        return true;
+      }
+      let outputArtifacts;
+      try {
+        outputArtifacts = await plugin.run(song, inputs, plugin.getParamsInternal());
+      } catch (e: any) {
+        console.error(e);
+        return false;
+      }
+
+      // TODO: Check the modifications made to the song against the plugin's access.
+      // Prevent the song from being modified by this plugin if access verification failed.
       if (
         outputArtifacts !== undefined &&
         outputArtifacts !== null // This check is necessary as typeof null === 'object'
@@ -60,6 +79,13 @@ export class TuneflowPipeline {
             outputArtifacts[key];
         }
       }
+    }
+    return true;
+  }
+
+  reset() {
+    for (const plugin of this.plugins) {
+      plugin.resetInternal();
     }
   }
 

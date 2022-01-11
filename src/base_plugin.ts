@@ -1,4 +1,4 @@
-import type { ParamDescriptor, LabelText } from './descriptors';
+import type { ParamDescriptor, LabelText, SongAccess } from './descriptors';
 import type { Song } from './models/song';
 import * as _ from 'underscore';
 
@@ -7,13 +7,19 @@ export interface ArtifactDescriptor {
   artifactId: string;
 }
 
+type RunParameters = { [paramName: string]: any };
+
 /**
  * The base class of a plugin.
  *
  * All plugins should be a sub-class of this plugin in order to run in the pipeline.
  */
 export class TuneflowPlugin {
-  protected paramsResult: { [paramName: string]: any } = {};
+  enabledInternal = true;
+  manualApplyInternal = false;
+
+  private paramsResultInternal: RunParameters = {};
+  private generatedTrackIdsInternal: string[] = [];
 
   /**
    * The unique id to identify the plugin provider.
@@ -72,6 +78,13 @@ export class TuneflowPlugin {
   }
 
   /**
+   * Provide the access this plugin needs to modify a song.
+   */
+  songAccess(): SongAccess {
+    return {};
+  }
+
+  /**
    * The main logic here.
    *
    * It should return a map that contains the produced artifacts of this plugin.
@@ -91,7 +104,7 @@ export class TuneflowPlugin {
     // eslint-disable-next-line
     inputs: { [inputName: string]: any },
     // eslint-disable-next-line
-    params: { [paramName: string]: any },
+    params: RunParameters,
   ): Promise<{ [artifactId: string]: any } | void> {}
 
   // ============ PUBLIC NO OVERWRITE ================
@@ -101,14 +114,41 @@ export class TuneflowPlugin {
    */
   public static create() {
     const plugin = new this();
-    plugin.resetParamsInternal();
+    plugin.resetInternal();
     return plugin;
   }
 
   /**
    * DO NOT overwrite this method.
+   *
+   * Gets a typed param.
+   * @param params The `params` from `run` method input.
+   */
+  public getParam<T>(params: RunParameters, paramName: string) {
+    return params[paramName] as T;
+  }
+
+  /**
+   * DO NOT overwrite this method.
    * @final
-   * @returns The unique identifier for this plugin, which is the combination of providerId and moduleId.
+   * @returns Whether all params has been set.
+   */
+  public hasAllParamsSet(): boolean {
+    for (const paramName of _.keys(this.params())) {
+      if (
+        this.paramsResultInternal[paramName] === undefined ||
+        this.paramsResultInternal[paramName] === null
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * DO NOT overwrite this method.
+   * @final
+   * @returns The unique identifier for the plugin CLASS, which is the combination of providerId and moduleId. NOTE: this is not the id of the plugin instance.
    */
   public static id(): string {
     return `${this.providerId()}.${this.pluginId()}`;
@@ -132,7 +172,7 @@ export class TuneflowPlugin {
    * @final
    */
   public setParamsInternal(params: { [paramName: string]: any }) {
-    this.paramsResult = params;
+    this.paramsResultInternal = params;
   }
 
   /**
@@ -140,13 +180,37 @@ export class TuneflowPlugin {
    * @final
    */
   public getParamsInternal() {
-    return this.paramsResult;
+    return this.paramsResultInternal;
   }
 
+  /**
+   * DO NOT overwrite this method.
+   *
+   * Resets the parameters of this plugin.
+   * @final
+   */
   public resetParamsInternal() {
     for (const key of _.keys(this.params())) {
       const paramDescriptor = this.params()[key];
-      this.paramsResult[key] = paramDescriptor.defaultValue;
+      this.paramsResultInternal[key] = paramDescriptor.defaultValue;
     }
+  }
+
+  /**
+   * DO NOT overwrite this method.
+   *
+   * Resets the whole plugin, including states.
+   * @final
+   */
+  public resetInternal() {
+    this.resetParamsInternal();
+    if (this.songAccess().createTrack || this.songAccess().removeTrack) {
+      this.enabledInternal = false;
+      this.manualApplyInternal = true;
+    }
+  }
+
+  public setEnabledInternal(enabled: boolean) {
+    this.enabledInternal = enabled;
   }
 }

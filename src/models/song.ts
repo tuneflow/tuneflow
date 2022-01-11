@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { lt as lowerThan } from 'binary-search-bounds';
+import * as _ from 'underscore';
+import type { TuneflowPlugin } from '../base_plugin';
 
 /**
  * Information about how an instrument should be played.
@@ -218,15 +220,15 @@ export class Track {
     return instrumentInfo;
   }
 
-  getUuid() {
+  getId() {
     return this.uuid;
   }
 
   /**
    * In most cases, you don't need to use this method and just let the pipeline assign an id for the track.
-   * @param uuid
+   * @param uuid A universally unique id for the track.
    */
-  setUuid(uuid: string) {
+  setId(uuid: string) {
     this.uuid = uuid;
   }
 
@@ -360,11 +362,17 @@ export class TimeSignatureEvent {
   }
 }
 
+interface PluginContext {
+  plugin: TuneflowPlugin;
+  numTracksCreatedByPlugin: number;
+}
+
 export class Song {
   private tracks: Track[];
   private PPQ: number;
   private tempos: TempoEvent[];
   private timeSignatures: TimeSignatureEvent[];
+  private pluginContext?: PluginContext;
 
   constructor() {
     this.tracks = [];
@@ -380,12 +388,46 @@ export class Song {
     return this.tracks;
   }
 
+  getTrackById(trackId: string) {
+    return _.find(this.tracks, track => track.getId() === trackId);
+  }
+
   /**
    * Adds a new track into the song and returns it.
+   *
+   * Requires `createTrack` access.
    */
-  createTrack(): Track {
-    const track = new Track({});
-    this.tracks.push(track);
+  createTrack({
+    index,
+  }: {
+    /** Index to insert at. If left blank, appends to the end. */
+    index?: number;
+  }): Track {
+    this.checkAccess('createTrack');
+    const track = new Track({ uuid: this.getNextTrackId() });
+    if (index !== undefined && index !== null) {
+      this.tracks.splice(index, 0, track);
+    } else {
+      this.tracks.push(track);
+    }
+    return track;
+  }
+
+  /**
+   * Removes a new track from the song and returns it.
+   *
+   * Requires `removeTrack` access.
+   */
+  removeTrack(trackId: string) {
+    this.checkAccess('removeTrack');
+    const track = this.getTrackById(trackId);
+    if (!track) {
+      return null;
+    }
+    this.tracks.splice(
+      _.findIndex(this.tracks, track => track.getId() === trackId),
+      1,
+    );
     return track;
   }
 
@@ -520,6 +562,43 @@ export class Song {
       this.getResolution(),
     );
     return Math.round(baseTempoChange.getTicks() + timeDelta * ticksPerSecondSinceLastTempoChange);
+  }
+
+  protected setPluginContextInternal(plugin: TuneflowPlugin) {
+    this.pluginContext = {
+      plugin,
+      numTracksCreatedByPlugin: 0,
+    };
+  }
+
+  private getNextTrackId() {
+    const pluginContext = this.pluginContext as PluginContext;
+    // @ts-ignore
+    const pluginGeneratedTrackIds = pluginContext.plugin.generatedTrackIdsInternal;
+    if (pluginContext.numTracksCreatedByPlugin === pluginGeneratedTrackIds.length) {
+      pluginGeneratedTrackIds.push(uuidv4());
+    } else if (pluginContext.numTracksCreatedByPlugin > pluginGeneratedTrackIds.length) {
+      throw new Error('Plugin generated track ids out of sync.');
+    }
+    const nextTrackId = pluginGeneratedTrackIds[pluginContext.numTracksCreatedByPlugin];
+    pluginContext.numTracksCreatedByPlugin += 1;
+    // @ts-ignore
+    return nextTrackId;
+  }
+
+  private checkAccess(accessName: string) {
+    if (!this.pluginContext) {
+      throw new Error(
+        `Song needs to be accessed in a plugin context in order to use privileged methods.`,
+      );
+    }
+    if (!(this.pluginContext.plugin.songAccess() as any)[accessName]) {
+      throw new Error(
+        `Plugin ${(
+          this.pluginContext.plugin.constructor as any
+        ).id()} requires access ${accessName} in order to run.`,
+      );
+    }
   }
 
   private static tempoBPMToTicksPerSecond(tempoBPM: number, ticksPerBeat: number) {
