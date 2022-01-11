@@ -1,6 +1,7 @@
 import type { ParamDescriptor, LabelText, SongAccess } from './descriptors';
 import type { Song } from './models/song';
 import * as _ from 'underscore';
+import { WidgetType } from '.';
 
 export interface ArtifactDescriptor {
   plugin: typeof TuneflowPlugin;
@@ -133,11 +134,35 @@ export class TuneflowPlugin {
    */
   public hasAllParamsSet(): boolean {
     for (const paramName of _.keys(this.params())) {
-      if (
-        this.paramsResultInternal[paramName] === undefined ||
-        this.paramsResultInternal[paramName] === null
-      ) {
+      const paramResult = this.paramsResultInternal[paramName];
+      if (paramResult === undefined || paramResult === null) {
         return false;
+      }
+      // If the param is a non-primitive value(like an object),
+      // we need to do additional check.
+      const paramDescriptor = this.params()[paramName];
+      const paramWidgetType = paramDescriptor.widget.type;
+      switch (paramWidgetType) {
+        case WidgetType.Input:
+        case WidgetType.Pitch:
+        case WidgetType.Slider:
+        case WidgetType.TrackSelector:
+          // Nothing else to check.
+          break;
+        case WidgetType.TrackPitchSelector:
+          if (
+            paramResult.track === undefined ||
+            paramResult.track === null ||
+            paramResult.pitch === undefined ||
+            paramResult.pitch === null
+          ) {
+            return false;
+          }
+          break;
+        default:
+          throw new Error(
+            `Additional param nullness check needs to be implemented for widget type ${paramWidgetType}`,
+          );
       }
     }
     return true;

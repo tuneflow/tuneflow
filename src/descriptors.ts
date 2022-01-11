@@ -35,6 +35,11 @@ export interface PitchWidgetConfig {
   maxAllowedPitch?: number;
 }
 
+export interface TrackPitchSelectorWidgetConfig {
+  trackSelectorConfig: TrackSelectorWidgetConfig;
+  pitchSelectorConfig: PitchWidgetConfig;
+}
+
 export interface WidgetDescriptor {
   type: WidgetType;
   config:
@@ -42,7 +47,8 @@ export interface WidgetDescriptor {
     | InputWidgetConfig
     | SelectWidgetConfig
     | TrackSelectorWidgetConfig
-    | PitchWidgetConfig;
+    | PitchWidgetConfig
+    | TrackPitchSelectorWidgetConfig;
 }
 
 export interface SongAccess {
@@ -60,6 +66,7 @@ export enum WidgetType {
   TrackSelector = 3,
   /** A widget that selects a pitch. */
   Pitch = 4,
+  TrackPitchSelector = 5,
 }
 
 export interface ParamDescriptor {
