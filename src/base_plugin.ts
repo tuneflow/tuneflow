@@ -19,6 +19,8 @@ export class TuneflowPlugin {
   private enabledInternal = true;
   private paramsResultInternal: RunParameters = {};
   private generatedTrackIdsInternal: string[] = [];
+  /** Whether the plugin is in operation. */
+  private functioningInternal = false;
 
   /**
    * The unique id to identify the plugin provider.

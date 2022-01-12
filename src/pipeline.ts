@@ -1,9 +1,12 @@
+import cloneDeep from 'lodash.clonedeep';
 import * as _ from 'underscore';
 import type { ArtifactDescriptor, TuneflowPlugin } from './base_plugin';
 import type { Song } from './models/song';
 
 export class TuneflowPipeline {
   private plugins: TuneflowPlugin[] = [];
+  /** Whether the last run encountered errors. */
+  private threwErrorInLastRun = false;
 
   /** Inserts a plugin to the end. */
   addPlugin(plugin: TuneflowPlugin) {
@@ -28,10 +31,18 @@ export class TuneflowPipeline {
   /**
    * Runs the pipeline and modifies the song.
    * @param song
-   * @returns Whether the flow has been successfully completed.
+   * @param sandboxMode In sandbox mode, a cloned sandbox Song will be fed into plugins.
+   * And the original song can only be modified by a plugin if it executes successfully.
+   * @returns Whether the flow completed with no errors.
    */
-  async run(song: Song): Promise<boolean> {
+  async run(song: Song, sandboxMode = false): Promise<boolean> {
+    this.threwErrorInLastRun = false;
     const artifactStore: { [key: string]: any } = {};
+
+    for (const plugin of this.plugins) {
+      // @ts-ignore
+      plugin.functioningInternal = false;
+    }
 
     for (const plugin of this.plugins) {
       // @ts-ignore
@@ -54,11 +65,16 @@ export class TuneflowPipeline {
       if (!plugin.hasAllParamsSet()) {
         return true;
       }
+      const rollbackSong = sandboxMode ? cloneDeep(song) : null;
       let outputArtifacts;
       try {
         outputArtifacts = await plugin.run(song, inputs, plugin.getParamsInternal());
       } catch (e: any) {
         console.error(e);
+        this.threwErrorInLastRun = true;
+        if (sandboxMode) {
+          _.assign(song, rollbackSong);
+        }
         return false;
       }
 
@@ -80,6 +96,8 @@ export class TuneflowPipeline {
             outputArtifacts[key];
         }
       }
+      // @ts-ignore
+      plugin.functioningInternal = true;
     }
     return true;
   }
@@ -88,6 +106,10 @@ export class TuneflowPipeline {
     for (const plugin of this.plugins) {
       plugin.resetInternal();
     }
+  }
+
+  getThrewErrorInLastRun() {
+    return this.threwErrorInLastRun;
   }
 
   private getArtifactId(descriptor: ArtifactDescriptor) {
