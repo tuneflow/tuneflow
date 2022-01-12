@@ -57,6 +57,13 @@ export class TuneflowPlugin {
   }
 
   /**
+   * The description of this plugin.
+   */
+  static pluginDescription(): LabelText | null {
+    return null;
+  }
+
+  /**
    * Specify params to get from user input.
    *
    * Param input widgets will be displayed on the UI, and the inputs will be collected and fed into @run method.
