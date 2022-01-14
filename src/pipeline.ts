@@ -103,6 +103,22 @@ export class TuneflowPipeline {
     }
   }
 
+  movePluginUp(plugin: TuneflowPlugin) {
+    const pluginIndex = this.getPluginIndexByPluginInstanceId(plugin.instanceId);
+    if (pluginIndex <= 0) {
+      return;
+    }
+    this.plugins.splice(pluginIndex - 1, 0, this.plugins.splice(pluginIndex, 1)[0]);
+  }
+
+  movePluginDown(plugin: TuneflowPlugin) {
+    const pluginIndex = this.getPluginIndexByPluginInstanceId(plugin.instanceId);
+    if (pluginIndex < 0 || pluginIndex >= this.plugins.length - 1) {
+      return;
+    }
+    this.plugins.splice(pluginIndex, 0, this.plugins.splice(pluginIndex + 1, 1)[0]);
+  }
+
   isPluginFunctioning(plugin: TuneflowPlugin) {
     return !!this.songCache[plugin.instanceId];
   }

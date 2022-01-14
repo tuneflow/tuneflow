@@ -12,7 +12,7 @@ type RunParameters = { [paramName: string]: any };
  * All plugins should be a sub-class of this plugin in order to run in the pipeline.
  */
 export class TuneflowPlugin {
-  instanceId = uuidv4();
+  private instanceIdInternal = uuidv4();
   enabledInternal = true;
   private paramsResultInternal: RunParameters = {};
   // @ts-ignore
@@ -106,6 +106,10 @@ export class TuneflowPlugin {
     const plugin = new this();
     plugin.resetInternal();
     return plugin;
+  }
+
+  public get instanceId() {
+    return this.instanceIdInternal;
   }
 
   /**
