@@ -220,6 +220,10 @@ export class Track {
     return instrumentInfo;
   }
 
+  clearSuggestedInstruments() {
+    this.suggestedInstruments = [];
+  }
+
   getId() {
     return this.uuid;
   }

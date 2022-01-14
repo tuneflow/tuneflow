@@ -115,6 +115,19 @@ export class TuneflowPipeline {
     return this.threwErrorInLastRun;
   }
 
+  getLastFunctioningPlugin() {
+    for (let i = this.plugins.length - 1; i >= 0; i -= 1) {
+      if (this.isPluginFunctioning(this.plugins[i])) {
+        return this.plugins[i];
+      }
+    }
+    return null;
+  }
+
+  getPluginCache(plugin: TuneflowPlugin) {
+    return this.songCache[plugin.instanceId];
+  }
+
   /**
    * Searches from index - 1 to 0 and return the index of the first plugin found with cache.
    * @param index
