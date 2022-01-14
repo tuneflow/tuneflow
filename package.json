@@ -1,7 +1,7 @@
 {
   "name": "tuneflow",
   "version": "0.3.0",
-  "description": "Programmable, pluggable music arrangement",
+  "description": "Programmable, extensible music composition & arrangement",
   "main": "src/index.ts",
   "scripts": {
     "lint": "gts lint",
