@@ -4,11 +4,6 @@ import * as _ from 'underscore';
 import { v4 as uuidv4 } from 'uuid';
 import { WidgetType } from '.';
 
-export interface ArtifactDescriptor {
-  plugin: typeof TuneflowPlugin;
-  artifactId: string;
-}
-
 type RunParameters = { [paramName: string]: any };
 
 /**
@@ -20,6 +15,7 @@ export class TuneflowPlugin {
   instanceId = uuidv4();
   enabledInternal = true;
   private paramsResultInternal: RunParameters = {};
+  // @ts-ignore
   private generatedTrackIdsInternal: string[] = [];
 
   /**
@@ -75,17 +71,6 @@ export class TuneflowPlugin {
   }
 
   /**
-   * Provide a key-value map of results from other plugins.
-   *
-   * You get the output of these plugins as the input of @run method of this plugin.
-   *
-   * If you don't need any input, return `{}`;
-   */
-  inputs(): { [inputName: string]: ArtifactDescriptor } {
-    return {};
-  }
-
-  /**
    * Provide the access this plugin needs to modify a song.
    */
   songAccess(): SongAccess {
@@ -102,15 +87,12 @@ export class TuneflowPlugin {
    *
    * @param song The song that is being processed. You can directly modify the song
    * by calling its methods.
-   * @param inputs The results collected from the plugins specified by the `inputs` method.
    * @param params The results collected from user input specified by the `params` method.
    *
    */
   async run(
     // eslint-disable-next-line
     song: Song,
-    // eslint-disable-next-line
-    inputs: { [inputName: string]: any },
     // eslint-disable-next-line
     params: RunParameters,
   ): Promise<{ [artifactId: string]: any } | void> {}
