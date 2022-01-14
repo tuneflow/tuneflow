@@ -7,6 +7,8 @@ export class TuneflowPipeline {
   private plugins: TuneflowPlugin[] = [];
   /** Whether the last run encountered errors. */
   private threwErrorInLastRun = false;
+  /** Cache for the Song instances that was successfully produced in the last run. */
+  private songCache: { [pluginId: string]: Song } = {};
 
   /** Inserts a plugin to the end. */
   addPlugin(plugin: TuneflowPlugin) {
@@ -28,29 +30,47 @@ export class TuneflowPipeline {
     return this.plugins;
   }
 
+  resetCache() {
+    this.songCache = {};
+  }
+
   /**
    * Runs the pipeline and modifies the song.
+   *
+   * TODO: Check all the cloneDeep usages and remove unecessary ones if possible.
+   *
    * @param song
-   * @param sandboxMode In sandbox mode, a cloned sandbox Song will be fed into plugins.
-   * And the original song can only be modified by a plugin if it executes successfully.
+   * @param dirtyIndex The index of the first dirty plugin.
    * @returns Whether the flow completed with no errors.
    */
-  async run(song: Song, sandboxMode = false): Promise<boolean> {
+  async run(song: Song, dirtyIndex = 0): Promise<boolean> {
+    console.log(`dirty from: ${dirtyIndex}`);
+    dirtyIndex = Math.max(0, dirtyIndex);
     this.threwErrorInLastRun = false;
     const artifactStore: { [key: string]: any } = {};
 
-    for (const plugin of this.plugins) {
-      // @ts-ignore
-      plugin.functioningInternal = false;
+    // Jump to the latest cached song before dirtyIndex if available.
+    const cachedInputSong = cloneDeep(song);
+    const cachedPluginIndex = this.getIndexOfLatestPluginWithCacheBeforeIndex(dirtyIndex);
+    if (cachedPluginIndex >= 0) {
+      _.assign(song, cloneDeep(this.songCache[this.plugins[cachedPluginIndex].instanceId]));
     }
 
-    for (const plugin of this.plugins) {
-      // @ts-ignore
-      song.setPluginContextInternal(plugin);
+    // Clear plugin cache from dirtyIndex since we will recompute.
+    for (let i = dirtyIndex; i < this.plugins.length; i += 1) {
+      delete this.songCache[this.plugins[i].instanceId];
+    }
+
+    // Run dirty plugins.
+    let numFinishedPlugins = 0;
+    for (let i = dirtyIndex; i < this.plugins.length; i += 1) {
+      const plugin = this.plugins[i];
       // @ts-ignore
       if (!plugin.enabledInternal) {
         continue;
       }
+      // @ts-ignore
+      song.setPluginContextInternal(plugin);
       const inputs: { [inputName: string]: any } = {};
       for (const inputName of _.keys(plugin.inputs())) {
         const input = plugin.inputs()[inputName];
@@ -65,18 +85,23 @@ export class TuneflowPipeline {
       if (!plugin.hasAllParamsSet()) {
         return true;
       }
-      const rollbackSong = sandboxMode ? cloneDeep(song) : null;
       let outputArtifacts;
       try {
         outputArtifacts = await plugin.run(song, inputs, plugin.getParamsInternal());
       } catch (e: any) {
         console.error(e);
         this.threwErrorInLastRun = true;
-        if (sandboxMode) {
-          _.assign(song, rollbackSong);
+        // Rollback song to the last successful plugin cache.
+        const pluginIndex = this.getIndexOfLatestPluginWithCacheBeforeIndex(i);
+        if (pluginIndex >= 0) {
+          _.assign(song, cloneDeep(this.songCache[this.plugins[pluginIndex].instanceId]));
+        } else {
+          _.assign(song, cachedInputSong);
         }
         return false;
       }
+
+      this.songCache[plugin.instanceId] = cloneDeep(song);
 
       // TODO: Check the modifications made to the song against the plugin's access.
       // Prevent the song from being modified by this plugin if access verification failed.
@@ -96,9 +121,9 @@ export class TuneflowPipeline {
             outputArtifacts[key];
         }
       }
-      // @ts-ignore
-      plugin.functioningInternal = true;
+      numFinishedPlugins += 1;
     }
+    console.log(`Number of successfully finished plugins: ${numFinishedPlugins}`);
     return true;
   }
 
@@ -108,11 +133,33 @@ export class TuneflowPipeline {
     }
   }
 
+  isPluginFunctioning(plugin: TuneflowPlugin) {
+    return !!this.songCache[plugin.instanceId];
+  }
+
+  getPluginIndexByPluginInstanceId(instanceId: string) {
+    return _.findIndex(this.plugins, plugin => plugin.instanceId === instanceId);
+  }
+
   getThrewErrorInLastRun() {
     return this.threwErrorInLastRun;
   }
 
   private getArtifactId(descriptor: ArtifactDescriptor) {
     return `${descriptor.plugin.id()}.${descriptor.artifactId}`;
+  }
+
+  /**
+   * Searches from index - 1 to 0 and return the index of the first plugin found with cache.
+   * @param index
+   * @returns
+   */
+  private getIndexOfLatestPluginWithCacheBeforeIndex(index: number) {
+    for (let lastIndexWithCache = index - 1; lastIndexWithCache >= 0; lastIndexWithCache -= 1) {
+      if (this.songCache[this.plugins[lastIndexWithCache].instanceId]) {
+        return lastIndexWithCache;
+      }
+    }
+    return -1;
   }
 }

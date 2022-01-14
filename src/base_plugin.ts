@@ -1,6 +1,7 @@
 import type { ParamDescriptor, LabelText, SongAccess } from './descriptors';
 import type { Song } from './models/song';
 import * as _ from 'underscore';
+import { v4 as uuidv4 } from 'uuid';
 import { WidgetType } from '.';
 
 export interface ArtifactDescriptor {
@@ -16,11 +17,10 @@ type RunParameters = { [paramName: string]: any };
  * All plugins should be a sub-class of this plugin in order to run in the pipeline.
  */
 export class TuneflowPlugin {
-  private enabledInternal = true;
+  instanceId = uuidv4();
+  enabledInternal = true;
   private paramsResultInternal: RunParameters = {};
   private generatedTrackIdsInternal: string[] = [];
-  /** Whether the plugin is in operation. */
-  private functioningInternal = false;
 
   /**
    * The unique id to identify the plugin provider.
