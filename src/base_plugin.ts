@@ -95,7 +95,7 @@ export class TuneflowPlugin {
     song: Song,
     // eslint-disable-next-line
     params: RunParameters,
-  ): Promise<{ [artifactId: string]: any } | void> {}
+  ): Promise<void> {}
 
   // ============ PUBLIC NO OVERWRITE ================
 

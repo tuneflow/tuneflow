@@ -29,7 +29,7 @@ describe('Skeleton Tuneflow', () => {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async run(song: Song, inputs: any[]): Promise<{ [artifactId: string]: any } | void> {
+    async run(song: Song, inputs: any[]): Promise<void> {
       song.createTrack({});
     }
   }
