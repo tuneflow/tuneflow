@@ -62,10 +62,13 @@ export class TuneflowPipeline {
 
     // Run dirty plugins.
     let numFinishedPlugins = 0;
-    for (let i = dirtyIndex; i < this.plugins.length; i += 1) {
+    for (let i = 0; i < this.plugins.length; i += 1) {
       const plugin = this.plugins[i];
       // @ts-ignore
       if (!plugin.enabledInternal) {
+        return true;
+      }
+      if (this.songCache[plugin.instanceId]) {
         continue;
       }
       // @ts-ignore
