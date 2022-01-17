@@ -154,6 +154,16 @@ export class TuneflowPlugin {
             return false;
           }
           break;
+        case WidgetType.InstrumentSelector:
+          if (
+            paramResult.program === undefined ||
+            paramResult.program === null ||
+            paramResult.isDrum === undefined ||
+            paramResult.isDrum === null
+          ) {
+            return false;
+          }
+          break;
         default:
           throw new Error(
             `Additional param nullness check needs to be implemented for widget type ${paramWidgetType}`,

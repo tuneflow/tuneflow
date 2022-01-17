@@ -40,6 +40,11 @@ export interface TrackPitchSelectorWidgetConfig {
   pitchSelectorConfig: PitchWidgetConfig;
 }
 
+export interface InstrumentSelectorWidgetConfig {
+  /** Not supported yet. */
+  disabledPrograms?: [];
+}
+
 export interface WidgetDescriptor {
   type: WidgetType;
   config:
@@ -48,7 +53,8 @@ export interface WidgetDescriptor {
     | SelectWidgetConfig
     | TrackSelectorWidgetConfig
     | PitchWidgetConfig
-    | TrackPitchSelectorWidgetConfig;
+    | TrackPitchSelectorWidgetConfig
+    | InstrumentSelectorWidgetConfig;
 }
 
 export interface SongAccess {
@@ -67,6 +73,7 @@ export enum WidgetType {
   /** A widget that selects a pitch. */
   Pitch = 4,
   TrackPitchSelector = 5,
+  InstrumentSelector = 6,
 }
 
 export interface ParamDescriptor {
