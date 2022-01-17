@@ -96,6 +96,7 @@ export class Track {
   private volume: number;
   private solo: boolean;
   private muted: boolean;
+  private rank: number;
 
   constructor({
     uuid = uuidv4(),
@@ -105,6 +106,7 @@ export class Track {
     volume = 1,
     solo = false,
     muted = false,
+    rank = 0,
   }: {
     /**
      * The universal-unique identifier of the track.
@@ -124,6 +126,8 @@ export class Track {
     solo?: boolean;
     /** Whether this track is muted. */
     muted?: boolean;
+    /** The rank of this track within the song. */
+    rank?: number;
   }) {
     this.insturment = instrument;
     this.notes = notes;
@@ -132,6 +136,7 @@ export class Track {
     this.volume = volume;
     this.solo = solo;
     this.muted = muted;
+    this.rank = rank;
   }
 
   getInstrument() {
@@ -263,6 +268,10 @@ export class Track {
   setMuted(muted: boolean) {
     this.muted = muted;
   }
+
+  getRank() {
+    return this.rank;
+  }
 }
 
 export class TempoEvent {
@@ -377,6 +386,7 @@ export class Song {
   private tempos: TempoEvent[];
   private timeSignatures: TimeSignatureEvent[];
   private pluginContext?: PluginContext;
+  private nextTrackRank = 1;
 
   constructor() {
     this.tracks = [];
@@ -408,7 +418,7 @@ export class Song {
     index?: number;
   }): Track {
     this.checkAccess('createTrack');
-    const track = new Track({ uuid: this.getNextTrackId() });
+    const track = new Track({ uuid: this.getNextTrackId(), rank: this.getNextTrackRank() });
     if (index !== undefined && index !== null) {
       this.tracks.splice(index, 0, track);
     } else {
@@ -588,6 +598,12 @@ export class Song {
     pluginContext.numTracksCreatedByPlugin += 1;
     // @ts-ignore
     return nextTrackId;
+  }
+
+  private getNextTrackRank() {
+    const nextRank = this.nextTrackRank;
+    this.nextTrackRank += 1;
+    return nextRank;
   }
 
   private checkAccess(accessName: string) {
