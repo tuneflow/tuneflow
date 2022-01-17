@@ -69,6 +69,8 @@ export class TuneflowPipeline {
         return true;
       }
       if (this.songCache[plugin.instanceId]) {
+        // @ts-ignore
+        plugin.isRollbackable = true;
         continue;
       }
       // @ts-ignore
@@ -93,6 +95,8 @@ export class TuneflowPipeline {
       }
 
       this.songCache[plugin.instanceId] = cloneDeep(song);
+      // @ts-ignore
+      plugin.isRollbackable = true;
 
       numFinishedPlugins += 1;
     }

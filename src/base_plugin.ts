@@ -17,6 +17,7 @@ export class TuneflowPlugin {
   private paramsResultInternal: RunParameters = {};
   // @ts-ignore
   private generatedTrackIdsInternal: string[] = [];
+  private isRollbackable = false;
 
   /**
    * The unique id to identify the plugin provider.
