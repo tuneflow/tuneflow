@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { lt as lowerThan } from 'binary-search-bounds';
+import { ge as greaterEqual, lt as lowerThan } from 'binary-search-bounds';
 import * as _ from 'underscore';
 import type { TuneflowPlugin } from '../base_plugin';
 
@@ -191,7 +191,16 @@ export class Track {
       startTick,
       endTick,
     });
-    this.notes.push(note);
+    const insertIndex = greaterEqual(
+      this.notes,
+      note,
+      (a: Note, b: Note) => a.getStartTick() - b.getStartTick(),
+    );
+    if (insertIndex < 0) {
+      this.notes.push(note);
+    } else {
+      this.notes.splice(insertIndex, 0, note);
+    }
     return note;
   }
 
@@ -406,6 +415,10 @@ export class Song {
     return _.find(this.tracks, track => track.getId() === trackId);
   }
 
+  getTrackIndex(trackId: string) {
+    return _.findIndex(this.tracks, track => track.getId() === trackId);
+  }
+
   /**
    * Adds a new track into the song and returns it.
    *
@@ -485,7 +498,16 @@ export class Song {
     }
     // Calculate time BEFORE the new tempo event is inserted.
     const tempoChange = new TempoEvent({ ticks, bpm, time: this.tickToSeconds(ticks) });
-    this.tempos.push(tempoChange);
+    const insertIndex = greaterEqual(
+      this.tempos,
+      tempoChange,
+      (a: TempoEvent, b: TempoEvent) => a.getTicks() - b.getTicks(),
+    );
+    if (insertIndex < 0) {
+      this.tempos.push(tempoChange);
+    } else {
+      this.tempos.splice(insertIndex, 0, tempoChange);
+    }
     this.retimingTempoEvents();
     return tempoChange;
   }
@@ -510,7 +532,16 @@ export class Song {
     denominator: number;
   }): TimeSignatureEvent {
     const timeSignature = new TimeSignatureEvent({ ticks, numerator, denominator });
-    this.timeSignatures.push(timeSignature);
+    const insertIndex = greaterEqual(
+      this.timeSignatures,
+      timeSignature,
+      (a: TimeSignatureEvent, b: TimeSignatureEvent) => a.getTicks() - b.getTicks(),
+    );
+    if (insertIndex < 0) {
+      this.timeSignatures.push(timeSignature);
+    } else {
+      this.timeSignatures.splice(insertIndex, 0, timeSignature);
+    }
     return timeSignature;
   }
 
