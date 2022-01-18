@@ -28,6 +28,9 @@ export interface SelectWidgetConfig {
 
 export interface TrackSelectorWidgetConfig {
   multiSelection?: boolean;
+
+  /** Whether to always show the track info. Default to false. */
+  alwaysShowTrackInfo?: boolean;
 }
 
 export interface PitchWidgetConfig {
@@ -85,6 +88,9 @@ export interface ParamDescriptor {
 
   /** The default value of the param. */
   defaultValue?: any;
+
+  /** Whether this param is adjustable. Default to true. */
+  adjustable?: boolean;
 
   /** Explaining what this parameter is for. */
   description?: LabelText;
