@@ -27,8 +27,6 @@ export interface SelectWidgetConfig {
 }
 
 export interface TrackSelectorWidgetConfig {
-  multiSelection?: boolean;
-
   /** Whether to always show the track info. Default to false. */
   alwaysShowTrackInfo?: boolean;
 }
