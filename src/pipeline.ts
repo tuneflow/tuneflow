@@ -104,10 +104,20 @@ export class TuneflowPipeline {
     return true;
   }
 
+  /**
+   * Reset all plugins in the pipeline.
+   */
   reset() {
     for (const plugin of this.plugins) {
       plugin.resetInternal();
     }
+  }
+
+  /**
+   * Remove all plugins from the pipeline.
+   */
+  clear() {
+    this.plugins.splice(0, this.plugins.length);
   }
 
   movePluginUp(plugin: TuneflowPlugin) {
