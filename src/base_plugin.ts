@@ -144,6 +144,7 @@ export class TuneflowPlugin {
         case WidgetType.Slider:
         case WidgetType.TrackSelector:
         case WidgetType.Select:
+        case WidgetType.Switch:
           // Nothing else to check.
           break;
         case WidgetType.TrackPitchSelector:

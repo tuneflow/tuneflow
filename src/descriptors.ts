@@ -47,6 +47,16 @@ export interface SelectWidgetConfig {
   /** Whether to show search box. Default to false. */
   allowSearch?: boolean;
   placeholder?: LabelText;
+  /** https://arco.design/vue/component/select#virtual-list */
+  virtualListProps?: any;
+}
+
+export interface SwitchWidgetConfig {
+  /**
+   * 'circle' | 'round' | 'line'
+   * https://arco.design/vue/component/switch
+   */
+  type?: 'circle' | 'round' | 'line';
 }
 
 export interface WidgetDescriptor {
@@ -59,7 +69,8 @@ export interface WidgetDescriptor {
     | PitchWidgetConfig
     | TrackPitchSelectorWidgetConfig
     | InstrumentSelectorWidgetConfig
-    | SelectWidgetConfig;
+    | SelectWidgetConfig
+    | SwitchWidgetConfig;
 }
 
 export interface SongAccess {
@@ -80,6 +91,7 @@ export enum WidgetType {
   TrackPitchSelector = 5,
   InstrumentSelector = 6,
   Select = 7,
+  Switch = 8,
 }
 
 export interface ParamDescriptor {
