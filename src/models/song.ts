@@ -594,7 +594,7 @@ export class Song {
     const baseTempoIndex = lowerThan(
       this.getTempoChanges(),
       // @ts-ignore
-      { getTime: () => timeInSeconds },
+      { getTime: () => seconds },
       (a, b) => a.getTime() - b.getTime(),
     );
     if (baseTempoIndex == -1) {

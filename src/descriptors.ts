@@ -17,15 +17,6 @@ export interface InputWidgetConfig {
   step: number;
 }
 
-export interface SelectOptionConfig {
-  value: number;
-  label: number;
-}
-
-export interface SelectWidgetConfig {
-  options: SelectOptionConfig[];
-}
-
 export interface TrackSelectorWidgetConfig {
   /** Whether to always show the track info. Default to false. */
   alwaysShowTrackInfo?: boolean;
@@ -43,7 +34,19 @@ export interface TrackPitchSelectorWidgetConfig {
 
 export interface InstrumentSelectorWidgetConfig {
   /** Not supported yet. */
-  disabledPrograms?: [];
+  disabledPrograms?: number[];
+}
+
+export interface SelectWidgetOption {
+  label: LabelText;
+  value: any;
+}
+
+export interface SelectWidgetConfig {
+  options: SelectWidgetOption[];
+  /** Whether to show search box. Default to false. */
+  allowSearch?: boolean;
+  placeholder?: LabelText;
 }
 
 export interface WidgetDescriptor {
@@ -55,7 +58,8 @@ export interface WidgetDescriptor {
     | TrackSelectorWidgetConfig
     | PitchWidgetConfig
     | TrackPitchSelectorWidgetConfig
-    | InstrumentSelectorWidgetConfig;
+    | InstrumentSelectorWidgetConfig
+    | SelectWidgetConfig;
 }
 
 export interface SongAccess {
@@ -75,6 +79,7 @@ export enum WidgetType {
   Pitch = 4,
   TrackPitchSelector = 5,
   InstrumentSelector = 6,
+  Select = 7,
 }
 
 export interface ParamDescriptor {

@@ -143,6 +143,7 @@ export class TuneflowPlugin {
         case WidgetType.Pitch:
         case WidgetType.Slider:
         case WidgetType.TrackSelector:
+        case WidgetType.Select:
           // Nothing else to check.
           break;
         case WidgetType.TrackPitchSelector:
@@ -167,7 +168,7 @@ export class TuneflowPlugin {
           break;
         default:
           throw new Error(
-            `Additional param nullness check needs to be implemented for widget type ${paramWidgetType}`,
+            `Param nullness check needs to be implemented for widget type ${paramWidgetType}. Either use default nullness check or define custom logic.`,
           );
       }
     }
