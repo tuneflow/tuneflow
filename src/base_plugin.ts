@@ -60,6 +60,9 @@ export class TuneflowPlugin {
     return null;
   }
 
+  /** Initializes the plugin instance. */
+  async init() {}
+
   /**
    * Specify params to get from user input.
    *
@@ -103,9 +106,10 @@ export class TuneflowPlugin {
   /**
    * Creates a plugin instance and initializes it.
    */
-  public static create() {
+  public static async create() {
     const plugin = new this();
     plugin.resetInternal();
+    await plugin.init();
     return plugin;
   }
 
