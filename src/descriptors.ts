@@ -59,6 +59,11 @@ export interface SwitchWidgetConfig {
   type?: 'circle' | 'round' | 'line';
 }
 
+export interface InputNumberWidgetConfig {
+  minValue: number;
+  maxValue: number;
+}
+
 export interface WidgetDescriptor {
   type: WidgetType;
   config:
@@ -70,7 +75,8 @@ export interface WidgetDescriptor {
     | TrackPitchSelectorWidgetConfig
     | InstrumentSelectorWidgetConfig
     | SelectWidgetConfig
-    | SwitchWidgetConfig;
+    | SwitchWidgetConfig
+    | InputNumberWidgetConfig;
 }
 
 export interface SongAccess {
@@ -92,6 +98,7 @@ export enum WidgetType {
   InstrumentSelector = 6,
   Select = 7,
   Switch = 8,
+  InputNumber = 9,
 }
 
 export interface ParamDescriptor {
@@ -104,8 +111,20 @@ export interface ParamDescriptor {
   /** The default value of the param. */
   defaultValue?: any;
 
-  /** Whether this param is adjustable. Default to true. */
+  /**
+   * Whether this param is adjustable. If the param is not adjustable, the controllable
+   * part is not shown.
+   * Default to true.
+   */
   adjustable?: boolean;
+
+  /**
+   * Whether this param is hidden completely.
+   */
+  hidden?: boolean;
+
+  /** Whether this param can be left undefined or null. */
+  optional?: boolean;
 
   /** Explaining what this parameter is for. */
   description?: LabelText;

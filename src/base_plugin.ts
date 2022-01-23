@@ -134,6 +134,9 @@ export class TuneflowPlugin {
    */
   public hasAllParamsSet(): boolean {
     for (const paramName of _.keys(this.params())) {
+      if (this.params()[paramName].optional) {
+        continue;
+      }
       const paramResult = this.paramsResultInternal[paramName];
       if (paramResult === undefined || paramResult === null) {
         return false;
@@ -149,6 +152,7 @@ export class TuneflowPlugin {
         case WidgetType.TrackSelector:
         case WidgetType.Select:
         case WidgetType.Switch:
+        case WidgetType.InputNumber:
           // Nothing else to check.
           break;
         case WidgetType.TrackPitchSelector:

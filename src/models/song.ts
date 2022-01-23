@@ -81,6 +81,14 @@ export class Note {
   getEndTick() {
     return this.endTick;
   }
+
+  setStartTick(startTick: number) {
+    this.startTick = startTick;
+  }
+
+  setEndTick(endTick: number) {
+    this.endTick = endTick;
+  }
 }
 
 /**
@@ -97,6 +105,8 @@ export class Track {
   private solo: boolean;
   private muted: boolean;
   private rank: number;
+  private trackStartTick = 0;
+  private trackEndTick = 0;
 
   constructor({
     uuid = uuidv4(),
@@ -201,6 +211,7 @@ export class Track {
     } else {
       this.notes.splice(insertIndex, 0, note);
     }
+    this.trackEndTick = Math.max(this.trackEndTick, note.getEndTick());
     return note;
   }
 
@@ -280,6 +291,61 @@ export class Track {
 
   getRank() {
     return this.rank;
+  }
+
+  getTrackStartTick() {
+    return this.trackStartTick;
+  }
+
+  getTrackEndTick() {
+    return this.trackEndTick;
+  }
+
+  adjustTrackLeft(trackStartTick: number) {
+    if (trackStartTick > this.trackEndTick) {
+      this.trackStartTick = this.trackEndTick;
+    } else {
+      this.trackStartTick = trackStartTick;
+    }
+    const startIndex = greaterEqual(
+      this.notes,
+      // @ts-ignore
+      { getStartTick: () => this.trackStartTick },
+      (a: Note, b: Note) => a.getStartTick() - b.getStartTick(),
+    );
+    for (let i = startIndex - 1; i >= 0; i -= 1) {
+      const note = this.notes[i];
+      if (note.getStartTick() < this.trackStartTick) {
+        this.notes.splice(i, 1);
+      }
+    }
+  }
+
+  adjustTrackRight(trackEndTick: number) {
+    if (trackEndTick < this.trackStartTick) {
+      this.trackEndTick = this.trackStartTick;
+    } else {
+      this.trackEndTick = trackEndTick;
+    }
+    for (let i = this.notes.length - 1; i >= 0; i -= 1) {
+      const note = this.notes[i];
+      if (note.getEndTick() > this.trackEndTick) {
+        this.notes.splice(i, 1);
+      }
+    }
+  }
+
+  moveTrack(offsetTick: number) {
+    this.trackStartTick = Math.max(0, this.trackStartTick + offsetTick);
+    this.trackEndTick = Math.max(0, this.trackEndTick + offsetTick);
+    for (let i = this.notes.length - 1; i >= 0; i -= 1) {
+      const note = this.notes[i];
+      note.setStartTick(note.getStartTick() + offsetTick);
+      note.setEndTick(note.getEndTick() + offsetTick);
+      if (note.getStartTick() < this.trackStartTick || note.getEndTick() > this.trackEndTick) {
+        this.notes.splice(i, 1);
+      }
+    }
   }
 }
 
@@ -553,10 +619,7 @@ export class Song {
     let lastTick = 0;
 
     for (const track of this.tracks) {
-      if (track.getNotes().length == 0) {
-        continue;
-      }
-      lastTick = Math.max(lastTick, track.getNotes()[track.getNotes().length - 1].getEndTick());
+      lastTick = Math.max(lastTick, track.getTrackEndTick());
     }
     return lastTick;
   }
