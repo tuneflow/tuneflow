@@ -98,7 +98,10 @@ export class Note {
  */
 export class Track {
   private insturment: InstrumentInfo;
+  /** Visible part of the notes. */
   private notes: Note[];
+  /** All notes, including those that are not visible. */
+  private rawNotes: Note[];
   private suggestedInstruments: InstrumentInfo[];
   private uuid: string;
   private volume: number;
@@ -140,8 +143,9 @@ export class Track {
     rank?: number;
   }) {
     this.insturment = instrument;
-    this.notes = notes;
-    this.suggestedInstruments = suggestedInstruments;
+    this.notes = [...notes];
+    this.rawNotes = [...notes];
+    this.suggestedInstruments = [...suggestedInstruments];
     this.uuid = uuid;
     this.volume = volume;
     this.solo = solo;
@@ -173,8 +177,18 @@ export class Track {
     this.insturment = new InstrumentInfo({ program, isDrum });
   }
 
+  /**
+   * Get currently visible notes.
+   */
   getNotes() {
     return this.notes;
+  }
+
+  /**
+   * Get all notes, including those that are not visible.
+   */
+  getRawNotes() {
+    return this.rawNotes;
   }
 
   /**
@@ -201,15 +215,9 @@ export class Track {
       startTick,
       endTick,
     });
-    const insertIndex = greaterEqual(
-      this.notes,
-      note,
-      (a: Note, b: Note) => a.getStartTick() - b.getStartTick(),
-    );
-    if (insertIndex < 0) {
-      this.notes.push(note);
-    } else {
-      this.notes.splice(insertIndex, 0, note);
+    this.orderedInsertNote(this.rawNotes, note);
+    if (this.isNoteVisible(note)) {
+      this.orderedInsertNote(this.notes, note);
     }
     this.trackEndTick = Math.max(this.trackEndTick, note.getEndTick());
     return note;
@@ -307,18 +315,7 @@ export class Track {
     } else {
       this.trackStartTick = trackStartTick;
     }
-    const startIndex = greaterEqual(
-      this.notes,
-      // @ts-ignore
-      { getStartTick: () => this.trackStartTick },
-      (a: Note, b: Note) => a.getStartTick() - b.getStartTick(),
-    );
-    for (let i = startIndex - 1; i >= 0; i -= 1) {
-      const note = this.notes[i];
-      if (note.getStartTick() < this.trackStartTick) {
-        this.notes.splice(i, 1);
-      }
-    }
+    this.syncNotesInternal();
   }
 
   adjustTrackRight(trackEndTick: number) {
@@ -327,24 +324,40 @@ export class Track {
     } else {
       this.trackEndTick = trackEndTick;
     }
-    for (let i = this.notes.length - 1; i >= 0; i -= 1) {
-      const note = this.notes[i];
-      if (note.getEndTick() > this.trackEndTick) {
-        this.notes.splice(i, 1);
-      }
-    }
+    this.syncNotesInternal();
   }
 
   moveTrack(offsetTick: number) {
     this.trackStartTick = Math.max(0, this.trackStartTick + offsetTick);
     this.trackEndTick = Math.max(0, this.trackEndTick + offsetTick);
-    for (let i = this.notes.length - 1; i >= 0; i -= 1) {
-      const note = this.notes[i];
+    for (const note of this.rawNotes) {
       note.setStartTick(note.getStartTick() + offsetTick);
       note.setEndTick(note.getEndTick() + offsetTick);
-      if (note.getStartTick() < this.trackStartTick || note.getEndTick() > this.trackEndTick) {
-        this.notes.splice(i, 1);
-      }
+    }
+    this.syncNotesInternal();
+  }
+
+  /**
+   * Re-calculate notes from rawNotes, based on the start and end tick of the track.
+   */
+  private syncNotesInternal() {
+    this.notes = _.filter(this.rawNotes, note => this.isNoteVisible(note));
+  }
+
+  private isNoteVisible(note: Note) {
+    return note.getStartTick() >= this.trackStartTick && note.getEndTick() <= this.trackEndTick;
+  }
+
+  private orderedInsertNote(noteList: Note[], newNote: Note) {
+    const insertIndex = greaterEqual(
+      noteList,
+      newNote,
+      (a: Note, b: Note) => a.getStartTick() - b.getStartTick(),
+    );
+    if (insertIndex < 0) {
+      noteList.push(newNote);
+    } else {
+      noteList.splice(insertIndex, 0, newNote);
     }
   }
 }
