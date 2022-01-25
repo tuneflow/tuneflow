@@ -60,6 +60,13 @@ export class TuneflowPlugin {
     return null;
   }
 
+  /**
+   * Whether to allow users to reset all parameters of this plugin.
+   */
+  static allowReset(): boolean {
+    return true;
+  }
+
   /** Initializes the plugin instance. */
   async init() {}
 
