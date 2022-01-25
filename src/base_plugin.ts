@@ -155,6 +155,11 @@ export class TuneflowPlugin {
         case WidgetType.InputNumber:
           // Nothing else to check.
           break;
+        case WidgetType.MultiTrackSelector:
+          if (paramResult.length === 0) {
+            return false;
+          }
+          break;
         case WidgetType.TrackPitchSelector:
           if (
             paramResult.track === undefined ||

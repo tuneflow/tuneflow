@@ -90,7 +90,7 @@ export interface SongAccess {
 export enum WidgetType {
   Slider = 1,
   Input = 2,
-  /** A widget that selects one or more track(s). */
+  /** A widget that selects one track. */
   TrackSelector = 3,
   /** A widget that selects a pitch. */
   Pitch = 4,
@@ -99,6 +99,7 @@ export enum WidgetType {
   Select = 7,
   Switch = 8,
   InputNumber = 9,
+  MultiTrackSelector = 10,
 }
 
 export interface ParamDescriptor {
