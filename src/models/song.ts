@@ -215,11 +215,11 @@ export class Track {
       startTick,
       endTick,
     });
+    this.trackEndTick = Math.max(this.trackEndTick, note.getEndTick());
     this.orderedInsertNote(this.rawNotes, note);
     if (this.isNoteVisible(note)) {
       this.orderedInsertNote(this.notes, note);
     }
-    this.trackEndTick = Math.max(this.trackEndTick, note.getEndTick());
     return note;
   }
 
