@@ -97,6 +97,7 @@ export class AudioPlugin {
   private manufacturerName: string;
   private pluginFormatName: string;
   private pluginVersion: string;
+  private isEnabled = true;
 
   constructor(
     name: string,
@@ -128,7 +129,16 @@ export class AudioPlugin {
       manufacturerName: this.manufacturerName,
       pluginFormatName: this.pluginFormatName,
       pluginVersion: this.pluginVersion,
+      isEnabled: this.isEnabled,
     };
+  }
+
+  setIsEnabled(isEnabled: boolean) {
+    this.isEnabled = isEnabled;
+  }
+
+  getIsEnabled() {
+    return this.isEnabled;
   }
 }
 
