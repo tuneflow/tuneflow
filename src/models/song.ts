@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ge as greaterEqual, lt as lowerThan } from 'binary-search-bounds';
 import * as _ from 'underscore';
 import type { TuneflowPlugin } from '../base_plugin';
+import { getAudioPluginTuneflowId } from '..';
 
 /**
  * Information about how an instrument should be played.
@@ -91,6 +92,46 @@ export class Note {
   }
 }
 
+export class AudioPlugin {
+  private name: string;
+  private manufacturerName: string;
+  private pluginFormatName: string;
+  private pluginVersion: string;
+
+  constructor(
+    name: string,
+    manufacturerName: string,
+    pluginFormatName: string,
+    pluginVersion: string,
+  ) {
+    this.name = name;
+    this.manufacturerName = manufacturerName;
+    this.pluginFormatName = pluginFormatName;
+    this.pluginVersion = pluginVersion;
+  }
+
+  /**
+   * Gets an id that lets Tuneflow uniquely identify the plugin.
+   */
+  getTuneflowId() {
+    return getAudioPluginTuneflowId(
+      this.manufacturerName,
+      this.pluginFormatName,
+      this.name,
+      this.pluginVersion,
+    );
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      manufacturerName: this.manufacturerName,
+      pluginFormatName: this.pluginFormatName,
+      pluginVersion: this.pluginVersion,
+    };
+  }
+}
+
 /**
  * A track in the song that maps to an instrument.
  *
@@ -110,6 +151,8 @@ export class Track {
   private rank: number;
   private trackStartTick = 0;
   private trackEndTick = 0;
+  private samplerPlugin?: AudioPlugin;
+  private audioPlugins: AudioPlugin[] = [];
 
   constructor({
     uuid = uuidv4(),
@@ -335,6 +378,18 @@ export class Track {
       note.setEndTick(note.getEndTick() + offsetTick);
     }
     this.syncNotesInternal();
+  }
+
+  getSamplerPlugin() {
+    return this.samplerPlugin;
+  }
+
+  setSamplerPlugin(plugin: AudioPlugin) {
+    this.samplerPlugin = plugin;
+  }
+
+  getAudioPlugins() {
+    return this.audioPlugins;
   }
 
   /**

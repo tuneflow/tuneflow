@@ -1,3 +1,5 @@
+import { AudioPlugin } from './models/song';
+
 function midiToPitchClass(midi: number): string {
   const scaleIndexToNote = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   const note = midi % 12;
@@ -65,4 +67,24 @@ export function pitchToMidiNumber(note: string): number {
   // @ts-ignore
   const index = noteToScaleIndex[pitch.toLowerCase()];
   return index + (parseInt(octave, 10) + 1) * 12;
+}
+
+/**
+ * Gets an id that Tuneflow can uniquely identify a plugin.
+ */
+export function getAudioPluginTuneflowId(
+  manufacturerName: string,
+  pluginFormatName: string,
+  pluginName: string,
+  pluginVersion: string,
+) {
+  return `${manufacturerName} // ${pluginFormatName} // ${pluginName} // ${pluginVersion}`;
+}
+
+export function decodeAudioPluginTuneflowId(tfId: string): AudioPlugin {
+  const parts = tfId.split(' // ');
+  if (parts.length < 4) {
+    throw new Error('Invalid audio plugin tuneflow id.');
+  }
+  return new AudioPlugin(parts[2], parts[0], parts[1], parts[3]);
 }
