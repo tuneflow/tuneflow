@@ -1,5 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
-import { ge as greaterEqual, lt as lowerThan } from 'binary-search-bounds';
+import { nanoid } from 'nanoid';
+import { ge as greaterEqual, lt as lowerThan, le as lowerEqual } from 'binary-search-bounds';
 import * as _ from 'underscore';
 import type { TuneflowPlugin } from '../base_plugin';
 import { getAudioPluginTuneflowId } from '..';
@@ -39,6 +39,13 @@ export class InstrumentInfo {
   getIsDrum() {
     return this.isDrum;
   }
+
+  clone() {
+    return new InstrumentInfo({
+      program: this.program,
+      isDrum: this.isDrum,
+    });
+  }
 }
 
 /**
@@ -50,6 +57,10 @@ export class Note {
   private startTick: number;
   private endTick: number;
 
+  /**
+   * IMPORTANT: Do not use the constructor directly, call
+   * createNote from clips instead.
+   */
   constructor({
     pitch,
     velocity,
@@ -90,6 +101,24 @@ export class Note {
   setEndTick(endTick: number) {
     this.endTick = endTick;
   }
+
+  equals(note: Note) {
+    return (
+      this.startTick === note.getStartTick() &&
+      this.endTick === note.getEndTick() &&
+      this.pitch === note.getPitch() &&
+      this.velocity === note.getVelocity()
+    );
+  }
+
+  clone() {
+    return new Note({
+      pitch: this.pitch,
+      velocity: this.velocity,
+      startTick: this.startTick,
+      endTick: this.endTick,
+    });
+  }
 }
 
 export class AudioPlugin {
@@ -123,6 +152,17 @@ export class AudioPlugin {
     );
   }
 
+  clone() {
+    const newPlugin = new AudioPlugin(
+      this.name,
+      this.manufacturerName,
+      this.pluginFormatName,
+      this.pluginVersion,
+    );
+    newPlugin.setIsEnabled(this.isEnabled);
+    return newPlugin;
+  }
+
   toJSON() {
     return {
       name: this.name,
@@ -143,30 +183,392 @@ export class AudioPlugin {
 }
 
 /**
+ * A clip is a piece in a track, and it contains notes and the clip range.
+ * One track can contain one or many non-overlapping
+ * clips.
+ */
+export class Clip {
+  private track: Track;
+  private id: string;
+  // Notes should be sorted all the time.
+  private notes: Note[];
+  /** Inclusive start tick. */
+  private clipStartTick = 0;
+  /** Inclusive end tick. */
+  private clipEndTick = 0;
+
+  /**
+   * IMPORTANT: Do not use the constructor directly, call createClip from tracks instead.
+   */
+  constructor({
+    track,
+    id = Clip.generateClipIdInternal(),
+    sortedNotes = [],
+    clipStartTick = 0,
+    clipEndTick = 0,
+  }: {
+    track: Track;
+    id?: string;
+    /**
+     * Notes of the clip sorted by start time.
+     * All notes should use absolute timing.
+     */
+    sortedNotes?: Note[];
+    clipStartTick?: number;
+    clipEndTick?: number;
+  }) {
+    this.track = track;
+    this.id = id;
+    this.notes = [...sortedNotes];
+    this.clipStartTick = clipStartTick;
+    this.clipEndTick = clipEndTick;
+  }
+
+  getId() {
+    return this.id;
+  }
+
+  /**
+   * @returns Notes within the clip's range.
+   */
+  getNotes() {
+    return Clip.getNotesInRange(this.notes, this.clipStartTick, this.clipEndTick);
+  }
+
+  /**
+   * @returns All notes contained by the clip, including those that
+   * are not within the clip's range.
+   */
+  getRawNotes() {
+    return this.notes;
+  }
+
+  getClipStartTick() {
+    return this.clipStartTick;
+  }
+
+  getClipEndTick() {
+    return this.clipEndTick;
+  }
+
+  /**
+   * Adds a note to the clip and returns it.
+   */
+  createNote({
+    pitch,
+    velocity,
+    startTick,
+    endTick,
+    updateClipRange = true,
+    resolveClipConflict = true,
+  }: {
+    /** An integer value between 0 - 127 */
+    pitch: number;
+    /** An integer value between 0 - 127 */
+    velocity: number;
+    /** An integer value indicating the start tick. */
+    startTick: number;
+    /** An integer value indicating the end tick. */
+    endTick: number;
+    /** Whether to update the clip's range if the note stretches outside the clip. */
+    updateClipRange?: boolean;
+    /** Whether to resolve clip conflict if the clip range is updated. */
+    resolveClipConflict?: boolean;
+  }) {
+    const note = new Note({
+      pitch,
+      velocity,
+      startTick,
+      endTick,
+    });
+    if (startTick < this.clipStartTick && updateClipRange) {
+      this.adjustClipLeft(startTick, resolveClipConflict);
+    }
+    if (endTick > this.clipEndTick && updateClipRange) {
+      this.adjustClipRight(endTick, resolveClipConflict);
+    }
+    this.orderedInsertNote(this.notes, note);
+    // TODO: Resolve note conflict.
+    return note;
+  }
+
+  deleteNote(note: Note) {
+    const startIndex = lowerThan(
+      this.notes,
+      note,
+      (a: Note, b: Note) => a.getStartTick() - b.getStartTick(),
+    );
+
+    for (let index = Math.max(0, startIndex); index < this.notes.length; index += 1) {
+      const currentNote = this.notes[index];
+      if (currentNote && currentNote === note) {
+        this.notes.splice(index, 1);
+        return;
+      }
+      if (currentNote && currentNote.getStartTick() > note.getStartTick()) {
+        // We have searched past all possible notes.
+        return;
+      }
+    }
+  }
+
+  deleteNoteAt(index: number) {
+    this.notes.splice(index, 1);
+  }
+
+  private orderedInsertNote(noteList: Note[], newNote: Note) {
+    const insertIndex = greaterEqual(
+      noteList,
+      newNote,
+      (a: Note, b: Note) => a.getStartTick() - b.getStartTick(),
+    );
+    if (insertIndex < 0) {
+      noteList.push(newNote);
+    } else {
+      noteList.splice(insertIndex, 0, newNote);
+    }
+  }
+
+  /**
+   * Adjust the left boundary of the clip.
+   *
+   * NOTE: This could delete the clip if the range becomes empty after
+   * this call. If you need to adjust the left and right boundaries at
+   * the same time, use adjustClipRange.
+   * @param clipStartTick The new start tick (inclusive) of the clip.
+   */
+  adjustClipLeft(clipStartTick: number, resolveConflict = true) {
+    clipStartTick = Math.max(0, clipStartTick);
+    if (clipStartTick > this.clipEndTick) {
+      this.deleteFromParent();
+    } else {
+      // Resolve conflict before changing the clip's range
+      // to preserve the current order of clips.
+      if (resolveConflict) {
+        // @ts-ignore
+        this.track.resolveClipConflictInternal(
+          this.getId(),
+          Math.min(this.clipStartTick, clipStartTick),
+          this.clipEndTick,
+        );
+      }
+      this.clipStartTick = clipStartTick;
+    }
+  }
+
+  /**
+   * Adjust the right boundary of the clip.
+   *
+   * NOTE: This could delete the clip if the range becomes empty after
+   * this call. If you need to adjust the left and right boundaries at
+   * the same time, use adjustClipRange.
+   *
+   * @param clipEndTick  The new end tick (inclusive) of the clip.
+   */
+  adjustClipRight(clipEndTick: number, resolveConflict = true) {
+    if (clipEndTick < this.clipStartTick) {
+      this.deleteFromParent();
+    } else {
+      // Resolve conflict before changing the clip's range
+      // to preserve the current order of clips.
+      if (resolveConflict) {
+        // @ts-ignore
+        this.track.resolveClipConflictInternal(
+          this.getId(),
+          this.clipStartTick,
+          Math.max(this.clipEndTick, clipEndTick),
+        );
+      }
+      this.clipEndTick = clipEndTick;
+    }
+  }
+
+  /**
+   * Adjust the left and right boundaries of the clip at the same time.
+   * @param clipStartTick The new start tick (inclusive) of the clip.
+   * @param clipEndTick The new end tick (inclusive) of the clip.
+   */
+  adjustClipRange(clipStartTick: number, clipEndTick: number, resolveConflict = true) {
+    clipStartTick = Math.max(0, clipStartTick);
+    if (clipStartTick > clipEndTick) {
+      this.deleteFromParent();
+    } else {
+      // Resolve conflict before changing the clip's range
+      // to preserve the current order of clips.
+      if (resolveConflict) {
+        // @ts-ignore
+        this.track.resolveClipConflictInternal(
+          this.getId(),
+          Math.min(this.clipStartTick, clipStartTick),
+          Math.max(this.clipEndTick, clipEndTick),
+        );
+      }
+      this.clipStartTick = clipStartTick;
+      this.clipEndTick = clipEndTick;
+    }
+  }
+
+  /**
+   * Move the clip by the given offset ticks.
+   * @param offsetTick
+   */
+  moveClip(offsetTick: number) {
+    const newClipStartTick = Math.max(0, this.clipStartTick + offsetTick);
+    const newClipEndTick = Math.max(0, this.clipEndTick + offsetTick);
+    // Resolve conflict before changing the clip's range
+    // to preserve the current order of clips.
+    // @ts-ignore
+    this.track.resolveClipConflictInternal(this.getId(), newClipStartTick, newClipEndTick);
+    this.clipStartTick = newClipStartTick;
+    this.clipEndTick = newClipEndTick;
+    for (const note of this.notes) {
+      note.setStartTick(note.getStartTick() + offsetTick);
+      note.setEndTick(note.getEndTick() + offsetTick);
+    }
+  }
+
+  /**
+   * Move the clip to a given tick.
+   * @param tick The tick that this clip will start at.
+   */
+  moveClipTo(tick: number) {
+    const offsetTick = tick - this.getClipStartTick();
+    this.moveClip(offsetTick);
+  }
+
+  deleteFromParent() {
+    this.track.deleteClip(this);
+  }
+
+  static getNotesInRange(rawNotes: Note[], startTick: number, endTick: number) {
+    const startIndex = lowerThan(
+      rawNotes,
+      { getStartTick: () => startTick } as any,
+      (a: Note, b: Note) => a.getStartTick() - b.getStartTick(),
+    );
+    const inRangeNotes: Note[] = [];
+    for (let i = Math.max(startIndex, 0); i < rawNotes.length; i += 1) {
+      const note = rawNotes[i];
+      if (note.getStartTick() > endTick) {
+        break;
+      }
+      if (!Clip.isNoteInClip(note.getStartTick(), note.getEndTick(), startTick, endTick)) {
+        // Note is not fully within this range.
+        continue;
+      }
+      inRangeNotes.push(note);
+    }
+    return inRangeNotes;
+  }
+
+  static isNoteInClip(
+    noteStartTick: number,
+    noteEndTick: number,
+    clipStartTick: number,
+    clipEndTick: number,
+  ) {
+    return noteStartTick >= clipStartTick && noteEndTick <= clipEndTick;
+  }
+
+  /**
+   * Trim the conflict part from the clip.
+   * Anything within the given range (inclusive), will be removed from the current clip.
+   * @param startTick
+   * @param endTick
+   */
+  private trimConflictPartInternal(startTick: number, endTick: number) {
+    const overlappingStartTick = Math.max(startTick, this.getClipStartTick());
+    const overlappingEndTick = Math.min(endTick, this.getClipEndTick());
+    if (overlappingStartTick > overlappingEndTick) {
+      // Overlapping range is empty.
+      return;
+    }
+    if (
+      overlappingStartTick > this.getClipEndTick() ||
+      overlappingEndTick < this.getClipStartTick()
+    ) {
+      // No overlapping.
+      return;
+    }
+    if (
+      overlappingEndTick >= this.getClipEndTick() &&
+      overlappingStartTick <= this.getClipStartTick()
+    ) {
+      // The whole clip overlaps with the given range.
+      // Delete the clip.
+      this.deleteFromParent();
+      return;
+    }
+    if (
+      overlappingEndTick < this.getClipEndTick() &&
+      overlappingStartTick > this.getClipStartTick()
+    ) {
+      // Overlapping part is in the middle of the clip.
+      // Trim the clip into the left part and create a new clip for the right part.
+      const rightClipStartTick = overlappingEndTick + 1;
+      const rightClipEndTick = this.getClipEndTick();
+      const rightNotes = Clip.getNotesInRange(this.notes, rightClipStartTick, rightClipEndTick).map(
+        item => item.clone(),
+      );
+      this.adjustClipRight(overlappingStartTick - 1, /* resolveConflict= */ false);
+
+      this.track.createClip({
+        sortedNotes: rightNotes,
+        clipStartTick: rightClipStartTick,
+        clipEndTick: rightClipEndTick,
+      });
+      return;
+    }
+    // Overlapping part is on the side.
+    if (
+      overlappingStartTick > this.getClipStartTick() &&
+      overlappingStartTick <= this.getClipEndTick()
+    ) {
+      // Do not resolve conflict here since it will
+      // cause a bad loop.
+      this.adjustClipRight(overlappingStartTick - 1, /* resolveConflict= */ false);
+    } else if (
+      overlappingEndTick < this.getClipEndTick() &&
+      overlappingEndTick >= this.getClipStartTick()
+    ) {
+      // Do not resolve conflict here since it will
+      // cause a bad loop.
+      this.adjustClipLeft(overlappingEndTick + 1, /* resolveConflict= */ false);
+    }
+  }
+
+  private static generateClipIdInternal() {
+    return nanoid(10);
+  }
+}
+
+/**
  * A track in the song that maps to an instrument.
  *
- * It contains notes, instrument information, play status(volume, muted, etc.), and more.
+ * It contains clips, instrument information, play status(volume, muted, etc.), and more.
  */
 export class Track {
   private insturment: InstrumentInfo;
-  /** Visible part of the notes. */
-  private notes: Note[];
-  /** All notes, including those that are not visible. */
-  private rawNotes: Note[];
+  /** Clips sorted by their start tick. */
+  private clips: Clip[];
   private suggestedInstruments: InstrumentInfo[];
   private uuid: string;
   private volume: number;
   private solo: boolean;
   private muted: boolean;
   private rank: number;
-  private trackStartTick = 0;
-  private trackEndTick = 0;
   private samplerPlugin?: AudioPlugin;
   private audioPlugins: AudioPlugin[] = [];
+  private song: Song;
 
+  /**
+   * IMPORTANT: Do not use the constructor directly, call
+   * createTrack from a song instead.
+   */
   constructor({
-    uuid = uuidv4(),
-    notes = [],
+    song,
+    uuid = Track.generateTrackIdInternal(),
+    clips = [],
     instrument = new InstrumentInfo({ program: 0, isDrum: false }),
     suggestedInstruments = [],
     volume = 1,
@@ -174,14 +576,15 @@ export class Track {
     muted = false,
     rank = 0,
   }: {
+    song: Song;
     /**
      * The universal-unique identifier of the track.
      *
      * In most cases, leave it blank and it will be automatically assigned.
      */
     uuid?: string;
-    /** Notes of the track. */
-    notes?: Note[];
+    /** Clips of the track. */
+    clips?: Clip[];
     /** Information about the instrument to play this track. */
     instrument?: InstrumentInfo;
     /** Other possible instruments. */
@@ -195,9 +598,9 @@ export class Track {
     /** The rank of this track within the song. */
     rank?: number;
   }) {
+    this.song = song;
     this.insturment = instrument;
-    this.notes = [...notes];
-    this.rawNotes = [...notes];
+    this.clips = [...clips];
     this.suggestedInstruments = [...suggestedInstruments];
     this.uuid = uuid;
     this.volume = volume;
@@ -228,52 +631,6 @@ export class Track {
     isDrum: boolean;
   }) {
     this.insturment = new InstrumentInfo({ program, isDrum });
-  }
-
-  /**
-   * Get currently visible notes.
-   */
-  getNotes() {
-    return this.notes;
-  }
-
-  /**
-   * Get all notes, including those that are not visible.
-   */
-  getRawNotes() {
-    return this.rawNotes;
-  }
-
-  /**
-   * Adds a note to the track and returns it.
-   */
-  createNote({
-    pitch,
-    velocity,
-    startTick,
-    endTick,
-  }: {
-    /** An integer value between 0 - 127 */
-    pitch: number;
-    /** An integer value between 0 - 127 */
-    velocity: number;
-    /** An integer value indicating the start tick. */
-    startTick: number;
-    /** An integer value indicating the end tick. */
-    endTick: number;
-  }) {
-    const note = new Note({
-      pitch,
-      velocity,
-      startTick,
-      endTick,
-    });
-    this.trackEndTick = Math.max(this.trackEndTick, note.getEndTick());
-    this.orderedInsertNote(this.rawNotes, note);
-    if (this.isNoteVisible(note)) {
-      this.orderedInsertNote(this.notes, note);
-    }
-    return note;
   }
 
   getSuggestedInstruments() {
@@ -354,42 +711,6 @@ export class Track {
     return this.rank;
   }
 
-  getTrackStartTick() {
-    return this.trackStartTick;
-  }
-
-  getTrackEndTick() {
-    return this.trackEndTick;
-  }
-
-  adjustTrackLeft(trackStartTick: number) {
-    if (trackStartTick > this.trackEndTick) {
-      this.trackStartTick = this.trackEndTick;
-    } else {
-      this.trackStartTick = trackStartTick;
-    }
-    this.syncNotesInternal();
-  }
-
-  adjustTrackRight(trackEndTick: number) {
-    if (trackEndTick < this.trackStartTick) {
-      this.trackEndTick = this.trackStartTick;
-    } else {
-      this.trackEndTick = trackEndTick;
-    }
-    this.syncNotesInternal();
-  }
-
-  moveTrack(offsetTick: number) {
-    this.trackStartTick = Math.max(0, this.trackStartTick + offsetTick);
-    this.trackEndTick = Math.max(0, this.trackEndTick + offsetTick);
-    for (const note of this.rawNotes) {
-      note.setStartTick(note.getStartTick() + offsetTick);
-      note.setEndTick(note.getEndTick() + offsetTick);
-    }
-    this.syncNotesInternal();
-  }
-
   getSamplerPlugin() {
     return this.samplerPlugin;
   }
@@ -402,28 +723,191 @@ export class Track {
     return this.audioPlugins;
   }
 
-  /**
-   * Re-calculate notes from rawNotes, based on the start and end tick of the track.
-   */
-  private syncNotesInternal() {
-    this.notes = _.filter(this.rawNotes, note => this.isNoteVisible(note));
+  addAudioPlugin(plugin: AudioPlugin) {
+    this.audioPlugins.push(plugin);
   }
 
-  private isNoteVisible(note: Note) {
-    return note.getStartTick() >= this.trackStartTick && note.getEndTick() <= this.trackEndTick;
-  }
-
-  private orderedInsertNote(noteList: Note[], newNote: Note) {
-    const insertIndex = greaterEqual(
-      noteList,
-      newNote,
-      (a: Note, b: Note) => a.getStartTick() - b.getStartTick(),
-    );
-    if (insertIndex < 0) {
-      noteList.push(newNote);
-    } else {
-      noteList.splice(insertIndex, 0, newNote);
+  getTrackStartTick() {
+    if (!this.clips || this.clips.length === 0) {
+      return 0;
     }
+    return this.clips[0].getClipStartTick();
+  }
+
+  getTrackEndTick() {
+    if (!this.clips || this.clips.length === 0) {
+      return 0;
+    }
+    return this.clips[this.clips.length - 1].getClipEndTick();
+  }
+
+  getClipById(clipId: string) {
+    for (const clip of this.clips) {
+      if (clip.getId() === clipId) {
+        return clip;
+      }
+    }
+    return null;
+  }
+
+  getClips() {
+    return this.clips;
+  }
+
+  /**
+   * Gets the clips whose range overlaps with the given range.
+   */
+  getClipsOverlappingWith(startTick: number, endTick: number) {
+    const overlappingClips: Clip[] = [];
+    const startIndex = lowerThan(
+      this.clips,
+      { getClipStartTick: () => startTick } as any,
+      (a: Clip, b: Clip) => a.getClipStartTick() - b.getClipStartTick(),
+    );
+    for (let i = Math.max(startIndex, 0); i < this.clips.length; i += 1) {
+      const currentClip = this.clips[i];
+      if (currentClip.getClipEndTick() < startTick) {
+        continue;
+      }
+      if (currentClip.getClipStartTick() > endTick) {
+        break;
+      }
+
+      overlappingClips.push(currentClip);
+    }
+    return overlappingClips;
+  }
+
+  /** Creates a clip and optionally inserts it into the track. */
+  createClip({
+    clipStartTick,
+    clipEndTick = undefined,
+    sortedNotes = [],
+    insertClip = true,
+  }: {
+    /**
+     * Notes of the clip sorted by start time.
+     * All notes should use absolute timing.
+     */
+    sortedNotes?: Note[];
+    /**
+     * The start of the clip, must be specified.
+     */
+    clipStartTick: number;
+    clipEndTick?: number;
+    /** Whether to insert the created clip into the track. */
+    insertClip?: boolean;
+  }) {
+    if (clipStartTick === undefined || clipStartTick === null) {
+      throw new Error('clipStartTick must be specified when creating a clip.');
+    }
+    const newClipEndTick =
+      clipEndTick === undefined || clipEndTick === null ? clipStartTick + 1 : clipEndTick;
+    if (newClipEndTick < clipStartTick) {
+      throw new Error(
+        `clipEndTick must be greater or equal to clipStartTick, got clipStartTick: ${clipStartTick}, clipEndTick: ${clipEndTick}`,
+      );
+    }
+    const clip = new Clip({
+      // @ts-ignore
+      id: Clip.generateClipIdInternal(),
+      track: this,
+      sortedNotes,
+      clipStartTick,
+      clipEndTick: newClipEndTick,
+    });
+    if (insertClip) {
+      this.insertClip(clip);
+    }
+
+    return clip;
+  }
+
+  insertClip(clip: Clip) {
+    // Resolve conflict before inserting a new clip
+    // to preserve the current order of clips.
+    this.resolveClipConflictInternal(clip.getId(), clip.getClipStartTick(), clip.getClipEndTick());
+    this.orderedInsertClipInternal(this.clips, clip);
+  }
+
+  /**
+   * Clones a clip without inserting it into this track, and returns the cloned instance.
+   * @param clip The clip (not necessarily in this track) to clone.
+   * @returns The cloned clip.
+   */
+  cloneClip(clip: Clip) {
+    const newClip = this.createClip({
+      sortedNotes: [],
+      clipStartTick: clip.getClipStartTick(),
+      clipEndTick: clip.getClipEndTick(),
+      insertClip: false,
+    });
+    for (const note of clip.getRawNotes()) {
+      newClip.createNote({
+        pitch: note.getPitch(),
+        velocity: note.getVelocity(),
+        startTick: note.getStartTick(),
+        endTick: note.getEndTick(),
+        updateClipRange: false,
+        resolveClipConflict: false,
+      });
+    }
+    newClip.adjustClipRange(
+      clip.getClipStartTick(),
+      clip.getClipEndTick(),
+      /* resolveConflict= */ false,
+    );
+    return newClip;
+  }
+
+  deleteClip(clip: Clip) {
+    const startIndex = lowerEqual(
+      this.clips,
+      clip,
+      (a: Clip, b: Clip) => a.getClipStartTick() - b.getClipStartTick(),
+    );
+
+    const index = this.clips.indexOf(clip, startIndex);
+    if (index >= 0) {
+      this.clips.splice(index, 1);
+    }
+  }
+
+  deleteFromParent() {
+    this.song.removeTrack(this.getId());
+  }
+
+  private static generateTrackIdInternal() {
+    return nanoid();
+  }
+
+  /**
+   * NOTE: Always resolve conflict BEFORE you make any changes to any clips,
+   * so that the order of the clips are still maintained.
+   *
+   * @param clipId
+   * @param startTick
+   * @param endTick
+   */
+  protected resolveClipConflictInternal(clipId: string, startTick: number, endTick: number) {
+    const overlappingClips = this.getClipsOverlappingWith(startTick, endTick);
+    for (const clip of overlappingClips) {
+      if (clip.getId() === clipId) {
+        continue;
+      }
+      // @ts-ignore
+      clip.trimConflictPartInternal(startTick, endTick);
+    }
+  }
+
+  private orderedInsertClipInternal(clipList: Clip[], newClip: Clip) {
+    const insertIndex = greaterEqual(
+      clipList,
+      newClip,
+      (a: Clip, b: Clip) => a.getClipStartTick() - b.getClipStartTick(),
+    );
+
+    clipList.splice(insertIndex, 0, newClip);
   }
 }
 
@@ -575,13 +1059,71 @@ export class Song {
     index?: number;
   }): Track {
     this.checkAccess('createTrack');
-    const track = new Track({ uuid: this.getNextTrackId(), rank: this.getNextTrackRank() });
+    const track = new Track({
+      song: this,
+      uuid: this.getNextTrackId(),
+      rank: this.getNextTrackRank(),
+    });
     if (index !== undefined && index !== null) {
       this.tracks.splice(index, 0, track);
     } else {
       this.tracks.push(track);
     }
     return track;
+  }
+
+  /**
+   * Clones a track and inserts it in this song and returns the cloned instance.
+   * @param track The track in this song to clone.
+   * @returns The cloned track.
+   */
+  cloneTrack(track: Track) {
+    let trackIndex: any = this.getTrackIndex(track.getId());
+    if (trackIndex < 0) {
+      // Track not found in this song, new track will be inserted at the end.
+      trackIndex = undefined;
+    }
+    const newTrack = this.createTrack({
+      index: trackIndex,
+    });
+    newTrack.setInstrument({
+      program: track.getInstrument().getProgram(),
+      isDrum: track.getInstrument().getIsDrum(),
+    });
+    for (const existingInstrument of track.getSuggestedInstruments()) {
+      newTrack.createSuggestedInstrument({
+        program: existingInstrument.getProgram(),
+        isDrum: existingInstrument.getIsDrum(),
+      });
+    }
+    newTrack.setVolume(track.getVolume());
+    newTrack.setSolo(track.getSolo());
+    newTrack.setMuted(track.getMuted());
+    const existingSamplerPlugin = track.getSamplerPlugin();
+    if (existingSamplerPlugin) {
+      newTrack.setSamplerPlugin(existingSamplerPlugin.clone());
+    }
+    for (const audioPlugin of track.getAudioPlugins()) {
+      newTrack.addAudioPlugin(audioPlugin.clone());
+    }
+    for (const clip of track.getClips()) {
+      const newClip = newTrack.createClip({
+        clipStartTick: clip.getClipStartTick(),
+        clipEndTick: clip.getClipEndTick(),
+        sortedNotes: [],
+      });
+      for (const note of clip.getRawNotes()) {
+        newClip.createNote({
+          pitch: note.getPitch(),
+          velocity: note.getVelocity(),
+          startTick: note.getStartTick(),
+          endTick: note.getEndTick(),
+          updateClipRange: false,
+          resolveClipConflict: false,
+        });
+      }
+    }
+    return newTrack;
   }
 
   /**
@@ -762,7 +1304,8 @@ export class Song {
     // @ts-ignore
     const pluginGeneratedTrackIds = pluginContext.plugin.generatedTrackIdsInternal;
     if (pluginContext.numTracksCreatedByPlugin === pluginGeneratedTrackIds.length) {
-      pluginGeneratedTrackIds.push(uuidv4());
+      // @ts-ignore
+      pluginGeneratedTrackIds.push(Track.generateTrackIdInternal());
     } else if (pluginContext.numTracksCreatedByPlugin > pluginGeneratedTrackIds.length) {
       throw new Error('Plugin generated track ids out of sync.');
     }

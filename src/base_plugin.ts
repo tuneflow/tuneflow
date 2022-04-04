@@ -1,7 +1,7 @@
 import type { ParamDescriptor, LabelText, SongAccess } from './descriptors';
 import type { Song } from './models/song';
 import * as _ from 'underscore';
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import { WidgetType } from '.';
 
 type RunParameters = { [paramName: string]: any };
@@ -12,7 +12,7 @@ type RunParameters = { [paramName: string]: any };
  * All plugins should be a sub-class of this plugin in order to run in the pipeline.
  */
 export class TuneflowPlugin {
-  private instanceIdInternal = uuidv4();
+  private instanceIdInternal = TuneflowPlugin.generatePluginIdInternal();
   enabledInternal = true;
   private paramsResultInternal: RunParameters = {};
   // @ts-ignore
@@ -187,6 +187,11 @@ export class TuneflowPlugin {
             return false;
           }
           break;
+        case WidgetType.None:
+          if (paramResult === undefined || paramResult === null) {
+            return false;
+          }
+          break;
         default:
           throw new Error(
             `Param nullness check needs to be implemented for widget type ${paramWidgetType}. Either use default nullness check or define custom logic.`,
@@ -283,5 +288,9 @@ export class TuneflowPlugin {
     if (this.shouldManualEnableInternal() && !this.hasAllParamsSet()) {
       this.setEnabledInternal(false);
     }
+  }
+
+  private static generatePluginIdInternal() {
+    return nanoid(10);
   }
 }

@@ -66,7 +66,7 @@ export interface InputNumberWidgetConfig {
 
 export interface WidgetDescriptor {
   type: WidgetType;
-  config:
+  config?:
     | SliderWidgetConfig
     | InputWidgetConfig
     | SelectWidgetConfig
@@ -76,7 +76,9 @@ export interface WidgetDescriptor {
     | InstrumentSelectorWidgetConfig
     | SelectWidgetConfig
     | SwitchWidgetConfig
-    | InputNumberWidgetConfig;
+    | InputNumberWidgetConfig
+    | undefined
+    | null;
 }
 
 export interface SongAccess {
@@ -100,6 +102,8 @@ export enum WidgetType {
   Switch = 8,
   InputNumber = 9,
   MultiTrackSelector = 10,
+  /** Does not render a widget. */
+  None = 11,
 }
 
 export interface ParamDescriptor {

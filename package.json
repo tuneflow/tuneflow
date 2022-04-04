@@ -40,9 +40,9 @@
   },
   "peerDependencies": {
     "underscore": "^1.13.2",
-    "uuid": "^8.3.2",
     "binary-search-bounds": "^2.0.5",
-    "lodash.clonedeep": "^4.5.0"
+    "lodash.clonedeep": "^4.5.0",
+    "nanoid": "^3.3.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.1.0",

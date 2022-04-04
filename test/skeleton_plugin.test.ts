@@ -59,7 +59,10 @@ describe('Skeleton Tuneflow', () => {
     });
     song.setResolution(480);
     const track = song.createTrack({});
-    track.createNote({
+    const clip = track.createClip({
+      clipStartTick: 0,
+    });
+    clip.createNote({
       pitch: 64,
       velocity: 80,
       startTick: 0,
