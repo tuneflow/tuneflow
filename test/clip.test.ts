@@ -222,6 +222,23 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 27);
       assertClipRange(clip3, 44, 65);
     });
+
+    it('Moves clip - delete out of range clip', async () => {
+      const track = song.getTracks()[0];
+      expect(track.getClips().length).toBe(3);
+      let clip1 = track.getClips()[0];
+      assertClipRange(clip1, 0, 15);
+      let clip2 = track.getClips()[1];
+      assertClipRange(clip2, 21, 30);
+      const clip3 = track.getClips()[2];
+      assertClipRange(clip3, 40, 65);
+      clip1.moveClip(-99999);
+      expect(track.getClips().length).toBe(2);
+      clip1 = track.getClips()[0];
+      assertClipRange(clip1, 21, 30);
+      clip2 = track.getClips()[1];
+      assertClipRange(clip2, 40, 65);
+    });
   });
 
   describe('Adjust clip ranges', () => {

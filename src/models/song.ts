@@ -366,7 +366,7 @@ export class Clip {
    * @param clipEndTick  The new end tick (inclusive) of the clip.
    */
   adjustClipRight(clipEndTick: number, resolveConflict = true) {
-    if (clipEndTick < this.clipStartTick) {
+    if (clipEndTick < this.clipStartTick || clipEndTick < 0) {
       this.deleteFromParent();
     } else {
       // Resolve conflict before changing the clip's range
@@ -390,7 +390,7 @@ export class Clip {
    */
   adjustClipRange(clipStartTick: number, clipEndTick: number, resolveConflict = true) {
     clipStartTick = Math.max(0, clipStartTick);
-    if (clipStartTick > clipEndTick) {
+    if (clipStartTick > clipEndTick || clipEndTick < 0) {
       this.deleteFromParent();
     } else {
       // Resolve conflict before changing the clip's range
@@ -414,7 +414,11 @@ export class Clip {
    */
   moveClip(offsetTick: number) {
     const newClipStartTick = Math.max(0, this.clipStartTick + offsetTick);
-    const newClipEndTick = Math.max(0, this.clipEndTick + offsetTick);
+    const newClipEndTick = this.clipEndTick + offsetTick;
+    if (newClipEndTick < 0) {
+      this.deleteFromParent();
+      return;
+    }
     // Resolve conflict before changing the clip's range
     // to preserve the current order of clips.
     // @ts-ignore
