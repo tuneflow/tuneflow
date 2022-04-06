@@ -82,6 +82,17 @@ export class Note {
     return this.pitch;
   }
 
+  setPitch(newPitch: number) {
+    if (!Note.isValidPitch(newPitch)) {
+      throw new Error(`Invalid pitch ${newPitch}`);
+    }
+    this.pitch = newPitch;
+  }
+
+  static isValidPitch(pitch: number) {
+    return pitch >= 0 && pitch <= 127;
+  }
+
   getVelocity() {
     return this.velocity;
   }

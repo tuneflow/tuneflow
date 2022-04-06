@@ -19,6 +19,8 @@ export class TuneflowPlugin {
   private generatedTrackIdsInternal: string[] = [];
   private isRollbackable = false;
 
+  // ============ PUBLIC OVERWRITABLE ================
+
   /**
    * The unique id to identify the plugin provider.
    *
@@ -86,6 +88,17 @@ export class TuneflowPlugin {
    */
   songAccess(): SongAccess {
     return {};
+  }
+
+  /**
+   * Whether the user can manually apply this plugin and go back to adjust it.
+   * Enable this when you want the user to frequently toggle this plugin on and off
+   * to see the difference.
+   * For example: A plugin that divides a track into two, you want the user to
+   * easily switch between the plugin is on or off to see what's going on.
+   */
+  public allowManualApplyAdjust() {
+    return false;
   }
 
   /**
@@ -262,18 +275,9 @@ export class TuneflowPlugin {
    */
   public resetInternal() {
     this.resetParamsInternal();
-    if (this.shouldManualEnableInternal()) {
+    if (this.allowManualApplyAdjust()) {
       this.enabledInternal = false;
     }
-  }
-
-  /**
-   * DO NOT overwrite this method.
-   *
-   * Whether this plugin should be enabled by clicking the apply button manually.
-   */
-  public shouldManualEnableInternal() {
-    return this.songAccess().createTrack || this.songAccess().removeTrack;
   }
 
   public setEnabledInternal(enabled: boolean) {
@@ -285,7 +289,7 @@ export class TuneflowPlugin {
    * the plugin should be disabled.
    */
   private maybeSyncEnabledWithParamsReadiness() {
-    if (this.shouldManualEnableInternal() && !this.hasAllParamsSet()) {
+    if (this.allowManualApplyAdjust() && !this.hasAllParamsSet()) {
       this.setEnabledInternal(false);
     }
   }
