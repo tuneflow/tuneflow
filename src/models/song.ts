@@ -344,8 +344,7 @@ export class Clip {
    * Adjust the left boundary of the clip.
    *
    * NOTE: This could delete the clip if the range becomes empty after
-   * this call. If you need to adjust the left and right boundaries at
-   * the same time, use adjustClipRange.
+   * this call.
    * @param clipStartTick The new start tick (inclusive) of the clip.
    */
   adjustClipLeft(clipStartTick: number, resolveConflict = true) {
@@ -371,8 +370,7 @@ export class Clip {
    * Adjust the right boundary of the clip.
    *
    * NOTE: This could delete the clip if the range becomes empty after
-   * this call. If you need to adjust the left and right boundaries at
-   * the same time, use adjustClipRange.
+   * this call.
    *
    * @param clipEndTick  The new end tick (inclusive) of the clip.
    */
@@ -395,32 +393,10 @@ export class Clip {
   }
 
   /**
-   * Adjust the left and right boundaries of the clip at the same time.
-   * @param clipStartTick The new start tick (inclusive) of the clip.
-   * @param clipEndTick The new end tick (inclusive) of the clip.
-   */
-  adjustClipRange(clipStartTick: number, clipEndTick: number, resolveConflict = true) {
-    clipStartTick = Math.max(0, clipStartTick);
-    if (clipStartTick > clipEndTick || clipEndTick < 0) {
-      this.deleteFromParent();
-    } else {
-      // Resolve conflict before changing the clip's range
-      // to preserve the current order of clips.
-      if (resolveConflict) {
-        // @ts-ignore
-        this.track.resolveClipConflictInternal(
-          this.getId(),
-          Math.min(this.clipStartTick, clipStartTick),
-          Math.max(this.clipEndTick, clipEndTick),
-        );
-      }
-      this.clipStartTick = clipStartTick;
-      this.clipEndTick = clipEndTick;
-    }
-  }
-
-  /**
    * Move the clip by the given offset ticks.
+   *
+   * NOTE: Moving a clip can break the order of clips,
+   * so the clip must be re-positioned to the correct index.
    * @param offsetTick
    */
   moveClip(offsetTick: number) {
@@ -434,12 +410,23 @@ export class Clip {
     // to preserve the current order of clips.
     // @ts-ignore
     this.track.resolveClipConflictInternal(this.getId(), newClipStartTick, newClipEndTick);
+
+    // The track's clip order will be invalidated after the move, and deleting the clip
+    // requires the clips to be sorted, so delete the clip before the move happens.
+    const clipIndex = this.track.getClipIndex(this);
+    this.track.deleteClipAt(clipIndex);
+
+    // Move the clip.
     this.clipStartTick = newClipStartTick;
     this.clipEndTick = newClipEndTick;
     for (const note of this.notes) {
       note.setStartTick(note.getStartTick() + offsetTick);
       note.setEndTick(note.getEndTick() + offsetTick);
     }
+
+    // Ordered insert back the clip.
+    // @ts-ignore
+    this.track.orderedInsertClipInternal(this);
   }
 
   /**
@@ -842,11 +829,12 @@ export class Track {
     // Resolve conflict before inserting a new clip
     // to preserve the current order of clips.
     this.resolveClipConflictInternal(clip.getId(), clip.getClipStartTick(), clip.getClipEndTick());
-    this.orderedInsertClipInternal(this.clips, clip);
+    this.orderedInsertClipInternal(clip);
   }
 
   /**
    * Clones a clip without inserting it into this track, and returns the cloned instance.
+   *
    * @param clip The clip (not necessarily in this track) to clone.
    * @returns The cloned clip.
    */
@@ -867,25 +855,34 @@ export class Track {
         resolveClipConflict: false,
       });
     }
-    newClip.adjustClipRange(
-      clip.getClipStartTick(),
-      clip.getClipEndTick(),
-      /* resolveConflict= */ false,
-    );
     return newClip;
   }
 
-  deleteClip(clip: Clip) {
+  /**
+   * Get the index of the clip within the clip list.
+   *
+   * NOTE: This assumes the clip list is sorted.
+   */
+  getClipIndex(clip: Clip) {
     const startIndex = lowerEqual(
       this.clips,
       clip,
       (a: Clip, b: Clip) => a.getClipStartTick() - b.getClipStartTick(),
     );
 
-    const index = this.clips.indexOf(clip, startIndex);
-    if (index >= 0) {
-      this.clips.splice(index, 1);
+    return this.clips.indexOf(clip, startIndex);
+  }
+
+  deleteClip(clip: Clip) {
+    const index = this.getClipIndex(clip);
+    this.deleteClipAt(index);
+  }
+
+  deleteClipAt(index: number) {
+    if (index < 0) {
+      return;
     }
+    this.clips.splice(index, 1);
   }
 
   deleteFromParent() {
@@ -915,14 +912,14 @@ export class Track {
     }
   }
 
-  private orderedInsertClipInternal(clipList: Clip[], newClip: Clip) {
+  private orderedInsertClipInternal(newClip: Clip) {
     const insertIndex = greaterEqual(
-      clipList,
+      this.clips,
       newClip,
       (a: Clip, b: Clip) => a.getClipStartTick() - b.getClipStartTick(),
     );
 
-    clipList.splice(insertIndex, 0, newClip);
+    this.clips.splice(insertIndex, 0, newClip);
   }
 }
 

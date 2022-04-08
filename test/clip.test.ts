@@ -46,7 +46,8 @@ describe('Clip-related Tests', () => {
       startTick: 15,
       endTick: 20,
     });
-    clip1.adjustClipRange(0, 15);
+    clip1.adjustClipLeft(0);
+    clip1.adjustClipRight(15);
     const clip2 = track.createClip({
       clipStartTick: 21,
     });
@@ -68,7 +69,8 @@ describe('Clip-related Tests', () => {
       startTick: 25,
       endTick: 35,
     });
-    clip2.adjustClipRange(21, 30);
+    clip2.adjustClipLeft(21);
+    clip2.adjustClipRight(30);
     const clip3 = track.createClip({
       clipStartTick: 40,
     });
@@ -90,7 +92,8 @@ describe('Clip-related Tests', () => {
       startTick: 55,
       endTick: 65,
     });
-    clip3.adjustClipRange(40, 65);
+    clip3.adjustClipLeft(40);
+    clip3.adjustClipRight(65);
   });
 
   describe('Basic operations', () => {
@@ -221,6 +224,27 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip1, 28, 43);
       assertClipRange(clip2, 21, 27);
       assertClipRange(clip3, 44, 65);
+    });
+
+    it('Moves clip - overlaps in the middle', async () => {
+      const track = song.getTracks()[0];
+      expect(track.getClips().length).toBe(3);
+      let clip1 = track.getClips()[0];
+      assertClipRange(clip1, 0, 15);
+      let clip2 = track.getClips()[1];
+      assertClipRange(clip2, 21, 30);
+      let clip3 = track.getClips()[2];
+      assertClipRange(clip3, 40, 65);
+      clip2.moveClipTo(42);
+      expect(track.getClips().length).toBe(4);
+      clip1 = track.getClips()[0];
+      assertClipRange(clip1, 0, 15);
+      clip2 = track.getClips()[1];
+      assertClipRange(clip2, 40, 41);
+      clip3 = track.getClips()[2];
+      assertClipRange(clip3, 42, 51);
+      const clip4 = track.getClips()[3];
+      assertClipRange(clip4, 52, 65);
     });
 
     it('Moves clip - delete out of range clip', async () => {
@@ -375,7 +399,8 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip2.adjustClipRange(18, 35);
+      clip2.adjustClipLeft(18);
+      clip2.adjustClipRight(35);
       assertClipRange(clip1, 0, 15);
       assertClipRange(clip2, 18, 35);
       assertClipRange(clip3, 40, 65);
@@ -390,7 +415,8 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip2.adjustClipRange(10, 35);
+      clip2.adjustClipLeft(10);
+      clip2.adjustClipRight(35);
       assertClipRange(clip1, 0, 9);
       assertClipRange(clip2, 10, 35);
       assertClipRange(clip3, 40, 65);
@@ -405,7 +431,8 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip2.adjustClipRange(0, 35);
+      clip2.adjustClipLeft(0);
+      clip2.adjustClipRight(35);
       expect(track.getClips().length).toBe(2);
       clip1 = track.getClips()[0];
       clip2 = track.getClips()[1];
@@ -422,7 +449,8 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip2.adjustClipRange(21, 45);
+      clip2.adjustClipLeft(21);
+      clip2.adjustClipRight(45);
       assertClipRange(clip1, 0, 15);
       assertClipRange(clip2, 21, 45);
       assertClipRange(clip3, 46, 65);
@@ -437,7 +465,8 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip2.adjustClipRange(21, 1000);
+      clip2.adjustClipLeft(21);
+      clip2.adjustClipRight(1000);
       expect(track.getClips().length).toBe(2);
       clip1 = track.getClips()[0];
       clip2 = track.getClips()[1];
@@ -454,7 +483,8 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip2.adjustClipRange(10, 45);
+      clip2.adjustClipLeft(10);
+      clip2.adjustClipRight(45);
       assertClipRange(clip1, 0, 9);
       assertClipRange(clip2, 10, 45);
       assertClipRange(clip3, 46, 65);
@@ -469,7 +499,8 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip2.adjustClipRange(0, 1000);
+      clip2.adjustClipLeft(0);
+      clip2.adjustClipRight(1000);
       expect(track.getClips().length).toBe(1);
       clip1 = track.getClips()[0];
       assertClipRange(clip1, 0, 1000);
