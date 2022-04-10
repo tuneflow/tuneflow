@@ -42,15 +42,23 @@ export class Song {
    */
   createTrack({
     index,
+    rank,
   }: {
     /** Index to insert at. If left blank, appends to the end. */
     index?: number;
+    /** The displayed rank which uniquely identifies a track. Internal use, do not set this. */
+    rank?: number;
   }): Track {
     this.checkAccess('createTrack');
+    if (rank == undefined || rank === null) {
+      rank = this.getNextTrackRank();
+    } else {
+      this.nextTrackRank = Math.max(rank + 1, this.nextTrackRank);
+    }
     const track = new Track({
       song: this,
       uuid: this.getNextTrackId(),
-      rank: this.getNextTrackRank(),
+      rank: rank == undefined || rank === null ? this.getNextTrackRank() : rank,
     });
     if (index !== undefined && index !== null) {
       this.tracks.splice(index, 0, track);
