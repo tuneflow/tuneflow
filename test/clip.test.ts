@@ -43,7 +43,7 @@ describe('Clip-related Tests', () => {
     clip1.createNote({
       pitch: 68,
       velocity: 80,
-      startTick: 15,
+      startTick: 14,
       endTick: 20,
     });
     clip1.adjustClipLeft(0);
@@ -52,21 +52,21 @@ describe('Clip-related Tests', () => {
       clipStartTick: 21,
     });
     clip2.createNote({
-      pitch: 64,
-      velocity: 80,
-      startTick: 21,
-      endTick: 30,
-    });
-    clip2.createNote({
       pitch: 66,
       velocity: 80,
       startTick: 25,
       endTick: 30,
     });
     clip2.createNote({
+      pitch: 64,
+      velocity: 80,
+      startTick: 18,
+      endTick: 30,
+    });
+    clip2.createNote({
       pitch: 68,
       velocity: 80,
-      startTick: 25,
+      startTick: 24,
       endTick: 35,
     });
     clip2.adjustClipLeft(21);
@@ -75,10 +75,10 @@ describe('Clip-related Tests', () => {
       clipStartTick: 40,
     });
     clip3.createNote({
-      pitch: 67,
+      pitch: 71,
       velocity: 80,
-      startTick: 40,
-      endTick: 45,
+      startTick: 55,
+      endTick: 65,
     });
     clip3.createNote({
       pitch: 69,
@@ -87,10 +87,10 @@ describe('Clip-related Tests', () => {
       endTick: 50,
     });
     clip3.createNote({
-      pitch: 71,
+      pitch: 67,
       velocity: 80,
-      startTick: 55,
-      endTick: 65,
+      startTick: 40,
+      endTick: 45,
     });
     clip3.adjustClipLeft(40);
     clip3.adjustClipRight(65);
@@ -111,6 +111,7 @@ describe('Clip-related Tests', () => {
       const clip1 = track.getClips()[0];
       const clip2 = track.getClips()[1];
       const clip3 = track.getClips()[2];
+      // Notes that are at the edge are included.
       assertNotesAreEqual(
         clip1.getNotes(),
         createTestNotes([
@@ -120,16 +121,29 @@ describe('Clip-related Tests', () => {
             startTick: 0,
             endTick: 10,
           },
+          {
+            pitch: 68,
+            velocity: 80,
+            startTick: 14,
+            endTick: 20,
+          },
+          {
+            pitch: 66,
+            velocity: 80,
+            startTick: 15,
+            endTick: 20,
+          },
         ]),
       );
+      // Note that start before the clip start are excluded.
       assertNotesAreEqual(
         clip2.getNotes(),
         createTestNotes([
           {
-            pitch: 64,
+            pitch: 68,
             velocity: 80,
-            startTick: 21,
-            endTick: 30,
+            startTick: 24,
+            endTick: 35,
           },
           {
             pitch: 66,
@@ -139,6 +153,7 @@ describe('Clip-related Tests', () => {
           },
         ]),
       );
+      // Note are sorted and all notes that are within clip are returned.
       assertNotesAreEqual(
         clip3.getNotes(),
         createTestNotes([

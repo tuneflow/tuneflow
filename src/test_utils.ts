@@ -7,7 +7,11 @@ export function assertNotesAreEqual(notes1: Note[], notes2: Note[]) {
   }
   for (let i = 0; i < notes1.length; i += 1) {
     if (!notes1[i].equals(notes2[i])) {
-      throw new Error(`${i}th notes of the two lists are not equal`);
+      throw new Error(
+        `${i}th notes of the two lists are not equal, ${JSON.stringify(notes1)} vs ${JSON.stringify(
+          notes2,
+        )}`,
+      );
     }
   }
 }

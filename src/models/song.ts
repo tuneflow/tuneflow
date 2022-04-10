@@ -463,13 +463,54 @@ export class Clip {
     return inRangeNotes;
   }
 
+  /**
+   * Note is in the clip when:
+   * * The note starts at or after the clip start.
+   * * The note has overlapping part with the clip.
+   * @param noteStartTick
+   * @param noteEndTick
+   * @param clipStartTick
+   * @param clipEndTick
+   * @returns
+   */
   static isNoteInClip(
     noteStartTick: number,
     noteEndTick: number,
     clipStartTick: number,
     clipEndTick: number,
   ) {
-    return noteStartTick >= clipStartTick && noteEndTick <= clipEndTick;
+    return (
+      noteStartTick >= clipStartTick && noteStartTick <= clipEndTick && noteEndTick >= noteStartTick
+    );
+  }
+
+  /**
+   * Some notes might not be fully within the clip, this returns the range of the note
+   * that is within the clip's range.
+   * @param noteStartTick
+   * @param noteEndTick
+   * @param clipStartTick
+   * @param clipEndTick
+   * @returns Returns the start and end tick if the note is in the clip and there's overlap, otherwise null.
+   */
+  static getNotePlayableRange(
+    noteStartTick: number,
+    noteEndTick: number,
+    clipStartTick: number,
+    clipEndTick: number,
+  ) {
+    if (!Clip.isNoteInClip(noteStartTick, noteEndTick, clipStartTick, clipEndTick)) {
+      return null;
+    }
+    const overlappingStartTick = Math.max(noteStartTick, clipStartTick);
+    const overlappingEndTick = Math.min(noteEndTick, clipEndTick);
+    if (overlappingStartTick > overlappingEndTick) {
+      return null;
+    }
+    return {
+      startTick: overlappingStartTick,
+      endTick: overlappingEndTick,
+    };
   }
 
   /**
