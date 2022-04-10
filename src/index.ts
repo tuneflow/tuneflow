@@ -1,5 +1,11 @@
 export { TuneflowPlugin } from './base_plugin';
 export { TuneflowPipeline } from './pipeline';
-export * from './models/song';
-export * from './descriptors';
+export { Song } from './models/song';
+export { Track } from './models/track';
+export { Clip } from './models/clip';
+export { Note } from './models/note';
+export { TempoEvent } from './models/tempo';
+export { TimeSignatureEvent } from './models/time_signature';
+export { AudioPlugin } from './models/audio_plugin';
+export * from './descriptors/index';
 export * from './utils';

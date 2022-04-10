@@ -1,8 +1,21 @@
-/** A dictionary whose keys are a locale such as 'zh', and the values are the translation. */
-export type I18nLabelText = { [locale: string]: string };
+import type { LabelText } from './text';
 
-/** A plain string or a dictionary mapping locales to translations. */
-export type LabelText = string | I18nLabelText;
+export enum WidgetType {
+  Slider = 1,
+  Input = 2,
+  /** A widget that selects one track. */
+  TrackSelector = 3,
+  /** A widget that selects a pitch. */
+  Pitch = 4,
+  TrackPitchSelector = 5,
+  InstrumentSelector = 6,
+  Select = 7,
+  Switch = 8,
+  InputNumber = 9,
+  MultiTrackSelector = 10,
+  /** Does not render a widget. */
+  None = 11,
+}
 
 export interface SliderWidgetConfig {
   minValue: number;
@@ -79,58 +92,4 @@ export interface WidgetDescriptor {
     | InputNumberWidgetConfig
     | undefined
     | null;
-}
-
-export interface SongAccess {
-  /** Whether the plugin has permission to create a new track. */
-  createTrack?: boolean;
-
-  /** Whether the plugin has permission to remove a track. */
-  removeTrack?: boolean;
-}
-
-export enum WidgetType {
-  Slider = 1,
-  Input = 2,
-  /** A widget that selects one track. */
-  TrackSelector = 3,
-  /** A widget that selects a pitch. */
-  Pitch = 4,
-  TrackPitchSelector = 5,
-  InstrumentSelector = 6,
-  Select = 7,
-  Switch = 8,
-  InputNumber = 9,
-  MultiTrackSelector = 10,
-  /** Does not render a widget. */
-  None = 11,
-}
-
-export interface ParamDescriptor {
-  /** The name to display on the UI. */
-  displayName: LabelText;
-
-  /** Configuration of the widget to display on the UI. */
-  widget: WidgetDescriptor;
-
-  /** The default value of the param. */
-  defaultValue?: any;
-
-  /**
-   * Whether this param is adjustable. If the param is not adjustable, the controllable
-   * part is not shown.
-   * Default to true.
-   */
-  adjustable?: boolean;
-
-  /**
-   * Whether this param is hidden completely.
-   */
-  hidden?: boolean;
-
-  /** Whether this param can be left undefined or null. */
-  optional?: boolean;
-
-  /** Explaining what this parameter is for. */
-  description?: LabelText;
 }

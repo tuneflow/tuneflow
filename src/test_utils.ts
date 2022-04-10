@@ -1,5 +1,5 @@
-import { Note } from './models/song';
-import type { Clip } from './models/song';
+import { Note } from '.';
+import type { Clip } from '.';
 
 export function assertNotesAreEqual(notes1: Note[], notes2: Note[]) {
   if (notes1.length !== notes2.length) {

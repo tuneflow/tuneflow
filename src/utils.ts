@@ -1,4 +1,4 @@
-import { AudioPlugin } from './models/song';
+import { AudioPlugin } from './models/audio_plugin';
 
 function midiToPitchClass(midi: number): string {
   const scaleIndexToNote = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
