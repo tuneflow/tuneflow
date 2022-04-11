@@ -1,4 +1,5 @@
 import { ge as greaterEqual, lt as lowerThan } from 'binary-search-bounds';
+import { cloneDeep } from 'lodash';
 import * as _ from 'underscore';
 import type { TuneflowPlugin } from '../base_plugin';
 import { TempoEvent } from './tempo';
@@ -192,6 +193,46 @@ export class Song {
     }
     this.retimingTempoEvents();
     return tempoChange;
+  }
+
+  /**
+   * Overwrite the existing tempo changes with the new tempo changes.
+   *
+   * Note that the new tempo events must have one tempo event starting at tick 0.
+   * @param tempoEvents
+   */
+  overwriteTempoChanges(tempoEvents: TempoEvent[]) {
+    if (tempoEvents.length === 0) {
+      throw new Error('Cannot clear all the tempo events.');
+    }
+    const sortedTempoEvents = cloneDeep(tempoEvents);
+    sortedTempoEvents.sort((a, b) => a.getTicks() - b.getTicks());
+    const firstTempoEvent = sortedTempoEvents[0];
+    if (firstTempoEvent.getTicks() > 0) {
+      throw new Error('The first tempo event needs to start from tick 0');
+    }
+    this.tempos = [
+      new TempoEvent({
+        ticks: 0,
+        time: 0,
+        bpm: firstTempoEvent.getBpm(),
+      }),
+    ];
+    for (let i = 1; i < sortedTempoEvents.length; i += 1) {
+      const tempoEvent = sortedTempoEvents[i];
+      this.createTempoChange({
+        ticks: tempoEvent.getTicks(),
+        bpm: tempoEvent.getBpm(),
+      });
+    }
+  }
+
+  /**
+   * Overwrite all existing time signatures with the given new time signatures.
+   * @param timeSignatures
+   */
+  overwriteTimeSignatures(timeSignatures: TimeSignatureEvent[]) {
+    this.timeSignatures = cloneDeep(timeSignatures);
   }
 
   updateTempo(tempoEvent: TempoEvent, newBPM: number) {

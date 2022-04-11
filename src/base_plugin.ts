@@ -173,6 +173,7 @@ export class TuneflowPlugin {
         case WidgetType.Select:
         case WidgetType.Switch:
         case WidgetType.InputNumber:
+        case WidgetType.FileSelector:
           // Nothing else to check.
           break;
         case WidgetType.MultiTrackSelector:

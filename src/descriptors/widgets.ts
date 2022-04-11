@@ -15,6 +15,28 @@ export enum WidgetType {
   MultiTrackSelector = 10,
   /** Does not render a widget. */
   None = 11,
+  FileSelector = 12,
+}
+
+/**
+ * Add your widget config here.
+ */
+export interface WidgetDescriptor {
+  type: WidgetType;
+  config?:
+    | SliderWidgetConfig
+    | InputWidgetConfig
+    | SelectWidgetConfig
+    | TrackSelectorWidgetConfig
+    | PitchWidgetConfig
+    | TrackPitchSelectorWidgetConfig
+    | InstrumentSelectorWidgetConfig
+    | SelectWidgetConfig
+    | SwitchWidgetConfig
+    | InputNumberWidgetConfig
+    | FileSelectorWidgetConfig
+    | undefined
+    | null;
 }
 
 export interface SliderWidgetConfig {
@@ -77,19 +99,7 @@ export interface InputNumberWidgetConfig {
   maxValue: number;
 }
 
-export interface WidgetDescriptor {
-  type: WidgetType;
-  config?:
-    | SliderWidgetConfig
-    | InputWidgetConfig
-    | SelectWidgetConfig
-    | TrackSelectorWidgetConfig
-    | PitchWidgetConfig
-    | TrackPitchSelectorWidgetConfig
-    | InstrumentSelectorWidgetConfig
-    | SelectWidgetConfig
-    | SwitchWidgetConfig
-    | InputNumberWidgetConfig
-    | undefined
-    | null;
+export interface FileSelectorWidgetConfig {
+  /** The extensions (without ".") that are allowed to choose. */
+  allowedExtensions: string[];
 }
