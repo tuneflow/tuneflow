@@ -5,11 +5,11 @@ import { Note } from './note';
 
 /**
  * A clip is a piece in a track, and it contains notes and the clip range.
- * One track can contain one or many non-overlapping
- * clips.
+ * One track can contain one or many non-overlapping clips.
  */
 export class Clip {
-  private track: Track;
+  /** If the clip is dettached from any track, this field is going to be undefined. */
+  private track?: Track;
   private id: string;
   // Notes should be sorted all the time.
   private notes: Note[];
@@ -22,13 +22,13 @@ export class Clip {
    * IMPORTANT: Do not use the constructor directly, call createClip from tracks instead.
    */
   constructor({
-    track,
+    track = undefined,
     id = Clip.generateClipIdInternal(),
     sortedNotes = [],
     clipStartTick = 0,
     clipEndTick = 0,
   }: {
-    track: Track;
+    track?: Track;
     id?: string;
     /**
      * Notes of the clip sorted by start time.
@@ -70,6 +70,10 @@ export class Clip {
 
   getClipEndTick() {
     return this.clipEndTick;
+  }
+
+  getTrack() {
+    return this.track;
   }
 
   /**
@@ -164,7 +168,7 @@ export class Clip {
     } else {
       // Resolve conflict before changing the clip's range
       // to preserve the current order of clips.
-      if (resolveConflict) {
+      if (resolveConflict && this.track) {
         // @ts-ignore
         this.track.resolveClipConflictInternal(
           this.getId(),
@@ -190,7 +194,7 @@ export class Clip {
     } else {
       // Resolve conflict before changing the clip's range
       // to preserve the current order of clips.
-      if (resolveConflict) {
+      if (resolveConflict && this.track) {
         // @ts-ignore
         this.track.resolveClipConflictInternal(
           this.getId(),
@@ -216,15 +220,19 @@ export class Clip {
       this.deleteFromParent();
       return;
     }
-    // Resolve conflict before changing the clip's range
-    // to preserve the current order of clips.
-    // @ts-ignore
-    this.track.resolveClipConflictInternal(this.getId(), newClipStartTick, newClipEndTick);
+    if (this.track) {
+      // Resolve conflict before changing the clip's range
+      // to preserve the current order of clips.
+      // @ts-ignore
+      this.track.resolveClipConflictInternal(this.getId(), newClipStartTick, newClipEndTick);
+    }
 
     // The track's clip order will be invalidated after the move, and deleting the clip
     // requires the clips to be sorted, so delete the clip before the move happens.
-    const clipIndex = this.track.getClipIndex(this);
-    this.track.deleteClipAt(clipIndex);
+    if (this.track) {
+      const clipIndex = this.track.getClipIndex(this);
+      this.track.deleteClipAt(clipIndex);
+    }
 
     // Move the clip.
     this.clipStartTick = newClipStartTick;
@@ -234,9 +242,11 @@ export class Clip {
       note.setEndTick(note.getEndTick() + offsetTick);
     }
 
-    // Ordered insert back the clip.
-    // @ts-ignore
-    this.track.orderedInsertClipInternal(this);
+    if (this.track) {
+      // Ordered insert back the clip.
+      // @ts-ignore
+      this.track.orderedInsertClipInternal(this);
+    }
   }
 
   /**
@@ -249,7 +259,10 @@ export class Clip {
   }
 
   deleteFromParent() {
-    this.track.deleteClip(this);
+    if (this.track) {
+      this.track.deleteClip(this);
+      this.track = undefined;
+    }
   }
 
   static getNotesInRange(rawNotes: Note[], startTick: number, endTick: number) {
@@ -365,11 +378,14 @@ export class Clip {
       );
       this.adjustClipRight(overlappingStartTick - 1, /* resolveConflict= */ false);
 
-      this.track.createClip({
-        sortedNotes: rightNotes,
-        clipStartTick: rightClipStartTick,
-        clipEndTick: rightClipEndTick,
-      });
+      if (this.track) {
+        this.track.createClip({
+          sortedNotes: rightNotes,
+          clipStartTick: rightClipStartTick,
+          clipEndTick: rightClipEndTick,
+        });
+      }
+
       return;
     }
     // Overlapping part is on the side.

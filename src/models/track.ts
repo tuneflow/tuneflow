@@ -274,7 +274,7 @@ export class Track {
     const clip = new Clip({
       // @ts-ignore
       id: Clip.generateClipIdInternal(),
-      track: this,
+      track: insertClip ? this : undefined,
       sortedNotes,
       clipStartTick,
       clipEndTick: newClipEndTick,
@@ -287,6 +287,14 @@ export class Track {
   }
 
   insertClip(clip: Clip) {
+    if (clip.getTrack() !== this) {
+      if (clip.getTrack()) {
+        clip.deleteFromParent();
+      }
+      // @ts-ignore
+      clip.track = this;
+    }
+
     // Resolve conflict before inserting a new clip
     // to preserve the current order of clips.
     this.resolveClipConflictInternal(clip.getId(), clip.getClipStartTick(), clip.getClipEndTick());

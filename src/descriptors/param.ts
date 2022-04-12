@@ -28,4 +28,24 @@ export interface ParamDescriptor {
 
   /** Explaining what this parameter is for. */
   description?: LabelText;
+
+  /**
+   * Injects the value from the editor at the time the plugin runs.
+   *
+   * If specified, the editor will inject the value specified by the `InjectSource`,
+   * if you want to overwrite the value provided by the editor,
+   * you can use initPluginInstance.
+   */
+  injectFrom?: InjectSource;
+}
+
+export enum InjectSource {
+  /** A string that represents the ids of the current selected tracks. */
+  SelectedTrackIds = 1,
+
+  /** A `ClipInfo[]` that represents the `ClipInfo`s of the current selected clips. */
+  SelectedClipInfos = 2,
+
+  /** A number that represents the current tick that the playhead is at. */
+  TickAtPlayhead = 3,
 }
