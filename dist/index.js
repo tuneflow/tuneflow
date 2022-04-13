@@ -6814,7 +6814,7 @@ class _r {
       );
     const u = new dr({
       id: dr.generateClipIdInternal(),
-      track: e ? this : void 0,
+      track: void 0,
       sortedNotes: r,
       clipStartTick: t,
       clipEndTick: i,
