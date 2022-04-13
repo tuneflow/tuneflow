@@ -274,7 +274,7 @@ export class Track {
     const clip = new Clip({
       // @ts-ignore
       id: Clip.generateClipIdInternal(),
-      track: insertClip ? this : undefined,
+      track: undefined,
       sortedNotes,
       clipStartTick,
       clipEndTick: newClipEndTick,
