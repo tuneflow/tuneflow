@@ -10,7 +10,8 @@
     "lint-staged:ts": "eslint --ext .js,.ts",
     "lint:tsc": "vue-tsc --noEmit --skipLibCheck",
     "prepare": "husky install",
-    "test": "jest"
+    "test": "jest",
+    "build": "vite build --config vite.config.ts"
   },
   "repository": {
     "type": "git",
@@ -26,7 +27,7 @@
   "license": "MIT",
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint-staged;npm run lint:tsc;"
+      "pre-commit": "npm run lint-staged;npm run lint:tsc;npm run build;"
     }
   },
   "lint-staged": {

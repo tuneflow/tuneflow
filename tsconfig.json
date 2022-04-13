@@ -16,5 +16,5 @@
     "skipLibCheck": true,
     "lib": ["esnext", "dom"]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "test/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "test/**/*.ts", "vite.config.ts"]
 }

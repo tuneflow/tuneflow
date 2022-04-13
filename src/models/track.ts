@@ -293,6 +293,9 @@ export class Track {
       }
       // @ts-ignore
       clip.track = this;
+    } else {
+      // Clip already belongs to the track.
+      return;
     }
 
     // Resolve conflict before inserting a new clip
