@@ -1,5 +1,5 @@
 import { ge as greaterEqual, lt as lowerThan } from 'binary-search-bounds';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash.clonedeep';
 import * as _ from 'underscore';
 import type { TuneflowPlugin } from '../base_plugin';
 import { TempoEvent } from './tempo';
@@ -196,7 +196,9 @@ export class Song {
   }
 
   /**
-   * Overwrite the existing tempo changes with the new tempo changes.
+   * Overwrite the existing tempo changes with the new tempo changes. Tempo times will be re-calculated.
+   *
+   * You can omit time in the new `TempoEvent`s since we'll re-calculate them altogether.
    *
    * Note that the new tempo events must have one tempo event starting at tick 0.
    * @param tempoEvents
