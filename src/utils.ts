@@ -1,4 +1,4 @@
-import { AudioPlugin } from './models/audio_plugin';
+import _ from 'underscore';
 
 function midiToPitchClass(midi: number): string {
   const scaleIndexToNote = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -81,10 +81,37 @@ export function getAudioPluginTuneflowId(
   return `${manufacturerName} // ${pluginFormatName} // ${pluginName} // ${pluginVersion}`;
 }
 
-export function decodeAudioPluginTuneflowId(tfId: string): AudioPlugin {
+export function decodeAudioPluginTuneflowId(tfId: string) {
   const parts = tfId.split(' // ');
   if (parts.length < 4) {
     throw new Error('Invalid audio plugin tuneflow id.');
   }
-  return new AudioPlugin(parts[2], parts[0], parts[1], parts[3]);
+  return {
+    name: parts[2],
+    manufacturerName: parts[0],
+    pluginFormatName: parts[1],
+    pluginVersion: parts[3],
+  };
+}
+
+export function areTuneflowIdsEqual(tfId1: string, tfId2: string) {
+  return tfId1 === tfId2;
+}
+
+export function areTuneflowIdsEqualIgnoreVersion(tfId1: string, tfId2: string) {
+  const parsedId1 = decodeAudioPluginTuneflowId(tfId1);
+  const parsedId2 = decodeAudioPluginTuneflowId(tfId2);
+  if (_.keys(parsedId1).length !== _.keys(parsedId2).length) {
+    return false;
+  }
+
+  for (const key of _.keys(parsedId1)) {
+    if (key === 'pluginVersion') {
+      continue;
+    }
+    if ((parsedId1 as any)[key] !== (parsedId2 as any)[key]) {
+      return false;
+    }
+  }
+  return true;
 }

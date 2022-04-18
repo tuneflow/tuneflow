@@ -1,9 +1,10 @@
 import { nanoid } from 'nanoid';
 import { ge as greaterEqual, lt as lowerThan, le as lowerEqual } from 'binary-search-bounds';
-import type { AudioPlugin } from './audio_plugin';
+import { AudioPlugin } from './audio_plugin';
 import type { Song } from './song';
 import type { Note } from './note';
 import { Clip } from './clip';
+import { decodeAudioPluginTuneflowId } from '../utils';
 
 /**
  * A track in the song that maps to an instrument.
@@ -172,6 +173,19 @@ export class Track {
 
   getRank() {
     return this.rank;
+  }
+
+  createAudioPlugin(tfId: string) {
+    const pluginInfo = decodeAudioPluginTuneflowId(tfId);
+    const plugin = new AudioPlugin(
+      pluginInfo.name,
+      pluginInfo.manufacturerName,
+      pluginInfo.pluginFormatName,
+      pluginInfo.pluginVersion,
+    );
+    // @ts-ignore
+    plugin.localInstanceIdInternal = nanoid(10);
+    return plugin;
   }
 
   getSamplerPlugin() {

@@ -98,10 +98,10 @@ export class Song {
     newTrack.setMuted(track.getMuted());
     const existingSamplerPlugin = track.getSamplerPlugin();
     if (existingSamplerPlugin) {
-      newTrack.setSamplerPlugin(existingSamplerPlugin.clone());
+      newTrack.setSamplerPlugin(existingSamplerPlugin.clone(newTrack));
     }
     for (const audioPlugin of track.getAudioPlugins()) {
-      newTrack.addAudioPlugin(audioPlugin.clone());
+      newTrack.addAudioPlugin(audioPlugin.clone(newTrack));
     }
     for (const clip of track.getClips()) {
       const newClip = newTrack.createClip({

@@ -1,4 +1,9 @@
-import { getAudioPluginTuneflowId } from '../utils';
+import {
+  areTuneflowIdsEqual,
+  areTuneflowIdsEqualIgnoreVersion,
+  getAudioPluginTuneflowId,
+} from '../utils';
+import type { Track } from './track';
 
 export class AudioPlugin {
   private name: string;
@@ -6,7 +11,18 @@ export class AudioPlugin {
   private pluginFormatName: string;
   private pluginVersion: string;
   private isEnabled = true;
+  // @ts-ignore
+  private localInstanceIdInternal: string;
+  // @ts-ignore
+  private base64StatesInternal: string;
 
+  /**
+   * DO NOT call the constructor directly, use Track.createAudioPlugin(tfId: string) instead.
+   * @param name
+   * @param manufacturerName
+   * @param pluginFormatName
+   * @param pluginVersion
+   */
   constructor(
     name: string,
     manufacturerName: string,
@@ -31,15 +47,28 @@ export class AudioPlugin {
     );
   }
 
-  clone() {
-    const newPlugin = new AudioPlugin(
-      this.name,
-      this.manufacturerName,
-      this.pluginFormatName,
-      this.pluginVersion,
-    );
+  clone(newTrack: Track) {
+    const newPlugin = newTrack.createAudioPlugin(this.getTuneflowId());
     newPlugin.setIsEnabled(this.isEnabled);
     return newPlugin;
+  }
+
+  /**
+   * Exactly matches the plugin type specified by the tfId.
+   * @param tfId
+   * @returns
+   */
+  matchesTfId(tfId: string) {
+    return areTuneflowIdsEqual(tfId, this.getTuneflowId());
+  }
+
+  /**
+   * Similar to matchesTfId but does not check version.
+   * @param tfId
+   * @returns
+   */
+  matchesTfIdIgnoreVersion(tfId: string) {
+    return areTuneflowIdsEqualIgnoreVersion(tfId, this.getTuneflowId());
   }
 
   toJSON() {
