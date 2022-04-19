@@ -81,6 +81,27 @@ export function getAudioPluginTuneflowId(
   return `${manufacturerName} // ${pluginFormatName} // ${pluginName} // ${pluginVersion}`;
 }
 
+/**
+ * Gets an id that Tuneflow can uniquely identify a plugin regardless of version.
+ */
+export function getAudioPluginVersionlessTuneflowId(
+  manufacturerName: string,
+  pluginFormatName: string,
+  pluginName: string,
+) {
+  return `${manufacturerName} // ${pluginFormatName} // ${pluginName}`;
+}
+
+/**
+ * Converts a full tfId to a versionless tfId.
+ * @param tfId A full tfId
+ * @returns A versionless tfId
+ */
+export function toVersionlessTfId(tfId: string) {
+  const parts = decodeAudioPluginTuneflowId(tfId);
+  return getAudioPluginVersionlessTuneflowId(parts.manufacturerName, parts.pluginFormatName, parts.name)
+}
+
 export function decodeAudioPluginTuneflowId(tfId: string) {
   const parts = tfId.split(' // ');
   if (parts.length < 4) {
