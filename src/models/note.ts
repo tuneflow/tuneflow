@@ -6,6 +6,7 @@ export class Note {
   private velocity: number;
   private startTick: number;
   private endTick: number;
+  private idInternal: number;
 
   /**
    * IMPORTANT: Do not use the constructor directly, call
@@ -16,16 +17,19 @@ export class Note {
     velocity,
     startTick,
     endTick,
+    id,
   }: {
     pitch: number;
     velocity: number;
     startTick: number;
     endTick: number;
+    id: number;
   }) {
     this.pitch = pitch;
     this.velocity = velocity;
     this.startTick = startTick;
     this.endTick = endTick;
+    this.idInternal = id;
   }
 
   getPitch() {
@@ -70,14 +74,5 @@ export class Note {
       this.pitch === note.getPitch() &&
       this.velocity === note.getVelocity()
     );
-  }
-
-  clone() {
-    return new Note({
-      pitch: this.pitch,
-      velocity: this.velocity,
-      startTick: this.startTick,
-      endTick: this.endTick,
-    });
   }
 }

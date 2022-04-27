@@ -107,7 +107,6 @@ export class Song {
       const newClip = newTrack.createClip({
         clipStartTick: clip.getClipStartTick(),
         clipEndTick: clip.getClipEndTick(),
-        sortedNotes: [],
       });
       for (const note of clip.getRawNotes()) {
         newClip.createNote({

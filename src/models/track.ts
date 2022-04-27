@@ -2,7 +2,6 @@ import { nanoid } from 'nanoid';
 import { ge as greaterEqual, lt as lowerThan, le as lowerEqual } from 'binary-search-bounds';
 import { AudioPlugin } from './audio_plugin';
 import type { Song } from './song';
-import type { Note } from './note';
 import { Clip } from './clip';
 import { decodeAudioPluginTuneflowId } from '../utils';
 
@@ -259,14 +258,8 @@ export class Track {
   createClip({
     clipStartTick,
     clipEndTick = undefined,
-    sortedNotes = [],
     insertClip = true,
   }: {
-    /**
-     * Notes of the clip sorted by start time.
-     * All notes should use absolute timing.
-     */
-    sortedNotes?: Note[];
     /**
      * The start of the clip, must be specified.
      */
@@ -289,7 +282,6 @@ export class Track {
       // @ts-ignore
       id: Clip.generateClipIdInternal(),
       track: undefined,
-      sortedNotes,
       clipStartTick,
       clipEndTick: newClipEndTick,
     });
@@ -326,7 +318,6 @@ export class Track {
    */
   cloneClip(clip: Clip) {
     const newClip = this.createClip({
-      sortedNotes: [],
       clipStartTick: clip.getClipStartTick(),
       clipEndTick: clip.getClipEndTick(),
       insertClip: false,

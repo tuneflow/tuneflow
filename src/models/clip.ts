@@ -17,6 +17,7 @@ export class Clip {
   private clipStartTick = 0;
   /** Inclusive end tick. */
   private clipEndTick = 0;
+  private nextNoteIdInternal = 1;
 
   /**
    * IMPORTANT: Do not use the constructor directly, call createClip from tracks instead.
@@ -24,23 +25,17 @@ export class Clip {
   constructor({
     track = undefined,
     id = Clip.generateClipIdInternal(),
-    sortedNotes = [],
     clipStartTick = 0,
     clipEndTick = 0,
   }: {
     track?: Track;
     id?: string;
-    /**
-     * Notes of the clip sorted by start time.
-     * All notes should use absolute timing.
-     */
-    sortedNotes?: Note[];
     clipStartTick?: number;
     clipEndTick?: number;
   }) {
     this.track = track;
     this.id = id;
-    this.notes = [...sortedNotes];
+    this.notes = [];
     this.clipStartTick = clipStartTick;
     this.clipEndTick = clipEndTick;
   }
@@ -105,6 +100,7 @@ export class Clip {
       velocity,
       startTick,
       endTick,
+      id: this.getNextNoteIdInternal(),
     });
     if (startTick < this.clipStartTick && updateClipRange) {
       this.adjustClipLeft(startTick, resolveClipConflict);
@@ -373,17 +369,25 @@ export class Clip {
       // Trim the clip into the left part and create a new clip for the right part.
       const rightClipStartTick = overlappingEndTick + 1;
       const rightClipEndTick = this.getClipEndTick();
-      const rightNotes = Clip.getNotesInRange(this.notes, rightClipStartTick, rightClipEndTick).map(
-        item => item.clone(),
-      );
+
       this.adjustClipRight(overlappingStartTick - 1, /* resolveConflict= */ false);
 
       if (this.track) {
-        this.track.createClip({
-          sortedNotes: rightNotes,
+        const rightClip = this.track.createClip({
           clipStartTick: rightClipStartTick,
           clipEndTick: rightClipEndTick,
         });
+        const rightNotes = Clip.getNotesInRange(this.notes, rightClipStartTick, rightClipEndTick);
+        for (const rightNote of rightNotes) {
+          rightClip.createNote({
+            pitch: rightNote.getPitch(),
+            velocity: rightNote.getVelocity(),
+            startTick: rightNote.getStartTick(),
+            endTick: rightNote.getEndTick(),
+            updateClipRange: false,
+            resolveClipConflict: false,
+          });
+        }
       }
 
       return;
@@ -404,6 +408,17 @@ export class Clip {
       // cause a bad loop.
       this.adjustClipLeft(overlappingEndTick + 1, /* resolveConflict= */ false);
     }
+  }
+
+  private getNextNoteIdInternal() {
+    const noteId = this.nextNoteIdInternal;
+    if (this.nextNoteIdInternal >= /* 2^31 -1 */ 2147483647) {
+      this.nextNoteIdInternal = 1;
+    } else {
+      this.nextNoteIdInternal += 1;
+    }
+
+    return noteId;
   }
 
   private static generateClipIdInternal() {
