@@ -1,4 +1,4 @@
-import { Song, TuneflowPlugin } from '../src';
+import { Clip, Song, TuneflowPlugin } from '../src';
 import type { SongAccess } from '../src';
 import { assertClipRange, assertNotesAreEqual, createTestNotes } from '../src/test_utils';
 
@@ -94,6 +94,91 @@ describe('Clip-related Tests', () => {
     });
     clip3.adjustClipLeft(40);
     clip3.adjustClipRight(65);
+  });
+
+  describe('isNoteInClip', () => {
+    it('Checks isNoteInClip correctly', () => {
+      expect(
+        Clip.isNoteInClip(
+          /* noteStartTick= */ 4,
+          /* noteEndTick= */ 5,
+          /* clipStartTick= */ 6,
+          /* clipEndTick= */ 12,
+        ),
+      ).toBeFalsy();
+      expect(
+        Clip.isNoteInClip(
+          /* noteStartTick= */ 5,
+          /* noteEndTick= */ 10,
+          /* clipStartTick= */ 6,
+          /* clipEndTick= */ 12,
+        ),
+      ).toBeFalsy();
+      expect(
+        Clip.isNoteInClip(
+          /* noteStartTick= */ 6,
+          /* noteEndTick= */ 10,
+          /* clipStartTick= */ 6,
+          /* clipEndTick= */ 12,
+        ),
+      ).toBeTruthy();
+      expect(
+        Clip.isNoteInClip(
+          /* noteStartTick= */ 6,
+          /* noteEndTick= */ 12,
+          /* clipStartTick= */ 6,
+          /* clipEndTick= */ 12,
+        ),
+      ).toBeTruthy();
+      expect(
+        Clip.isNoteInClip(
+          /* noteStartTick= */ 7,
+          /* noteEndTick= */ 12,
+          /* clipStartTick= */ 6,
+          /* clipEndTick= */ 12,
+        ),
+      ).toBeTruthy();
+      expect(
+        Clip.isNoteInClip(
+          /* noteStartTick= */ 7,
+          /* noteEndTick= */ 13,
+          /* clipStartTick= */ 6,
+          /* clipEndTick= */ 12,
+        ),
+      ).toBeTruthy();
+      expect(
+        Clip.isNoteInClip(
+          /* noteStartTick= */ 12,
+          /* noteEndTick= */ 13,
+          /* clipStartTick= */ 6,
+          /* clipEndTick= */ 12,
+        ),
+      ).toBeTruthy();
+      expect(
+        Clip.isNoteInClip(
+          /* noteStartTick= */ 13,
+          /* noteEndTick= */ 15,
+          /* clipStartTick= */ 6,
+          /* clipEndTick= */ 12,
+        ),
+      ).toBeFalsy();
+      expect(
+        Clip.isNoteInClip(
+          /* noteStartTick= */ 5,
+          /* noteEndTick= */ 13,
+          /* clipStartTick= */ 6,
+          /* clipEndTick= */ 12,
+        ),
+      ).toBeFalsy();
+      expect(
+        Clip.isNoteInClip(
+          /* noteStartTick= */ -13,
+          /* noteEndTick= */ 5,
+          /* clipStartTick= */ 0,
+          /* clipEndTick= */ 12,
+        ),
+      ).toBeTruthy();
+    });
   });
 
   describe('Basic operations', () => {

@@ -346,7 +346,10 @@ export class Clip {
     clipEndTick: number,
   ) {
     return (
-      noteStartTick >= clipStartTick && noteStartTick <= clipEndTick && noteEndTick >= noteStartTick
+      // If the clip starts at 0, notes that start before 0 will start at 0.
+      (noteStartTick >= clipStartTick || (clipStartTick === 0 && noteStartTick <= 0)) &&
+      noteStartTick <= clipEndTick &&
+      noteEndTick >= noteStartTick
     );
   }
 
