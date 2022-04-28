@@ -148,27 +148,8 @@ export class Clip {
     }
   }
 
-  /**
-   * Safely moves a note and maintains the order of all notes.
-   */
-  private moveNoteInternal(note: Note, offsetTick: number) {
-    if (offsetTick === 0) {
-      return;
-    }
-    this.deleteNote(note);
-    note.setStartTick(Math.max(0, note.getStartTick() + offsetTick));
-    note.setEndTick(note.getEndTick() + offsetTick);
-    if (note.getEndTick() < 0) {
-      // Note is out of valid range, delete it
-      // by not inserting it back.
-      return;
-    }
-    this.orderedInsertNote(this.notes, note);
-  }
-
   private orderedInsertNote(noteList: Note[], newNote: Note) {
-    // @ts-ignore.
-    if (newNote.clipInternal === this) {
+    if (newNote.getClip() === this) {
       // Do not insert if the note is already in the list.
       return;
     }

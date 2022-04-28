@@ -299,7 +299,7 @@ describe('Note-related Tests', () => {
   });
 
   describe('Move note', () => {
-    it('Do not move if the note is not in any clip', async () => {
+    it('Moves the note if the note is not in any clip', async () => {
       const track = song.getTracks()[0];
       expect(track.getClips().length).toBe(1);
       const clip1 = track.getClips()[0];
@@ -308,9 +308,11 @@ describe('Note-related Tests', () => {
 
       const note2 = clip1.getRawNotes()[1];
       note2.deleteFromParent();
+
+      expect(note2.getClip()).toBeFalsy();
       note2.moveNote(100);
-      expect(note2.getStartTick()).toBe(14);
-      expect(note2.getEndTick()).toBe(20);
+      expect(note2.getStartTick()).toBe(114);
+      expect(note2.getEndTick()).toBe(120);
     });
 
     it('Deletes the note if moved to the left of 0', async () => {
@@ -611,6 +613,150 @@ describe('Note-related Tests', () => {
               pitch: 68,
               velocity: 80,
               startTick: 14,
+              endTick: 20,
+            },
+          ],
+          clip1,
+        ),
+      );
+    });
+  });
+
+  describe('Trim note', () => {
+    it('Trims the note if the note is not in any clip', async () => {
+      const track = song.getTracks()[0];
+      expect(track.getClips().length).toBe(1);
+      const clip1 = track.getClips()[0];
+      expect(clip1).toBeTruthy();
+      expect(clip1.getRawNotes().length).toBe(3);
+
+      const note2 = clip1.getRawNotes()[1];
+      note2.deleteFromParent();
+
+      expect(note2.getClip()).toBeFalsy();
+      note2.adjustLeftTo(10);
+      note2.adjustRightTo(100);
+      expect(note2.getStartTick()).toBe(10);
+      expect(note2.getEndTick()).toBe(100);
+    });
+
+    it('Deletes the note if the note is trimmed to be invalid.', async () => {
+      const track = song.getTracks()[0];
+      expect(track.getClips().length).toBe(1);
+      const clip1 = track.getClips()[0];
+      expect(clip1).toBeTruthy();
+      expect(clip1.getRawNotes().length).toBe(3);
+
+      const note2 = clip1.getRawNotes()[1];
+
+      expect(note2.getClip()).toBeTruthy();
+      note2.adjustRightTo(1);
+      expect(note2.getStartTick()).toBe(14);
+      expect(note2.getEndTick()).toBe(1);
+      expect(note2.getClip()).toBeFalsy();
+      // Verify clip notes.
+      expect(clip1.getRawNotes().length).toBe(2);
+      assertNotesAreEqual(
+        clip1.getRawNotes(),
+        createTestNotes(
+          [
+            {
+              pitch: 64,
+              velocity: 80,
+              startTick: 0,
+              endTick: 10,
+            },
+            {
+              pitch: 66,
+              velocity: 80,
+              startTick: 15,
+              endTick: 20,
+            },
+          ],
+          clip1,
+        ),
+      );
+    });
+
+    it('Adjusts left and re-order notes correctly', async () => {
+      const track = song.getTracks()[0];
+      expect(track.getClips().length).toBe(1);
+      const clip1 = track.getClips()[0];
+      expect(clip1).toBeTruthy();
+      expect(clip1.getRawNotes().length).toBe(3);
+
+      const note2 = clip1.getRawNotes()[1];
+
+      expect(note2.getClip()).toBeTruthy();
+      note2.adjustLeftTo(16);
+      expect(note2.getStartTick()).toBe(16);
+      expect(note2.getEndTick()).toBe(20);
+      expect(note2.getClip()).toBeTruthy();
+      // Verify clip notes.
+      expect(clip1.getRawNotes().length).toBe(3);
+      assertNotesAreEqual(
+        clip1.getRawNotes(),
+        createTestNotes(
+          [
+            {
+              pitch: 64,
+              velocity: 80,
+              startTick: 0,
+              endTick: 10,
+            },
+            {
+              pitch: 66,
+              velocity: 80,
+              startTick: 15,
+              endTick: 20,
+            },
+            {
+              pitch: 68,
+              velocity: 80,
+              startTick: 16,
+              endTick: 20,
+            },
+          ],
+          clip1,
+        ),
+      );
+    });
+    it('Adjusts right correctly', async () => {
+      const track = song.getTracks()[0];
+      expect(track.getClips().length).toBe(1);
+      const clip1 = track.getClips()[0];
+      expect(clip1).toBeTruthy();
+      expect(clip1.getRawNotes().length).toBe(3);
+
+      const note2 = clip1.getRawNotes()[1];
+
+      expect(note2.getClip()).toBeTruthy();
+      note2.adjustRightTo(16);
+      expect(note2.getStartTick()).toBe(14);
+      expect(note2.getEndTick()).toBe(16);
+      expect(note2.getClip()).toBeTruthy();
+      // Verify clip notes.
+      expect(clip1.getRawNotes().length).toBe(3);
+      assertNotesAreEqual(
+        clip1.getRawNotes(),
+        createTestNotes(
+          [
+            {
+              pitch: 64,
+              velocity: 80,
+              startTick: 0,
+              endTick: 10,
+            },
+            {
+              pitch: 68,
+              velocity: 80,
+              startTick: 14,
+              endTick: 16,
+            },
+            {
+              pitch: 66,
+              velocity: 80,
+              startTick: 15,
               endTick: 20,
             },
           ],

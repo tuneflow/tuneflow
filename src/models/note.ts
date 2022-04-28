@@ -100,11 +100,79 @@ export class Note {
   }
 
   moveNote(offsetTick: number) {
-    if (!this.clipInternal) {
+    if (offsetTick === 0) {
       return;
     }
-    // @ts-ignore
-    this.clipInternal.moveNoteInternal(this, offsetTick);
+    const clip = this.clipInternal;
+    if (clip) {
+      clip.deleteNote(this);
+    }
+    this.startTick = Math.max(0, this.startTick + offsetTick);
+    this.endTick = this.endTick + offsetTick;
+    if (this.isRangeInvalid()) {
+      // Note is out of valid range, delete it
+      // by not inserting it back.
+      return;
+    }
+    if (clip) {
+      // @ts-ignore
+      clip.orderedInsertNote(clip.getRawNotes(), this);
+    }
+  }
+
+  /**
+   * Adjusts the start tick of the note by an offset.
+   */
+  adjustLeft(offsetTick: number) {
+    if (offsetTick === 0) {
+      return;
+    }
+    const clip = this.clipInternal;
+    if (clip) {
+      clip.deleteNote(this);
+    }
+    this.startTick += offsetTick;
+    if (this.isRangeInvalid()) {
+      // Note is out of valid range, delete it
+      // by not inserting it back.
+      return;
+    }
+    if (clip) {
+      // @ts-ignore
+      clip.orderedInsertNote(clip.getRawNotes(), this);
+    }
+  }
+
+  /**
+   * Adjusts the start tick of the note to a given tick.
+   */
+  adjustLeftTo(tick: number) {
+    this.adjustLeft(tick - this.startTick);
+  }
+
+  /**
+   * Adjusts the end tick of the note by an offset.
+   */
+  adjustRight(offsetTick: number) {
+    this.endTick += offsetTick;
+    if (this.isRangeInvalid()) {
+      this.deleteFromParent();
+    }
+  }
+
+  /**
+   * Adjusts the end tick of the note to a given tick.
+   */
+  adjustRightTo(tick: number) {
+    this.adjustRight(tick - this.endTick);
+  }
+
+  isRangeInvalid() {
+    return this.endTick < 0 || this.startTick > this.endTick;
+  }
+
+  getClip() {
+    return this.clipInternal;
   }
 
   /**
