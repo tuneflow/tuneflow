@@ -1,3 +1,5 @@
+import type { Clip } from './clip';
+
 /**
  * Information about how a note should be played.
  */
@@ -7,6 +9,7 @@ export class Note {
   private startTick: number;
   private endTick: number;
   private idInternal: number;
+  private clipInternal?: Clip;
 
   /**
    * IMPORTANT: Do not use the constructor directly, call
@@ -18,18 +21,22 @@ export class Note {
     startTick,
     endTick,
     id,
+    clip,
   }: {
     pitch: number;
     velocity: number;
     startTick: number;
     endTick: number;
     id: number;
+    /** If left empty, all clip-related methods will be no-op. */
+    clip?: Clip;
   }) {
     this.pitch = pitch;
     this.velocity = velocity;
     this.startTick = startTick;
     this.endTick = endTick;
     this.idInternal = id;
+    this.clipInternal = clip;
   }
 
   getPitch() {
@@ -51,6 +58,10 @@ export class Note {
     return this.velocity;
   }
 
+  setVelocity(newVelocity: number) {
+    this.velocity = newVelocity;
+  }
+
   getStartTick() {
     return this.startTick;
   }
@@ -67,6 +78,11 @@ export class Note {
     this.endTick = endTick;
   }
 
+  /**
+   * Returns true if the notes should sound the same.
+   *
+   * NOTE: This does not check note Ids or the clips they belong to.
+   */
   equals(note: Note) {
     return (
       this.startTick === note.getStartTick() &&
@@ -74,5 +90,36 @@ export class Note {
       this.pitch === note.getPitch() &&
       this.velocity === note.getVelocity()
     );
+  }
+
+  deleteFromParent() {
+    if (!this.clipInternal) {
+      return;
+    }
+    this.clipInternal.deleteNote(this);
+  }
+
+  moveNote(offsetTick: number) {
+    if (!this.clipInternal) {
+      return;
+    }
+    // @ts-ignore
+    this.clipInternal.moveNoteInternal(this, offsetTick);
+  }
+
+  /**
+   * Adjust the pitch of a note.
+   * If the pitch of the note becomes invalid (less than 0 or greater than 127),
+   * it will be deleted from the clip.
+   */
+  adjustPitch(pitchOffset: number) {
+    this.pitch = this.pitch + pitchOffset;
+    if (!Note.isValidPitch(this.pitch)) {
+      this.deleteFromParent();
+    }
+  }
+
+  getId() {
+    return this.idInternal;
   }
 }

@@ -114,68 +114,77 @@ describe('Clip-related Tests', () => {
       // Notes that are at the edge are included.
       assertNotesAreEqual(
         clip1.getNotes(),
-        createTestNotes([
-          {
-            pitch: 64,
-            velocity: 80,
-            startTick: 0,
-            endTick: 10,
-          },
-          {
-            pitch: 68,
-            velocity: 80,
-            startTick: 14,
-            endTick: 20,
-          },
-          {
-            pitch: 66,
-            velocity: 80,
-            startTick: 15,
-            endTick: 20,
-          },
-        ]),
+        createTestNotes(
+          [
+            {
+              pitch: 64,
+              velocity: 80,
+              startTick: 0,
+              endTick: 10,
+            },
+            {
+              pitch: 68,
+              velocity: 80,
+              startTick: 14,
+              endTick: 20,
+            },
+            {
+              pitch: 66,
+              velocity: 80,
+              startTick: 15,
+              endTick: 20,
+            },
+          ],
+          clip1,
+        ),
       );
       // Note that start before the clip start are excluded.
       assertNotesAreEqual(
         clip2.getNotes(),
-        createTestNotes([
-          {
-            pitch: 68,
-            velocity: 80,
-            startTick: 24,
-            endTick: 35,
-          },
-          {
-            pitch: 66,
-            velocity: 80,
-            startTick: 25,
-            endTick: 30,
-          },
-        ]),
+        createTestNotes(
+          [
+            {
+              pitch: 68,
+              velocity: 80,
+              startTick: 24,
+              endTick: 35,
+            },
+            {
+              pitch: 66,
+              velocity: 80,
+              startTick: 25,
+              endTick: 30,
+            },
+          ],
+          clip2,
+        ),
       );
       // Note are sorted and all notes that are within clip are returned.
       assertNotesAreEqual(
         clip3.getNotes(),
-        createTestNotes([
-          {
-            pitch: 67,
-            velocity: 80,
-            startTick: 40,
-            endTick: 45,
-          },
-          {
-            pitch: 69,
-            velocity: 80,
-            startTick: 45,
-            endTick: 50,
-          },
-          {
-            pitch: 71,
-            velocity: 80,
-            startTick: 55,
-            endTick: 65,
-          },
-        ]),
+        createTestNotes(
+          [
+            {
+              pitch: 67,
+              velocity: 80,
+              startTick: 40,
+              endTick: 45,
+            },
+            {
+              pitch: 69,
+              velocity: 80,
+              startTick: 45,
+              endTick: 50,
+            },
+            {
+              pitch: 71,
+              velocity: 80,
+              startTick: 55,
+              endTick: 65,
+            },
+          ],
+          clip3,
+        ),
       );
     });
   });

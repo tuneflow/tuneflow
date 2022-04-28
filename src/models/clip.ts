@@ -109,11 +109,10 @@ export class Clip {
       this.adjustClipRight(endTick, resolveClipConflict);
     }
     this.orderedInsertNote(this.notes, note);
-    // TODO: Resolve note conflict.
     return note;
   }
 
-  deleteNote(note: Note) {
+  private getNoteIndexInternal(note: Note) {
     const startIndex = lowerThan(
       this.notes,
       note,
@@ -123,21 +122,56 @@ export class Clip {
     for (let index = Math.max(0, startIndex); index < this.notes.length; index += 1) {
       const currentNote = this.notes[index];
       if (currentNote && currentNote === note) {
-        this.notes.splice(index, 1);
-        return;
+        return index;
       }
       if (currentNote && currentNote.getStartTick() > note.getStartTick()) {
         // We have searched past all possible notes.
-        return;
+        break;
       }
+    }
+    return -1;
+  }
+
+  deleteNote(note: Note) {
+    const noteIndex = this.getNoteIndexInternal(note);
+    if (noteIndex >= 0) {
+      this.deleteNoteAt(noteIndex);
     }
   }
 
   deleteNoteAt(index: number) {
-    this.notes.splice(index, 1);
+    const note = this.notes[index];
+    if (note) {
+      // @ts-ignore
+      note.clipInternal = null;
+      this.notes.splice(index, 1);
+    }
+  }
+
+  /**
+   * Safely moves a note and maintains the order of all notes.
+   */
+  private moveNoteInternal(note: Note, offsetTick: number) {
+    if (offsetTick === 0) {
+      return;
+    }
+    this.deleteNote(note);
+    note.setStartTick(Math.max(0, note.getStartTick() + offsetTick));
+    note.setEndTick(note.getEndTick() + offsetTick);
+    if (note.getEndTick() < 0) {
+      // Note is out of valid range, delete it
+      // by not inserting it back.
+      return;
+    }
+    this.orderedInsertNote(this.notes, note);
   }
 
   private orderedInsertNote(noteList: Note[], newNote: Note) {
+    // @ts-ignore.
+    if (newNote.clipInternal === this) {
+      // Do not insert if the note is already in the list.
+      return;
+    }
     const insertIndex = greaterEqual(
       noteList,
       newNote,
@@ -148,6 +182,8 @@ export class Clip {
     } else {
       noteList.splice(insertIndex, 0, newNote);
     }
+    // @ts-ignore.
+    newNote.clipInternal = this;
   }
 
   /**
@@ -259,6 +295,17 @@ export class Clip {
       this.track.deleteClip(this);
       this.track = undefined;
     }
+  }
+
+  getNotesByIds(noteIds: number[]) {
+    const noteIdSet = new Set<number>(noteIds);
+    const notes = [];
+    for (const note of this.notes) {
+      if (noteIdSet.has(note.getId())) {
+        notes.push(note);
+      }
+    }
+    return notes;
   }
 
   static getNotesInRange(rawNotes: Note[], startTick: number, endTick: number) {

@@ -48,4 +48,10 @@ export enum InjectSource {
 
   /** A number that represents the current tick that the playhead is at. */
   TickAtPlayhead = 3,
+
+  /** The `ClipInfo` of the clip that is being edited in the MIDI editor. */
+  EditingClipInfo = 4,
+
+  /** The ids of the notes that is being edited in the MIDI editor. */
+  EditingNoteIds = 5,
 }
