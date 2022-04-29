@@ -50,10 +50,6 @@ export class Note {
     this.pitch = newPitch;
   }
 
-  static isValidPitch(pitch: number) {
-    return pitch >= 0 && pitch <= 127;
-  }
-
   getVelocity() {
     return this.velocity;
   }
@@ -171,8 +167,21 @@ export class Note {
     return Note.isNoteRangeValid(this.startTick, this.endTick);
   }
 
+  static isValidPitch(pitch: number) {
+    return pitch >= 0 && pitch <= 127 && Number.isInteger(pitch);
+  }
+
   static isNoteRangeValid(startTick: number, endTick: number) {
-    return endTick >= 0 && startTick <= endTick;
+    return (
+      endTick >= 0 &&
+      startTick <= endTick &&
+      Number.isInteger(startTick) &&
+      Number.isInteger(endTick)
+    );
+  }
+
+  static isNoteVelocityValid(velocity: number) {
+    return velocity >= 0 && velocity <= 127 && Number.isInteger(velocity);
   }
 
   getClip() {

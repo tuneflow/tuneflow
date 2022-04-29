@@ -1,4 +1,5 @@
 import { Clip, Song, TuneflowPlugin } from '../src';
+import type { Note } from '../src';
 import type { SongAccess } from '../src';
 import { assertClipRange, assertNotesAreEqual, createTestNotes } from '../src/test_utils';
 
@@ -269,6 +270,316 @@ describe('Clip-related Tests', () => {
             },
           ],
           clip3,
+        ),
+      );
+    });
+  });
+
+  describe('Create notes', () => {
+    it('Rejects if creating note with invalid pitch', async () => {
+      const clip1 = song.getTracks()[0].getClips()[0];
+      expect(clip1.getRawNotes().length).toBe(3);
+      assertNotesAreEqual(
+        clip1.getRawNotes(),
+        createTestNotes(
+          [
+            {
+              pitch: 64,
+              velocity: 80,
+              startTick: 0,
+              endTick: 10,
+            },
+            {
+              pitch: 68,
+              velocity: 80,
+              startTick: 14,
+              endTick: 20,
+            },
+            {
+              pitch: 66,
+              velocity: 80,
+              startTick: 15,
+              endTick: 20,
+            },
+          ],
+          clip1,
+        ),
+      );
+
+      // Create notes with invalid pitch.
+      const createdNote1 = clip1.createNote({
+        pitch: 128,
+        velocity: 80,
+        startTick: 2,
+        endTick: 8,
+      });
+      expect(createdNote1).toBeNull();
+      const createdNote2 = clip1.createNote({
+        pitch: -1,
+        velocity: 80,
+        startTick: 2,
+        endTick: 8,
+      });
+      expect(createdNote2).toBeNull();
+      expect(clip1.getRawNotes().length).toBe(3);
+      assertNotesAreEqual(
+        clip1.getRawNotes(),
+        createTestNotes(
+          [
+            {
+              pitch: 64,
+              velocity: 80,
+              startTick: 0,
+              endTick: 10,
+            },
+            {
+              pitch: 68,
+              velocity: 80,
+              startTick: 14,
+              endTick: 20,
+            },
+            {
+              pitch: 66,
+              velocity: 80,
+              startTick: 15,
+              endTick: 20,
+            },
+          ],
+          clip1,
+        ),
+      );
+    });
+
+    it('Rejects if creating note with invalid velocity', async () => {
+      const clip1 = song.getTracks()[0].getClips()[0];
+      expect(clip1.getRawNotes().length).toBe(3);
+      assertNotesAreEqual(
+        clip1.getRawNotes(),
+        createTestNotes(
+          [
+            {
+              pitch: 64,
+              velocity: 80,
+              startTick: 0,
+              endTick: 10,
+            },
+            {
+              pitch: 68,
+              velocity: 80,
+              startTick: 14,
+              endTick: 20,
+            },
+            {
+              pitch: 66,
+              velocity: 80,
+              startTick: 15,
+              endTick: 20,
+            },
+          ],
+          clip1,
+        ),
+      );
+
+      // Create notes with invalid pitch.
+      const createdNote1 = clip1.createNote({
+        pitch: 58,
+        velocity: 128,
+        startTick: 2,
+        endTick: 8,
+      });
+      expect(createdNote1).toBeNull();
+      const createdNote2 = clip1.createNote({
+        pitch: 56,
+        velocity: -1,
+        startTick: 2,
+        endTick: 8,
+      });
+      expect(createdNote2).toBeNull();
+      expect(clip1.getRawNotes().length).toBe(3);
+      assertNotesAreEqual(
+        clip1.getRawNotes(),
+        createTestNotes(
+          [
+            {
+              pitch: 64,
+              velocity: 80,
+              startTick: 0,
+              endTick: 10,
+            },
+            {
+              pitch: 68,
+              velocity: 80,
+              startTick: 14,
+              endTick: 20,
+            },
+            {
+              pitch: 66,
+              velocity: 80,
+              startTick: 15,
+              endTick: 20,
+            },
+          ],
+          clip1,
+        ),
+      );
+    });
+
+    it('Rejects if creating note with invalid range', async () => {
+      const clip1 = song.getTracks()[0].getClips()[0];
+      expect(clip1.getRawNotes().length).toBe(3);
+      assertNotesAreEqual(
+        clip1.getRawNotes(),
+        createTestNotes(
+          [
+            {
+              pitch: 64,
+              velocity: 80,
+              startTick: 0,
+              endTick: 10,
+            },
+            {
+              pitch: 68,
+              velocity: 80,
+              startTick: 14,
+              endTick: 20,
+            },
+            {
+              pitch: 66,
+              velocity: 80,
+              startTick: 15,
+              endTick: 20,
+            },
+          ],
+          clip1,
+        ),
+      );
+
+      // Create notes with invalid pitch.
+      const createdNote1 = clip1.createNote({
+        pitch: 58,
+        velocity: 80,
+        startTick: -20,
+        endTick: -1,
+      });
+      expect(createdNote1).toBeNull();
+      const createdNote2 = clip1.createNote({
+        pitch: 56,
+        velocity: 80,
+        startTick: 9,
+        endTick: 8,
+      });
+      expect(createdNote2).toBeNull();
+      expect(clip1.getRawNotes().length).toBe(3);
+      assertNotesAreEqual(
+        clip1.getRawNotes(),
+        createTestNotes(
+          [
+            {
+              pitch: 64,
+              velocity: 80,
+              startTick: 0,
+              endTick: 10,
+            },
+            {
+              pitch: 68,
+              velocity: 80,
+              startTick: 14,
+              endTick: 20,
+            },
+            {
+              pitch: 66,
+              velocity: 80,
+              startTick: 15,
+              endTick: 20,
+            },
+          ],
+          clip1,
+        ),
+      );
+    });
+
+    it('Creates a note correctly if creating note with valid params', async () => {
+      const clip1 = song.getTracks()[0].getClips()[0];
+      expect(clip1.getRawNotes().length).toBe(3);
+      assertNotesAreEqual(
+        clip1.getRawNotes(),
+        createTestNotes(
+          [
+            {
+              pitch: 64,
+              velocity: 80,
+              startTick: 0,
+              endTick: 10,
+            },
+            {
+              pitch: 68,
+              velocity: 80,
+              startTick: 14,
+              endTick: 20,
+            },
+            {
+              pitch: 66,
+              velocity: 80,
+              startTick: 15,
+              endTick: 20,
+            },
+          ],
+          clip1,
+        ),
+      );
+
+      // Create notes with invalid pitch.
+      const createdNote1 = clip1.createNote({
+        pitch: 58,
+        velocity: 80,
+        startTick: 12,
+        endTick: 14,
+      });
+      assertNotesAreEqual(
+        [createdNote1 as Note],
+        createTestNotes(
+          [
+            {
+              pitch: 58,
+              velocity: 80,
+              startTick: 12,
+              endTick: 14,
+            },
+          ],
+          clip1,
+        ),
+      );
+      expect(clip1.getRawNotes().length).toBe(4);
+      assertNotesAreEqual(
+        clip1.getRawNotes(),
+        createTestNotes(
+          [
+            {
+              pitch: 64,
+              velocity: 80,
+              startTick: 0,
+              endTick: 10,
+            },
+            {
+              pitch: 58,
+              velocity: 80,
+              startTick: 12,
+              endTick: 14,
+            },
+            {
+              pitch: 68,
+              velocity: 80,
+              startTick: 14,
+              endTick: 20,
+            },
+            {
+              pitch: 66,
+              velocity: 80,
+              startTick: 15,
+              endTick: 20,
+            },
+          ],
+          clip1,
         ),
       );
     });
