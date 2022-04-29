@@ -109,7 +109,7 @@ export class Note {
     }
     this.startTick = Math.max(0, this.startTick + offsetTick);
     this.endTick = this.endTick + offsetTick;
-    if (this.isRangeInvalid()) {
+    if (!this.isRangeValid()) {
       // Note is out of valid range, delete it
       // by not inserting it back.
       return;
@@ -132,7 +132,7 @@ export class Note {
       clip.deleteNote(this);
     }
     this.startTick += offsetTick;
-    if (this.isRangeInvalid()) {
+    if (!this.isRangeValid()) {
       // Note is out of valid range, delete it
       // by not inserting it back.
       return;
@@ -155,7 +155,7 @@ export class Note {
    */
   adjustRight(offsetTick: number) {
     this.endTick += offsetTick;
-    if (this.isRangeInvalid()) {
+    if (!this.isRangeValid()) {
       this.deleteFromParent();
     }
   }
@@ -167,12 +167,12 @@ export class Note {
     this.adjustRight(tick - this.endTick);
   }
 
-  isRangeInvalid() {
-    return Note.isNoteRangeInvalid(this.startTick, this.endTick);
+  isRangeValid() {
+    return Note.isNoteRangeValid(this.startTick, this.endTick);
   }
 
-  static isNoteRangeInvalid(startTick: number, endTick: number) {
-    return endTick < 0 || startTick > endTick;
+  static isNoteRangeValid(startTick: number, endTick: number) {
+    return endTick >= 0 && startTick <= endTick;
   }
 
   getClip() {

@@ -95,6 +95,10 @@ export class Clip {
     /** Whether to resolve clip conflict if the clip range is updated. */
     resolveClipConflict?: boolean;
   }) {
+    if (!Note.isValidPitch(pitch) || !Note.isNoteRangeValid(startTick, endTick)) {
+      return null;
+    }
+
     const note = new Note({
       pitch,
       velocity,
