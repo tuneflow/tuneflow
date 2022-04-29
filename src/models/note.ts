@@ -168,7 +168,11 @@ export class Note {
   }
 
   isRangeInvalid() {
-    return this.endTick < 0 || this.startTick > this.endTick;
+    return Note.isNoteRangeInvalid(this.startTick, this.endTick);
+  }
+
+  static isNoteRangeInvalid(startTick: number, endTick: number) {
+    return endTick < 0 || startTick > endTick;
   }
 
   getClip() {
