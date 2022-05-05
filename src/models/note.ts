@@ -55,7 +55,7 @@ export class Note {
   }
 
   setVelocity(newVelocity: number) {
-    this.velocity = newVelocity;
+    this.velocity = Math.max(Math.min(newVelocity, 127), 0);
   }
 
   getStartTick() {
