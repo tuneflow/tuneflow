@@ -32,6 +32,14 @@ export class Song {
     return _.find(this.tracks, track => track.getId() === trackId);
   }
 
+  getTracksByIds(trackIds: string[]) {
+    if (!this.tracks) {
+      return [];
+    }
+    const trackIdSet = new Set<string>(trackIds);
+    return this.tracks.filter(track => trackIdSet.has(track.getId()));
+  }
+
   getTrackIndex(trackId: string) {
     return _.findIndex(this.tracks, track => track.getId() === trackId);
   }
@@ -145,6 +153,14 @@ export class Song {
    */
   getResolution(): number {
     return this.PPQ;
+  }
+
+  getBeatsPerBar() {
+    return this.getTimeSignatures()[0].getNumerator();
+  }
+
+  getTicksPerBar() {
+    return this.getBeatsPerBar() * this.getResolution();
   }
 
   /**
