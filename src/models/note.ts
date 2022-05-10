@@ -95,6 +95,13 @@ export class Note {
     this.clipInternal.deleteNote(this);
   }
 
+  /**
+   * Moves the note by a given offset in terms of ticks.
+   * This will not update the clip's boundaries.
+   *
+   * @param offsetTick
+   * @returns
+   */
   moveNote(offsetTick: number) {
     if (offsetTick === 0) {
       return;
