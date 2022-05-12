@@ -18,6 +18,9 @@ export class TuneflowPlugin {
   // @ts-ignore
   private generatedTrackIdsInternal: string[] = [];
   private isRollbackable = false;
+  /** Cache for the Song instance that was successfully produced in the last pipeline run. */
+  // @ts-ignore
+  private songCacheInternal?: Song;
 
   // ============ PUBLIC OVERWRITABLE ================
 

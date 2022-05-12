@@ -7,17 +7,18 @@ export class TuneflowPipeline {
   private plugins: TuneflowPlugin[] = [];
   /** Whether the last run encountered errors. */
   private threwErrorInLastRun = false;
-  /** Cache for the Song instances that was successfully produced in the last run. */
-  private songCache: { [pluginId: string]: Song } = {};
+  private maxNumPluginsToKeep = 50;
 
   /** Inserts a plugin to the end. */
   addPlugin(plugin: TuneflowPlugin) {
     this.plugins.push(plugin);
+    this.maintainPluginListSize();
   }
 
   /** Inserts a plugin at index. */
   addPluginAt(plugin: TuneflowPlugin, index: number) {
     this.plugins.splice(index, 0, plugin);
+    this.maintainPluginListSize();
   }
 
   /** Removes a plugin from the plugin list. */
@@ -31,7 +32,10 @@ export class TuneflowPipeline {
   }
 
   resetCache() {
-    this.songCache = {};
+    for (const plugin of this.plugins) {
+      // @ts-ignore
+      delete plugin.songCacheInternal;
+    }
   }
 
   /**
@@ -52,12 +56,14 @@ export class TuneflowPipeline {
     const cachedInputSong = cloneDeep(song);
     const cachedPluginIndex = this.getIndexOfLatestPluginWithCacheBeforeIndex(dirtyIndex);
     if (cachedPluginIndex >= 0) {
-      _.assign(song, cloneDeep(this.songCache[this.plugins[cachedPluginIndex].instanceId]));
+      // @ts-ignore
+      _.assign(song, cloneDeep(this.plugins[cachedPluginIndex].songCacheInternal));
     }
 
     // Clear plugin cache from dirtyIndex since we will recompute.
     for (let i = dirtyIndex; i < this.plugins.length; i += 1) {
-      delete this.songCache[this.plugins[i].instanceId];
+      // @ts-ignore
+      delete this.plugins[i].songCacheInternal;
     }
 
     // Run dirty plugins.
@@ -68,7 +74,8 @@ export class TuneflowPipeline {
       if (!plugin.enabledInternal) {
         return true;
       }
-      if (this.songCache[plugin.instanceId]) {
+      // @ts-ignore
+      if (plugin.songCacheInternal) {
         // @ts-ignore
         plugin.isRollbackable = true;
         continue;
@@ -87,14 +94,16 @@ export class TuneflowPipeline {
         // Rollback song to the last successful plugin cache.
         const pluginIndex = this.getIndexOfLatestPluginWithCacheBeforeIndex(i);
         if (pluginIndex >= 0) {
-          _.assign(song, cloneDeep(this.songCache[this.plugins[pluginIndex].instanceId]));
+          // @ts-ignore
+          _.assign(song, cloneDeep(this.plugins[pluginIndex].songCacheInternal));
         } else {
           _.assign(song, cachedInputSong);
         }
         return false;
       }
 
-      this.songCache[plugin.instanceId] = cloneDeep(song);
+      // @ts-ignore
+      plugin.songCacheInternal = cloneDeep(song);
       // @ts-ignore
       plugin.isRollbackable = true;
 
@@ -137,7 +146,8 @@ export class TuneflowPipeline {
   }
 
   isPluginFunctioning(plugin: TuneflowPlugin) {
-    return !!this.songCache[plugin.instanceId];
+    // @ts-ignore
+    return !!plugin.songCacheInternal;
   }
 
   getPluginIndexByPluginInstanceId(instanceId: string) {
@@ -158,7 +168,20 @@ export class TuneflowPipeline {
   }
 
   getPluginCache(plugin: TuneflowPlugin) {
-    return this.songCache[plugin.instanceId];
+    // @ts-ignore
+    return plugin.songCacheInternal;
+  }
+
+  /**
+   * Sets the maximum number of plugins to keep in the pipeline.
+   *
+   * The oldest plugins will be removed to keep the plugins within limit.
+   *
+   * @param maxNumPluginsToKeep
+   */
+  setMaxNumPluginsToKeep(maxNumPluginsToKeep: number) {
+    this.maxNumPluginsToKeep = maxNumPluginsToKeep;
+    this.maintainPluginListSize();
   }
 
   /**
@@ -168,10 +191,16 @@ export class TuneflowPipeline {
    */
   private getIndexOfLatestPluginWithCacheBeforeIndex(index: number) {
     for (let lastIndexWithCache = index - 1; lastIndexWithCache >= 0; lastIndexWithCache -= 1) {
-      if (this.songCache[this.plugins[lastIndexWithCache].instanceId]) {
+      if (!!this.getPluginCache(this.plugins[lastIndexWithCache])) {
         return lastIndexWithCache;
       }
     }
     return -1;
+  }
+
+  private maintainPluginListSize() {
+    while (this.plugins.length > this.maxNumPluginsToKeep && this.plugins.length > 0) {
+      this.plugins.shift();
+    }
   }
 }
