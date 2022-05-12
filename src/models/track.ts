@@ -161,7 +161,7 @@ export class Track {
 
   /**
    *
-   * @param pan An integer value between -64 and 63.
+   * @param pan An integer value between -64 and 63. Setting to 0 means balanced.
    */
   setPan(pan: number) {
     this.pan = pan;
