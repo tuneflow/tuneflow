@@ -20,6 +20,7 @@ export class Track {
   private solo: boolean;
   private muted: boolean;
   private rank: number;
+  private pan: number;
   private samplerPlugin?: AudioPlugin;
   private audioPlugins: AudioPlugin[] = [];
   private song: Song;
@@ -38,6 +39,7 @@ export class Track {
     solo = false,
     muted = false,
     rank = 0,
+    pan = 0,
   }: {
     song: Song;
     /**
@@ -60,6 +62,8 @@ export class Track {
     muted?: boolean;
     /** The rank of this track within the song. */
     rank?: number;
+    /** An integer value from -64 to 63, corresponding to the midi pan CC 0 - 127. */
+    pan?: number;
   }) {
     this.song = song;
     this.insturment = instrument;
@@ -70,6 +74,7 @@ export class Track {
     this.solo = solo;
     this.muted = muted;
     this.rank = rank;
+    this.pan = pan;
   }
 
   getInstrument() {
@@ -152,6 +157,18 @@ export class Track {
    */
   setVolume(volume: number) {
     this.volume = volume;
+  }
+
+  /**
+   *
+   * @param pan An integer value between -64 and 63.
+   */
+  setPan(pan: number) {
+    this.pan = pan;
+  }
+
+  getPan() {
+    return this.pan;
   }
 
   getSolo() {
