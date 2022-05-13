@@ -298,18 +298,38 @@ export class Clip {
   }
 
   static getNotesInRange(rawNotes: Note[], startTick: number, endTick: number) {
+    return Clip.getNotesInRangeImpl<Note>(
+      rawNotes,
+      startTick,
+      endTick,
+      (startTick: number) => ({ getStartTick: () => startTick }),
+      (note: Note) => note.getStartTick(),
+      (note: Note) => note.getEndTick(),
+    );
+  }
+
+  static getNotesInRangeImpl<T>(
+    rawNotes: T[],
+    startTick: number,
+    endTick: number,
+    startTickToNoteFn: Function,
+    noteToStartTickFn: Function,
+    noteToEndTickFn: Function,
+  ): T[] {
     const startIndex = lowerThan(
       rawNotes,
-      { getStartTick: () => startTick } as any,
-      (a: Note, b: Note) => a.getStartTick() - b.getStartTick(),
+      startTickToNoteFn(startTick),
+      (a: any, b: any) => noteToStartTickFn(a) - noteToStartTickFn(b),
     );
-    const inRangeNotes: Note[] = [];
+    const inRangeNotes: any[] = [];
     for (let i = Math.max(startIndex, 0); i < rawNotes.length; i += 1) {
       const note = rawNotes[i];
-      if (note.getStartTick() > endTick) {
+      const noteStartTick = noteToStartTickFn(note);
+      const noteEndTick = noteToEndTickFn(note);
+      if (noteStartTick > endTick) {
         break;
       }
-      if (!Clip.isNoteInClip(note.getStartTick(), note.getEndTick(), startTick, endTick)) {
+      if (!Clip.isNoteInClip(noteStartTick, noteEndTick, startTick, endTick)) {
         // Note is not fully within this range.
         continue;
       }
