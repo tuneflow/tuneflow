@@ -102,6 +102,7 @@ export class Song {
       });
     }
     newTrack.setVolume(track.getVolume());
+    newTrack.setPan(track.getPan());
     newTrack.setSolo(track.getSolo());
     newTrack.setMuted(track.getMuted());
     const existingSamplerPlugin = track.getSamplerPlugin();
