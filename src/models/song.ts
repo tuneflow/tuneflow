@@ -354,6 +354,10 @@ export class Song {
     };
   }
 
+  protected clearPluginContextInternal() {
+    this.pluginContext = undefined;
+  }
+
   private getNextTrackId() {
     const pluginContext = this.pluginContext as PluginContext;
     // @ts-ignore

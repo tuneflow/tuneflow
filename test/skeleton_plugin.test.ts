@@ -69,9 +69,12 @@ describe('Skeleton Tuneflow', () => {
       endTick: 10,
     });
     const pipeline = new TuneflowPipeline();
+    pipeline.setOriginalSong(song);
+    // @ts-ignore
+    pipeline.cloneSongFnInternal = (song: Song) => song;
     pipeline.addPluginAt(new CreateTrackPlugin(), 0);
     expect(song.getTracks().length).toBe(1);
-    await pipeline.run(song);
+    await pipeline.run();
     expect(song.getTracks().length).toBe(2);
   });
 
@@ -90,7 +93,10 @@ describe('Skeleton Tuneflow', () => {
       const pipeline = new TuneflowPipeline();
       pipeline.addPluginAt(new NoAccessCreateTrackPlugin(), 0);
       expect(song.getTracks().length).toBe(0);
-      expect(pipeline.run(song)).rejects.toBeTruthy();
+      pipeline.setOriginalSong(song);
+      // @ts-ignore
+      pipeline.cloneSongFnInternal = (song: Song) => song;
+      expect(pipeline.run()).rejects.toBeTruthy();
       expect(song.getTracks().length).toBe(0);
     });
   });

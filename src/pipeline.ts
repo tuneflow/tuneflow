@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash.clonedeep';
 import * as _ from 'underscore';
 import type { TuneflowPlugin } from './base_plugin';
 import type { Song } from './models/song';
@@ -8,6 +7,9 @@ export class TuneflowPipeline {
   /** Whether the last run encountered errors. */
   private threwErrorInLastRun = false;
   private maxNumPluginsToKeep = 50;
+  private originalSong?: Song;
+  // @ts-ignore
+  private cloneSongFnInternal: Function;
 
   /** Inserts a plugin to the end. */
   addPlugin(plugin: TuneflowPlugin) {
@@ -38,26 +40,39 @@ export class TuneflowPipeline {
     }
   }
 
+  setOriginalSong(originalSong: Song) {
+    this.originalSong = originalSong;
+  }
+
+  hasOriginalSong() {
+    return !!this.originalSong;
+  }
+
   /**
    * Runs the pipeline and modifies the song.
    *
-   * TODO: Check all the cloneDeep usages and remove unecessary ones if possible.
-   *
-   * @param song
    * @param dirtyIndex The index of the first dirty plugin.
-   * @returns Whether the flow completed with no errors.
+   * @returns If successful, returns the updated song instance. Otherwise return null.
    */
-  async run(song: Song, dirtyIndex = 0): Promise<boolean> {
+  async run(dirtyIndex = 0): Promise<Song | null> {
     console.log(`dirty from: ${dirtyIndex}`);
+
+    if (!this.originalSong) {
+      this.threwErrorInLastRun = true;
+      return null;
+    }
+
     dirtyIndex = Math.max(0, dirtyIndex);
     this.threwErrorInLastRun = false;
 
     // Jump to the latest cached song before dirtyIndex if available.
-    const cachedInputSong = cloneDeep(song);
+    let inputSong: Song;
     const cachedPluginIndex = this.getIndexOfLatestPluginWithCacheBeforeIndex(dirtyIndex);
     if (cachedPluginIndex >= 0) {
       // @ts-ignore
-      _.assign(song, cloneDeep(this.plugins[cachedPluginIndex].songCacheInternal));
+      inputSong = await this.cloneSong(this.plugins[cachedPluginIndex].songCacheInternal as Song);
+    } else {
+      inputSong = await this.cloneSong(this.originalSong);
     }
 
     // Clear plugin cache from dirtyIndex since we will recompute.
@@ -66,51 +81,72 @@ export class TuneflowPipeline {
       delete this.plugins[i].songCacheInternal;
     }
 
-    // Run dirty plugins.
-    let numFinishedPlugins = 0;
-    for (let i = 0; i < this.plugins.length; i += 1) {
+    for (let i = 0; i <= cachedPluginIndex; i += 1) {
       const plugin = this.plugins[i];
       // @ts-ignore
+      plugin.isRollbackable = true;
+    }
+
+    // Run dirty plugins.
+    let numFinishedPlugins = 0;
+    for (
+      let i = cachedPluginIndex >= 0 ? cachedPluginIndex + 1 : 0;
+      i < this.plugins.length;
+      i += 1
+    ) {
+      const plugin = this.plugins[i];
+      // TODO: Revisit here to see if we need to set isRollbackable to false.
+      // @ts-ignore
       if (!plugin.enabledInternal) {
-        return true;
+        return inputSong;
       }
-      // @ts-ignore
-      if (plugin.songCacheInternal) {
-        // @ts-ignore
-        plugin.isRollbackable = true;
-        continue;
-      }
-      // @ts-ignore
-      song.setPluginContextInternal(plugin);
       if (!plugin.hasAllParamsSet()) {
-        return true;
+        return inputSong;
       }
 
+      // @ts-ignore
+      inputSong.setPluginContextInternal(plugin);
       try {
-        await plugin.run(song, plugin.getParamsInternal());
+        await plugin.run(inputSong, plugin.getParamsInternal());
+        // @ts-ignore
+        inputSong.clearPluginContextInternal();
       } catch (e: any) {
         console.error(e);
         this.threwErrorInLastRun = true;
+        // @ts-ignore
+        inputSong.clearPluginContextInternal();
         // Rollback song to the last successful plugin cache.
         const pluginIndex = this.getIndexOfLatestPluginWithCacheBeforeIndex(i);
         if (pluginIndex >= 0) {
           // @ts-ignore
-          _.assign(song, cloneDeep(this.plugins[pluginIndex].songCacheInternal));
+          return await this.cloneSong(this.plugins[pluginIndex].songCacheInternal);
         } else {
-          _.assign(song, cachedInputSong);
+          return await this.cloneSong(this.originalSong);
         }
-        return false;
       }
 
       // @ts-ignore
-      plugin.songCacheInternal = cloneDeep(song);
+      plugin.songCacheInternal = await this.cloneSong(inputSong);
       // @ts-ignore
       plugin.isRollbackable = true;
 
       numFinishedPlugins += 1;
     }
     console.log(`Number of successfully finished plugins: ${numFinishedPlugins}`);
-    return true;
+    return inputSong;
+  }
+
+  /**
+   * Returns an exactly same song with the same ids for everything.
+   *
+   * @param song
+   * @returns
+   */
+  async cloneSong(song: Song): Promise<Song> {
+    if (!this.cloneSongFnInternal) {
+      throw new Error('Pipeline is not provided with a clone song function.');
+    }
+    return this.cloneSongFnInternal(song);
   }
 
   /**
@@ -127,6 +163,7 @@ export class TuneflowPipeline {
    */
   clear() {
     this.plugins.splice(0, this.plugins.length);
+    this.originalSong = undefined;
   }
 
   movePluginUp(plugin: TuneflowPlugin) {
