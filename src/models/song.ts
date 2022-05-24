@@ -40,6 +40,10 @@ export class Song {
     return this.tracks.filter(track => trackIdSet.has(track.getId()));
   }
 
+  /**
+   * Get the index of the track within the tracks list.
+   * Returns -1 if no track matches the track id.
+   */
   getTrackIndex(trackId: string) {
     return _.findIndex(this.tracks, track => track.getId() === trackId);
   }
