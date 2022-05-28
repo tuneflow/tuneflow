@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import type { Song } from './models/song';
 
 function midiToPitchClass(midi: number): string {
   const scaleIndexToNote = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -99,7 +100,11 @@ export function getAudioPluginVersionlessTuneflowId(
  */
 export function toVersionlessTfId(tfId: string) {
   const parts = decodeAudioPluginTuneflowId(tfId);
-  return getAudioPluginVersionlessTuneflowId(parts.manufacturerName, parts.pluginFormatName, parts.name)
+  return getAudioPluginVersionlessTuneflowId(
+    parts.manufacturerName,
+    parts.pluginFormatName,
+    parts.name,
+  );
 }
 
 export function decodeAudioPluginTuneflowId(tfId: string) {
@@ -135,4 +140,55 @@ export function areTuneflowIdsEqualIgnoreVersion(tfId1: string, tfId2: string) {
     }
   }
   return true;
+}
+
+interface TempoInfo {
+  ticks: number;
+  time: number;
+}
+
+/**
+ * A helper class to be used when performing large number of tick to second
+ * conversions incrementally.
+ */
+export class TickToSecondStepper {
+  private tempoInfos: TempoInfo[] = [];
+  private currentTempoIndex = 0;
+  private ticksPerSecondAtTempoTick: { [tick: number]: number } = {};
+
+  constructor(song: Song) {
+    // Do not directly use anything from the song as it might
+    // be a ref and accessing a ref is much more time consuming.
+    for (const tempo of song.getTempoChanges()) {
+      this.tempoInfos.push({
+        ticks: tempo.getTicks(),
+        time: tempo.getTime(),
+      });
+      this.ticksPerSecondAtTempoTick[tempo.getTicks()] =
+        (tempo.getBpm() * song.getResolution()) / 60;
+    }
+  }
+
+  tickToSeconds(ticks: number) {
+    let baseTempo = this.tempoInfos[this.currentTempoIndex];
+    // Move to the closest tempo before or at the tick.
+    while (
+      this.tempoInfos[this.currentTempoIndex + 1] &&
+      this.tempoInfos[this.currentTempoIndex + 1].ticks <= ticks
+    ) {
+      this.currentTempoIndex += 1;
+      baseTempo = this.tempoInfos[this.currentTempoIndex];
+    }
+    // If the current tempo is later than the current tick, move back.
+    while (baseTempo.ticks > ticks && this.currentTempoIndex > 0) {
+      this.currentTempoIndex -= 1;
+      baseTempo = this.tempoInfos[this.currentTempoIndex];
+    }
+    if (baseTempo.ticks > ticks) {
+      console.error(`Cannot find any tempo earlier than tick ${ticks}, this should not happen.`);
+    }
+    const ticksDelta = ticks - baseTempo.ticks;
+    const ticksPerSecondSinceLastTempoChange = this.ticksPerSecondAtTempoTick[baseTempo.ticks];
+    return baseTempo.time + ticksDelta / ticksPerSecondSinceLastTempoChange;
+  }
 }
