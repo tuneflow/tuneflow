@@ -4,6 +4,7 @@ import { AudioPlugin } from './audio_plugin';
 import type { Song } from './song';
 import { Clip } from './clip';
 import { decodeAudioPluginTuneflowId } from '../utils';
+import { AutomationData } from './automation';
 
 /**
  * A track in the song that maps to an instrument.
@@ -24,6 +25,7 @@ export class Track {
   private samplerPlugin?: AudioPlugin;
   private audioPlugins: AudioPlugin[] = [];
   private song: Song;
+  private automation: AutomationData;
 
   /**
    * IMPORTANT: Do not use the constructor directly, call
@@ -75,6 +77,7 @@ export class Track {
     this.muted = muted;
     this.rank = rank;
     this.pan = pan;
+    this.automation = new AutomationData();
   }
 
   getInstrument() {
@@ -381,6 +384,10 @@ export class Track {
 
   deleteFromParent() {
     this.song.removeTrack(this.getId());
+  }
+
+  getAutomation() {
+    return this.automation;
   }
 
   private static generateTrackIdInternal() {

@@ -71,6 +71,11 @@ export class AudioPlugin {
     return areTuneflowIdsEqualIgnoreVersion(tfId, this.getTuneflowId());
   }
 
+  /** A unique id to identify the plugin instance. */
+  getInstanceId() {
+    return this.localInstanceIdInternal;
+  }
+
   toJSON() {
     return {
       name: this.name,
