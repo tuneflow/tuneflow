@@ -145,6 +145,14 @@ export class AutomationValue {
   private disabled = false;
   private nextPointIdInternal = 1;
 
+  getDisabled() {
+    return this.disabled;
+  }
+
+  setDisabled(isDisabled: boolean) {
+    this.disabled = isDisabled;
+  }
+
   getPoints() {
     return this.points;
   }
@@ -253,14 +261,6 @@ export class AutomationValue {
 
     points.splice(insertIndex, 0, newPoint);
   }
-
-  getDisabled() {
-    return this.disabled;
-  }
-
-  setDisabled(isDisabled: boolean) {
-    this.disabled = isDisabled;
-  }
 }
 
 /**
@@ -278,7 +278,7 @@ export class AutomationValue {
 export class AutomationData {
   private targets: AutomationTarget[] = [];
 
-  private targetValues: { [tfAutomationTargetId: string]: AutomationValue } = {};
+  private targetValues: { [tfAutomationTargetId: string]: AutomationValue | undefined } = {};
 
   /** All automation targets specified by the user. */
   getAutomationTargets() {
