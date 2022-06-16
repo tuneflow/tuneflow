@@ -1,6 +1,6 @@
 import { AutomationTarget, AutomationTargetType, Clip, Song, TuneflowPlugin } from '../src';
-import type { Note } from '../src';
-import type { SongAccess } from '../src';
+import type { Note, AutomationValue, SongAccess } from '../src';
+
 import { assertClipRange, assertNotesAreEqual, createTestNotes } from '../src/test_utils';
 
 describe('Clip-related Tests', () => {
@@ -704,7 +704,9 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       assertClipRange(clip3, 40, 65);
       expect(
-        track.getAutomation().getAutomationValueByTarget(automationTarget)?.getPoints(),
+        (
+          track.getAutomation().getAutomationValueByTarget(automationTarget) as AutomationValue
+        ).getPoints(),
       ).toEqual([
         {
           id: expect.any(Number),
@@ -1068,7 +1070,9 @@ describe('Clip-related Tests', () => {
         .getOrCreateAutomationValueById(automationTarget.toTfAutomationTargetId())
         .addPoint(47, 0.7);
       expect(
-        track.getAutomation().getAutomationValueByTarget(automationTarget)?.getPoints(),
+        (
+          track.getAutomation().getAutomationValueByTarget(automationTarget) as AutomationValue
+        ).getPoints(),
       ).toEqual([
         {
           id: expect.any(Number),
@@ -1090,7 +1094,9 @@ describe('Clip-related Tests', () => {
       clip2 = track.getClips()[1];
       assertClipRange(clip2, 21, 30);
       expect(
-        track.getAutomation().getAutomationValueByTarget(automationTarget)?.getPoints(),
+        (
+          track.getAutomation().getAutomationValueByTarget(automationTarget) as AutomationValue
+        ).getPoints(),
       ).toEqual([]);
     });
   });
