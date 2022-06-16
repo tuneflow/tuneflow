@@ -171,6 +171,58 @@ describe('Automation-related Tests', () => {
       ]);
     });
 
+    it('gets points within range correctly', async () => {
+      const automationValue = new AutomationValue();
+      expect(automationValue.getPoints()).toEqual([]);
+      automationValue.addPoint(/* tick= */ 3, /* value= */ 0.5);
+      automationValue.addPoint(/* tick= */ 3, /* value= */ 0.65);
+      automationValue.addPoint(/* tick= */ 1, /* value= */ 0.25);
+      automationValue.addPoint(/* tick= */ 2, /* value= */ 0.75);
+      automationValue.addPoint(/* tick= */ 2, /* value= */ 0.55);
+      automationValue.addPoint(/* tick= */ 4, /* value= */ 0.15);
+      expect(automationValue.getPointsInRange(2, 3)).toEqual([
+        {
+          id: expect.any(Number),
+          tick: 2,
+          value: 0.55,
+        },
+        {
+          id: expect.any(Number),
+          tick: 2,
+          value: 0.75,
+        },
+        {
+          id: expect.any(Number),
+          tick: 3,
+          value: 0.65,
+        },
+        {
+          id: expect.any(Number),
+          tick: 3,
+          value: 0.5,
+        },
+      ]);
+
+      expect(automationValue.getPointsInRange(4, 3)).toEqual([]);
+
+      expect(automationValue.getPointsInRange(5, 6)).toEqual([]);
+
+      expect(automationValue.getPointsInRange(4, 5)).toEqual([
+        {
+          id: expect.any(Number),
+          tick: 4,
+          value: 0.15,
+        },
+      ]);
+      expect(automationValue.getPointsInRange(0, 1)).toEqual([
+        {
+          id: expect.any(Number),
+          tick: 1,
+          value: 0.25,
+        },
+      ]);
+    });
+
     it('Removes points correctly', async () => {
       const automationValue = new AutomationValue();
       expect(automationValue.getPoints()).toEqual([]);
@@ -208,6 +260,62 @@ describe('Automation-related Tests', () => {
           id: point2Id,
           tick: 3,
           value: 0.5,
+        },
+      ]);
+    });
+
+    it('Removes points in range correctly', async () => {
+      const automationValue = new AutomationValue();
+      expect(automationValue.getPoints()).toEqual([]);
+      automationValue.addPoint(/* tick= */ 3, /* value= */ 0.5);
+      automationValue.addPoint(/* tick= */ 3, /* value= */ 0.65);
+      automationValue.addPoint(/* tick= */ 1, /* value= */ 0.25);
+      automationValue.addPoint(/* tick= */ 2, /* value= */ 0.75);
+      automationValue.addPoint(/* tick= */ 2, /* value= */ 0.55);
+      automationValue.addPoint(/* tick= */ 4, /* value= */ 0.15);
+      expect(automationValue.getPoints()).toEqual([
+        {
+          id: expect.any(Number),
+          tick: 1,
+          value: 0.25,
+        },
+        {
+          id: expect.any(Number),
+          tick: 2,
+          value: 0.55,
+        },
+        {
+          id: expect.any(Number),
+          tick: 2,
+          value: 0.75,
+        },
+        {
+          id: expect.any(Number),
+          tick: 3,
+          value: 0.65,
+        },
+        {
+          id: expect.any(Number),
+          tick: 3,
+          value: 0.5,
+        },
+        {
+          id: expect.any(Number),
+          tick: 4,
+          value: 0.15,
+        },
+      ]);
+      automationValue.removePointsInRange(2, 3);
+      expect(automationValue.getPoints()).toEqual([
+        {
+          id: expect.any(Number),
+          tick: 1,
+          value: 0.25,
+        },
+        {
+          id: expect.any(Number),
+          tick: 4,
+          value: 0.15,
         },
       ]);
     });
@@ -359,6 +467,60 @@ describe('Automation-related Tests', () => {
           id: expect.any(Number),
           tick: 5,
           value: 0.45,
+        },
+      ]);
+    });
+
+    it('Moves points in range no overwrite correctly', async () => {
+      const automationValue = new AutomationValue();
+      expect(automationValue.getPoints()).toEqual([]);
+      automationValue.addPoint(/* tick= */ 3, /* value= */ 0.5);
+      automationValue.addPoint(/* tick= */ 1, /* value= */ 0.25);
+      automationValue.addPoint(/* tick= */ 2, /* value= */ 0.75);
+      automationValue.addPoint(/* tick= */ 4, /* value= */ 0.15);
+      expect(automationValue.getPoints()).toEqual([
+        {
+          id: expect.any(Number),
+          tick: 1,
+          value: 0.25,
+        },
+        {
+          id: expect.any(Number),
+          tick: 2,
+          value: 0.75,
+        },
+        {
+          id: expect.any(Number),
+          tick: 3,
+          value: 0.5,
+        },
+        {
+          id: expect.any(Number),
+          tick: 4,
+          value: 0.15,
+        },
+      ]);
+      automationValue.movePointsInRange(2, 3, 4, 0, /* overwriteValuesInDragArea= */ false);
+      expect(automationValue.getPoints()).toEqual([
+        {
+          id: expect.any(Number),
+          tick: 1,
+          value: 0.25,
+        },
+        {
+          id: expect.any(Number),
+          tick: 4,
+          value: 0.15,
+        },
+        {
+          id: expect.any(Number),
+          tick: 6,
+          value: 0.75,
+        },
+        {
+          id: expect.any(Number),
+          tick: 7,
+          value: 0.5,
         },
       ]);
     });

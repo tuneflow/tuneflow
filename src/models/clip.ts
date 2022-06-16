@@ -185,7 +185,7 @@ export class Clip {
   adjustClipLeft(clipStartTick: number, resolveConflict = true) {
     clipStartTick = Math.max(0, clipStartTick);
     if (clipStartTick > this.clipEndTick) {
-      this.deleteFromParent();
+      this.deleteFromParent(/* deleteAssociatedTrackAutomation= */ true);
     } else {
       // Resolve conflict before changing the clip's range
       // to preserve the current order of clips.
@@ -211,7 +211,7 @@ export class Clip {
    */
   adjustClipRight(clipEndTick: number, resolveConflict = true) {
     if (clipEndTick < this.clipStartTick || clipEndTick < 0) {
-      this.deleteFromParent();
+      this.deleteFromParent(/* deleteAssociatedTrackAutomation= */ true);
     } else {
       // Resolve conflict before changing the clip's range
       // to preserve the current order of clips.
@@ -234,11 +234,11 @@ export class Clip {
    * so the clip must be re-positioned to the correct index.
    * @param offsetTick
    */
-  moveClip(offsetTick: number) {
+  moveClip(offsetTick: number, moveAssociatedTrackAutomationPoints: boolean) {
     const newClipStartTick = Math.max(0, this.clipStartTick + offsetTick);
     const newClipEndTick = this.clipEndTick + offsetTick;
     if (newClipEndTick < 0) {
-      this.deleteFromParent();
+      this.deleteFromParent(/* deleteAssociatedTrackAutomation= */ true);
       return;
     }
     if (this.track) {
@@ -252,10 +252,12 @@ export class Clip {
     // requires the clips to be sorted, so delete the clip before the move happens.
     if (this.track) {
       const clipIndex = this.track.getClipIndex(this);
-      this.track.deleteClipAt(clipIndex);
+      this.track.deleteClipAt(clipIndex, /* deleteAssociatedTrackAutomation= */ false);
     }
 
     // Move the clip.
+    const originalStartTick = this.clipStartTick;
+    const originalEndTick = this.clipEndTick;
     this.clipStartTick = newClipStartTick;
     this.clipEndTick = newClipEndTick;
     for (const note of this.notes) {
@@ -267,6 +269,18 @@ export class Clip {
       // Ordered insert back the clip.
       // @ts-ignore
       this.track.orderedInsertClipInternal(this);
+
+      // Move track automation points if required.
+      if (moveAssociatedTrackAutomationPoints) {
+        this.track
+          .getAutomation()
+          .moveAllPointsWithinRange(
+            originalStartTick,
+            originalEndTick,
+            offsetTick,
+            /* offsetValue= */ 0,
+          );
+      }
     }
   }
 
@@ -274,14 +288,14 @@ export class Clip {
    * Move the clip to a given tick.
    * @param tick The tick that this clip will start at.
    */
-  moveClipTo(tick: number) {
+  moveClipTo(tick: number, moveAssociatedTrackAutomationPoints: boolean) {
     const offsetTick = tick - this.getClipStartTick();
-    this.moveClip(offsetTick);
+    this.moveClip(offsetTick, moveAssociatedTrackAutomationPoints);
   }
 
-  deleteFromParent() {
+  deleteFromParent(deleteAssociatedTrackAutomation: boolean) {
     if (this.track) {
-      this.track.deleteClip(this);
+      this.track.deleteClip(this, deleteAssociatedTrackAutomation);
       this.track = undefined;
     }
   }
@@ -417,7 +431,7 @@ export class Clip {
     ) {
       // The whole clip overlaps with the given range.
       // Delete the clip.
-      this.deleteFromParent();
+      this.deleteFromParent(/* deleteAssociatedTrackAutomation= */ true);
       return;
     }
     if (

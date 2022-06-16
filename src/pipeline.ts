@@ -51,6 +51,8 @@ export class TuneflowPipeline {
   /**
    * Runs the pipeline and modifies the song.
    *
+   * TODO: Add timeout.
+   *
    * @param dirtyIndex The index of the first dirty plugin.
    * @returns If successful, returns the updated song instance. Otherwise return null.
    */

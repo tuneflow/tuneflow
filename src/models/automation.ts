@@ -157,6 +157,31 @@ export class AutomationValue {
     return this.points;
   }
 
+  getPointsInRange(startTick: number, endTick: number) {
+    return AutomationValue.getPointsInRangeImpl(this.points, startTick, endTick);
+  }
+
+  private static getPointsInRangeImpl(
+    points: AutomationPoint[],
+    startTick: number,
+    endTick: number,
+  ) {
+    const startIndex = greaterEqual(
+      points,
+      { tick: startTick } as AutomationPoint,
+      (a, b) => a.tick - b.tick,
+    );
+    const results = [];
+    for (let i = startIndex; i < points.length; i += 1) {
+      const point = points[i];
+      if (point.tick > endTick) {
+        break;
+      }
+      results.push(point);
+    }
+    return results;
+  }
+
   /**
    *
    * @param overwrite Whether to overwrite the points at the insert tick.
@@ -183,6 +208,43 @@ export class AutomationValue {
         this.points.splice(i, 1);
       }
     }
+  }
+
+  /**
+   * Removes all points within the given time range.
+   * @param startTick Inclusive
+   * @param endTick Inclusive
+   */
+  removePointsInRange(startTick: number, endTick: number) {
+    const startIndex = greaterEqual(
+      this.points,
+      { tick: startTick } as AutomationPoint,
+      (a, b) => a.tick - b.tick,
+    );
+    if (startIndex >= this.points.length) {
+      return;
+    }
+    let endIndex = startIndex;
+    while (endIndex + 1 < this.points.length && this.points[endIndex + 1].tick <= endTick) {
+      endIndex += 1;
+    }
+    this.points.splice(startIndex, endIndex - startIndex + 1);
+  }
+
+  movePointsInRange(
+    startTick: number,
+    endTick: number,
+    offsetTick: number,
+    offsetValue: number,
+    overwriteValuesInDragArea = true,
+  ) {
+    const points = this.getPointsInRange(startTick, endTick);
+    this.movePoints(
+      points.map(point => point.id),
+      offsetTick,
+      offsetValue,
+      overwriteValuesInDragArea,
+    );
   }
 
   /**
@@ -290,11 +352,11 @@ export class AutomationData {
    * @param tfAutomationTargetId The targetId that can be retrieved from `AutomationTarget.prototype.toTfAutomationTargetId` or `AutomationTarget.encodeAutomationTarget`.
    * @returns The automation value of the given target if exists, otherwise creates a new one and returns it.
    */
-  getOrCreateAutomationValueById(tfAutomationTargetId: string) {
+  getOrCreateAutomationValueById(tfAutomationTargetId: string): AutomationValue {
     if (!this.targetValues[tfAutomationTargetId]) {
       this.targetValues[tfAutomationTargetId] = new AutomationValue();
     }
-    return this.targetValues[tfAutomationTargetId];
+    return this.targetValues[tfAutomationTargetId] as AutomationValue;
   }
 
   /**
@@ -337,5 +399,40 @@ export class AutomationData {
     // Remove values.
     const tfAutomationTargetId = target.toTfAutomationTargetId();
     delete this.targetValues[tfAutomationTargetId];
+  }
+
+  /**
+   *
+   * @param startTick Inclusive
+   * @param endTick Inclusive
+   */
+  removeAllPointsWithinRange(startTick: number, endTick: number) {
+    for (const tfAutomationTargetId of _.keys(this.targetValues)) {
+      const automationValue = this.targetValues[tfAutomationTargetId] as AutomationValue;
+      automationValue.removePointsInRange(startTick, endTick);
+    }
+  }
+
+  /**
+   *
+   * @param startTick Inclusive
+   * @param endTick Inclusive
+   */
+  moveAllPointsWithinRange(
+    startTick: number,
+    endTick: number,
+    offsetTick: number,
+    offsetValue: number,
+  ) {
+    for (const tfAutomationTargetId of _.keys(this.targetValues)) {
+      const automationValue = this.targetValues[tfAutomationTargetId] as AutomationValue;
+      automationValue.movePointsInRange(
+        startTick,
+        endTick,
+        offsetTick,
+        offsetValue,
+        /* overwriteValuesInDragArea= */ false,
+      );
+    }
   }
 }

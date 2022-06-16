@@ -315,7 +315,8 @@ export class Track {
   insertClip(clip: Clip) {
     if (clip.getTrack() !== this) {
       if (clip.getTrack()) {
-        clip.deleteFromParent();
+        // Clip belongs to another track.
+        clip.deleteFromParent(/* deleteAssociatedTrackAutomation= */ false);
       }
       // @ts-ignore
       clip.track = this;
@@ -370,15 +371,23 @@ export class Track {
     return this.clips.indexOf(clip, startIndex);
   }
 
-  deleteClip(clip: Clip) {
+  deleteClip(clip: Clip, deleteAssociatedTrackAutomation: boolean) {
     const index = this.getClipIndex(clip);
-    this.deleteClipAt(index);
+    this.deleteClipAt(index, deleteAssociatedTrackAutomation);
   }
 
-  deleteClipAt(index: number) {
+  deleteClipAt(index: number, deleteAssociatedTrackAutomation: boolean) {
     if (index < 0) {
       return;
     }
+    if (deleteAssociatedTrackAutomation) {
+      const clip = this.clips[index];
+      if (!clip) {
+        return;
+      }
+      this.automation.removeAllPointsWithinRange(clip.getClipStartTick(), clip.getClipEndTick());
+    }
+
     this.clips.splice(index, 1);
   }
 

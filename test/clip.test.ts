@@ -1,4 +1,4 @@
-import { Clip, Song, TuneflowPlugin } from '../src';
+import { AutomationTarget, AutomationTargetType, Clip, Song, TuneflowPlugin } from '../src';
 import type { Note } from '../src';
 import type { SongAccess } from '../src';
 import { assertClipRange, assertNotesAreEqual, createTestNotes } from '../src/test_utils';
@@ -595,7 +595,7 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip1.moveClipTo(70);
+      clip1.moveClipTo(70, /* moveAssociatedTrackAutomationPoints= */ false);
       assertClipRange(clip1, 70, 85);
       assertClipRange(clip2, 21, 30);
       assertClipRange(clip3, 40, 65);
@@ -610,7 +610,7 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip1.moveClipTo(10);
+      clip1.moveClipTo(10, /* moveAssociatedTrackAutomationPoints= */ false);
       assertClipRange(clip1, 10, 25);
       assertClipRange(clip2, 26, 30);
       assertClipRange(clip3, 40, 65);
@@ -625,7 +625,7 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip1.moveClipTo(60);
+      clip1.moveClipTo(60, /* moveAssociatedTrackAutomationPoints= */ false);
       assertClipRange(clip1, 60, 75);
       assertClipRange(clip2, 21, 30);
       assertClipRange(clip3, 40, 59);
@@ -640,7 +640,7 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip1.moveClipTo(28);
+      clip1.moveClipTo(28, /* moveAssociatedTrackAutomationPoints= */ false);
       assertClipRange(clip1, 28, 43);
       assertClipRange(clip2, 21, 27);
       assertClipRange(clip3, 44, 65);
@@ -655,7 +655,7 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       let clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip2.moveClipTo(42);
+      clip2.moveClipTo(42, /* moveAssociatedTrackAutomationPoints= */ false);
       expect(track.getClips().length).toBe(4);
       clip1 = track.getClips()[0];
       assertClipRange(clip1, 0, 15);
@@ -676,12 +676,42 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip1.moveClip(-99999);
+      clip1.moveClip(-99999, /* moveAssociatedTrackAutomationPoints= */ false);
       expect(track.getClips().length).toBe(2);
       clip1 = track.getClips()[0];
       assertClipRange(clip1, 21, 30);
       clip2 = track.getClips()[1];
       assertClipRange(clip2, 40, 65);
+    });
+
+    it('Moves clip - move associated track automation points.', async () => {
+      const track = song.getTracks()[0];
+      const automationTarget = new AutomationTarget(AutomationTargetType.PAN);
+      track.getAutomation().addAutomation(automationTarget);
+      track
+        .getAutomation()
+        .getOrCreateAutomationValueById(automationTarget.toTfAutomationTargetId())
+        .addPoint(7, 0.7);
+      expect(track.getClips().length).toBe(3);
+      const clip1 = track.getClips()[0];
+      assertClipRange(clip1, 0, 15);
+      const clip2 = track.getClips()[1];
+      assertClipRange(clip2, 21, 30);
+      const clip3 = track.getClips()[2];
+      assertClipRange(clip3, 40, 65);
+      clip1.moveClipTo(70, /* moveAssociatedTrackAutomationPoints= */ true);
+      assertClipRange(clip1, 70, 85);
+      assertClipRange(clip2, 21, 30);
+      assertClipRange(clip3, 40, 65);
+      expect(
+        track.getAutomation().getAutomationValueByTarget(automationTarget)?.getPoints(),
+      ).toEqual([
+        {
+          id: expect.any(Number),
+          tick: 77,
+          value: 0.7,
+        },
+      ]);
     });
   });
 
@@ -986,7 +1016,7 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip1.deleteFromParent();
+      clip1.deleteFromParent(/* deleteAssociatedTrackAutomation= */ false);
       expect(track.getClips().length).toBe(2);
       clip1 = track.getClips()[0];
       assertClipRange(clip1, 21, 30);
@@ -1003,7 +1033,7 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip2.deleteFromParent();
+      clip2.deleteFromParent(/* deleteAssociatedTrackAutomation= */ false);
       expect(track.getClips().length).toBe(2);
       clip1 = track.getClips()[0];
       assertClipRange(clip1, 0, 15);
@@ -1020,12 +1050,48 @@ describe('Clip-related Tests', () => {
       assertClipRange(clip2, 21, 30);
       const clip3 = track.getClips()[2];
       assertClipRange(clip3, 40, 65);
-      clip3.deleteFromParent();
+      clip3.deleteFromParent(/* deleteAssociatedTrackAutomation= */ false);
       expect(track.getClips().length).toBe(2);
       clip1 = track.getClips()[0];
       assertClipRange(clip1, 0, 15);
       clip2 = track.getClips()[1];
       assertClipRange(clip2, 21, 30);
+    });
+
+    it('Delete last clip - delete associated track automation', async () => {
+      const track = song.getTracks()[0];
+      const automationTarget = new AutomationTarget(AutomationTargetType.PAN);
+
+      track.getAutomation().addAutomation(automationTarget);
+      track
+        .getAutomation()
+        .getOrCreateAutomationValueById(automationTarget.toTfAutomationTargetId())
+        .addPoint(47, 0.7);
+      expect(
+        track.getAutomation().getAutomationValueByTarget(automationTarget)?.getPoints(),
+      ).toEqual([
+        {
+          id: expect.any(Number),
+          tick: 47,
+          value: 0.7,
+        },
+      ]);
+      expect(track.getClips().length).toBe(3);
+      let clip1 = track.getClips()[0];
+      assertClipRange(clip1, 0, 15);
+      let clip2 = track.getClips()[1];
+      assertClipRange(clip2, 21, 30);
+      const clip3 = track.getClips()[2];
+      assertClipRange(clip3, 40, 65);
+      clip3.deleteFromParent(/* deleteAssociatedTrackAutomation= */ true);
+      expect(track.getClips().length).toBe(2);
+      clip1 = track.getClips()[0];
+      assertClipRange(clip1, 0, 15);
+      clip2 = track.getClips()[1];
+      assertClipRange(clip2, 21, 30);
+      expect(
+        track.getAutomation().getAutomationValueByTarget(automationTarget)?.getPoints(),
+      ).toEqual([]);
     });
   });
 });
