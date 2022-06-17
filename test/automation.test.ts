@@ -320,18 +320,42 @@ describe('Automation-related Tests', () => {
       ]);
     });
 
-    it('Moves multiple points overwrite correctly', async () => {
+    it('Moves multiple points to left overwrite correctly', async () => {
       const automationValue = new AutomationValue();
       expect(automationValue.getPoints()).toEqual([]);
       automationValue.addPoint(/* tick= */ 3, /* value= */ 0.5);
       automationValue.addPoint(/* tick= */ 1, /* value= */ 0.25);
+      automationValue.addPoint(/* tick= */ 1, /* value= */ 0.65);
+      automationValue.addPoint(/* tick= */ 1, /* value= */ 0.95);
       automationValue.addPoint(/* tick= */ 2, /* value= */ 0.75);
+      automationValue.addPoint(/* tick= */ 2, /* value= */ 0.85);
+      automationValue.addPoint(/* tick= */ 2, /* value= */ 0.35);
       automationValue.addPoint(/* tick= */ 4, /* value= */ 0.15);
       expect(automationValue.getPoints()).toEqual([
         {
           id: expect.any(Number),
           tick: 1,
+          value: 0.95,
+        },
+        {
+          id: expect.any(Number),
+          tick: 1,
+          value: 0.65,
+        },
+        {
+          id: expect.any(Number),
+          tick: 1,
           value: 0.25,
+        },
+        {
+          id: expect.any(Number),
+          tick: 2,
+          value: 0.35,
+        },
+        {
+          id: expect.any(Number),
+          tick: 2,
+          value: 0.85,
         },
         {
           id: expect.any(Number),
@@ -350,8 +374,23 @@ describe('Automation-related Tests', () => {
         },
       ]);
       const points = automationValue.getPoints();
-      automationValue.movePoints([points[1].id, points[2].id], -1, 0.3);
+      automationValue.movePoints([points[1].id, points[2].id, points[3].id, points[4].id], -1, 0.3);
       expect(automationValue.getPoints()).toEqual([
+        {
+          id: expect.any(Number),
+          tick: 0,
+          value: expect.closeTo(0.95),
+        },
+        {
+          id: expect.any(Number),
+          tick: 0,
+          value: expect.closeTo(0.55),
+        },
+        {
+          id: expect.any(Number),
+          tick: 1,
+          value: expect.closeTo(0.65),
+        },
         {
           id: expect.any(Number),
           tick: 1,
@@ -360,12 +399,106 @@ describe('Automation-related Tests', () => {
         {
           id: expect.any(Number),
           tick: 2,
-          value: 0.8,
+          value: expect.closeTo(0.75),
+        },
+        {
+          id: expect.any(Number),
+          tick: 3,
+          value: 0.5,
+        },
+        {
+          id: expect.any(Number),
+          tick: 4,
+          value: expect.closeTo(0.15),
+        },
+      ]);
+    });
+
+    it('Moves multiple points to right overwrite correctly', async () => {
+      const automationValue = new AutomationValue();
+      expect(automationValue.getPoints()).toEqual([]);
+      automationValue.addPoint(/* tick= */ 3, /* value= */ 0.5);
+      automationValue.addPoint(/* tick= */ 1, /* value= */ 0.25);
+      automationValue.addPoint(/* tick= */ 1, /* value= */ 0.65);
+      automationValue.addPoint(/* tick= */ 1, /* value= */ 0.95);
+      automationValue.addPoint(/* tick= */ 2, /* value= */ 0.75);
+      automationValue.addPoint(/* tick= */ 2, /* value= */ 0.85);
+      automationValue.addPoint(/* tick= */ 2, /* value= */ 0.35);
+      automationValue.addPoint(/* tick= */ 4, /* value= */ 0.15);
+      expect(automationValue.getPoints()).toEqual([
+        {
+          id: expect.any(Number),
+          tick: 1,
+          value: 0.95,
+        },
+        {
+          id: expect.any(Number),
+          tick: 1,
+          value: 0.65,
+        },
+        {
+          id: expect.any(Number),
+          tick: 1,
+          value: 0.25,
+        },
+        {
+          id: expect.any(Number),
+          tick: 2,
+          value: 0.35,
+        },
+        {
+          id: expect.any(Number),
+          tick: 2,
+          value: 0.85,
+        },
+        {
+          id: expect.any(Number),
+          tick: 2,
+          value: 0.75,
+        },
+        {
+          id: expect.any(Number),
+          tick: 3,
+          value: 0.5,
         },
         {
           id: expect.any(Number),
           tick: 4,
           value: 0.15,
+        },
+      ]);
+      const points = automationValue.getPoints();
+      automationValue.movePoints([points[1].id, points[2].id, points[3].id, points[4].id], 2, -0.3);
+      expect(automationValue.getPoints()).toEqual([
+        {
+          id: expect.any(Number),
+          tick: 1,
+          value: expect.closeTo(0.95),
+        },
+        {
+          id: expect.any(Number),
+          tick: 3,
+          value: expect.closeTo(0.35),
+        },
+        {
+          id: expect.any(Number),
+          tick: 3,
+          value: 0,
+        },
+        {
+          id: expect.any(Number),
+          tick: 4,
+          value: expect.closeTo(0.05),
+        },
+        {
+          id: expect.any(Number),
+          tick: 4,
+          value: expect.closeTo(0.55),
+        },
+        {
+          id: expect.any(Number),
+          tick: 4,
+          value: expect.closeTo(0.15),
         },
       ]);
     });
@@ -405,23 +538,23 @@ describe('Automation-related Tests', () => {
         {
           id: expect.any(Number),
           tick: 1,
-          value: 0.25,
+          value: expect.closeTo(0.25),
         },
         {
           id: expect.any(Number),
           tick: 1,
-          value: 0.8,
+          value: expect.closeTo(0.8),
         },
         {
           id: expect.any(Number),
           tick: 2,
-          value: 0.75,
+          value: expect.closeTo(0.75),
         },
 
         {
           id: expect.any(Number),
           tick: 4,
-          value: 0.15,
+          value: expect.closeTo(0.15),
         },
       ]);
     });
@@ -431,9 +564,21 @@ describe('Automation-related Tests', () => {
       expect(automationValue.getPoints()).toEqual([]);
       automationValue.addPoint(/* tick= */ 3, /* value= */ 0.5);
       automationValue.addPoint(/* tick= */ 1, /* value= */ 0.25);
+      automationValue.addPoint(/* tick= */ 1, /* value= */ 0.65);
+      automationValue.addPoint(/* tick= */ 1, /* value= */ 0.85);
       automationValue.addPoint(/* tick= */ 2, /* value= */ 0.75);
       automationValue.addPoint(/* tick= */ 4, /* value= */ 0.15);
       expect(automationValue.getPoints()).toEqual([
+        {
+          id: expect.any(Number),
+          tick: 1,
+          value: 0.85,
+        },
+        {
+          id: expect.any(Number),
+          tick: 1,
+          value: 0.65,
+        },
         {
           id: expect.any(Number),
           tick: 1,
@@ -461,12 +606,17 @@ describe('Automation-related Tests', () => {
         {
           id: expect.any(Number),
           tick: 1,
-          value: 0.25,
+          value: expect.closeTo(0.85),
         },
         {
           id: expect.any(Number),
-          tick: 5,
-          value: 0.45,
+          tick: 4,
+          value: expect.closeTo(0.35),
+        },
+        {
+          id: expect.any(Number),
+          tick: 4,
+          value: expect.closeTo(0.15),
         },
       ]);
     });

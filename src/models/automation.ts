@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import { ge as greaterEqual } from 'binary-search-bounds';
+import { ge as greaterEqual, gt as greaterThan, lt as lowerThan } from 'binary-search-bounds';
 
 export enum AutomationTargetType {
   UNDEFINED = 0,
@@ -252,7 +252,7 @@ export class AutomationValue {
    * @param pointIds
    * @param offsetTick
    * @param offsetValue
-   * @param overwriteValuesInDragArea If true, all values in between the new and old point time ranges will be deleted.
+   * @param overwriteValuesInDragArea If true, all values in between the moved points' old and new indexes will be removed.
    */
   movePoints(
     pointIds: number[],
@@ -260,33 +260,60 @@ export class AutomationValue {
     offsetValue: number,
     overwriteValuesInDragArea = true,
   ) {
+    if (pointIds.length === 0) {
+      return;
+    }
     const pointIdSet = new Set<number>(pointIds);
-    let dragAreaLeft = Number.MAX_SAFE_INTEGER;
-    let dragAreaRight = 0;
-    for (const point of this.points) {
+    let dragAreaLeftIndex: number | undefined = undefined;
+    let dragAreaRightIndex: number | undefined = undefined;
+    const selectedPoints = [];
+    for (let i = 0; i < this.points.length; i += 1) {
+      const point = this.points[i];
       if (!pointIdSet.has(point.id)) {
         continue;
       }
-      dragAreaLeft = Math.min(point.tick, dragAreaLeft);
-      dragAreaRight = Math.max(point.tick, dragAreaRight);
-    }
-    dragAreaLeft = Math.min(dragAreaLeft, dragAreaLeft + offsetTick);
-    dragAreaRight = Math.max(dragAreaRight, dragAreaRight + offsetTick);
-    for (let i = this.points.length - 1; i >= 0; i -= 1) {
-      const point = this.points[i];
-      const isSelected = pointIdSet.has(point.id);
-      if (
-        overwriteValuesInDragArea &&
-        !isSelected &&
-        point.tick >= dragAreaLeft &&
-        point.tick <= dragAreaRight
-      ) {
-        // Delete the points that are not being moved and overlap with the drag area.
-        this.points.splice(i, 1);
-      } else if (isSelected) {
-        point.tick = Math.max(0, point.tick + offsetTick);
-        point.value = Math.max(0, Math.min(1, point.value + offsetValue));
+      selectedPoints.push(point);
+      if (dragAreaLeftIndex === undefined) {
+        dragAreaLeftIndex = i;
       }
+      dragAreaRightIndex = i;
+    }
+    if (dragAreaLeftIndex === undefined || dragAreaRightIndex === undefined) {
+      // None of the given points are not in the automation.
+      return;
+    }
+    if (overwriteValuesInDragArea) {
+      // Remove values in drag area.
+      if (offsetTick < 0) {
+        // Move left, remove values to the left.
+        const selectedPointsLeftAfterMove = Math.max(
+          0,
+          this.points[dragAreaLeftIndex].tick + offsetTick,
+        );
+        const startRemoveIndex = greaterThan(
+          this.points,
+          { tick: selectedPointsLeftAfterMove } as AutomationPoint,
+          (a, b) => a.tick - b.tick,
+        );
+        if (startRemoveIndex < dragAreaLeftIndex) {
+          this.points.splice(startRemoveIndex, dragAreaLeftIndex - startRemoveIndex);
+        }
+      } else if (offsetTick > 0) {
+        // Move right, remove values to the right.
+        const selectedPointsRightAfterMove = this.points[dragAreaRightIndex].tick + offsetTick;
+        const endRemoveIndex = lowerThan(
+          this.points,
+          { tick: selectedPointsRightAfterMove } as AutomationPoint,
+          (a, b) => a.tick - b.tick,
+        );
+        if (endRemoveIndex > dragAreaRightIndex) {
+          this.points.splice(dragAreaRightIndex + 1, endRemoveIndex - dragAreaRightIndex);
+        }
+      }
+    }
+    for (const point of selectedPoints) {
+      point.tick = Math.max(0, point.tick + offsetTick);
+      point.value = Math.max(0, Math.min(1, point.value + offsetValue));
     }
     // Maintain the order of points.
     if (Math.abs(offsetTick) > 0) {
