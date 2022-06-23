@@ -374,6 +374,11 @@ export class AutomationData {
     return this.targets;
   }
 
+  /** Values of each unique automation target. */
+  getAutomationTargetValues() {
+    return this.targetValues;
+  }
+
   /**
    *
    * @param tfAutomationTargetId The targetId that can be retrieved from `AutomationTarget.prototype.toTfAutomationTargetId` or `AutomationTarget.encodeAutomationTarget`.
