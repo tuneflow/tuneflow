@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { ge as greaterEqual, lt as lowerThan } from 'binary-search-bounds';
+import { ge as greaterEqual, lt as lowerThan, gt as greaterThan } from 'binary-search-bounds';
 import type { Track } from './track';
 import { Note } from './note';
 
@@ -322,6 +322,17 @@ export class Clip {
     );
   }
 
+  /**
+   * Performs two O(logn) searches and some extra while loops to narrow down range.
+   *
+   * @param rawNotes
+   * @param startTick
+   * @param endTick
+   * @param startTickToNoteFn
+   * @param noteToStartTickFn
+   * @param noteToEndTickFn
+   * @returns
+   */
   static getNotesInRangeImpl<T>(
     rawNotes: T[],
     startTick: number,
@@ -330,26 +341,57 @@ export class Clip {
     noteToStartTickFn: Function,
     noteToEndTickFn: Function,
   ): T[] {
-    const startIndex = lowerThan(
-      rawNotes,
-      startTickToNoteFn(startTick),
-      (a: any, b: any) => noteToStartTickFn(a) - noteToStartTickFn(b),
+    // Find the first note that is within the clip.
+    let startIndex = Math.max(
+      0,
+      // IMPORTANT: Assuming that a note cannot be within the Clip if it starts before the clip.
+      lowerThan(
+        rawNotes,
+        startTickToNoteFn(startTick),
+        (a: any, b: any) => noteToStartTickFn(a) - noteToStartTickFn(b),
+      ),
     );
-    const inRangeNotes: any[] = [];
-    for (let i = Math.max(startIndex, 0); i < rawNotes.length; i += 1) {
-      const note = rawNotes[i];
-      const noteStartTick = noteToStartTickFn(note);
-      const noteEndTick = noteToEndTickFn(note);
-      if (noteStartTick > endTick) {
-        break;
-      }
-      if (!Clip.isNoteInClip(noteStartTick, noteEndTick, startTick, endTick)) {
-        // Note is not fully within this range.
-        continue;
-      }
-      inRangeNotes.push(note);
+    while (
+      rawNotes[startIndex] &&
+      !Clip.isNoteInClip(
+        noteToStartTickFn(rawNotes[startIndex]),
+        noteToEndTickFn(rawNotes[startIndex]),
+        startTick,
+        endTick,
+      )
+    ) {
+      startIndex += 1;
     }
-    return inRangeNotes;
+    if (startIndex >= rawNotes.length) {
+      return [];
+    }
+    // Find the last note that is within the clip.
+    let endIndex = Math.min(
+      rawNotes.length - 1,
+      greaterThan(
+        rawNotes,
+        startTickToNoteFn(endTick),
+        (a: any, b: any) => noteToStartTickFn(a) - noteToStartTickFn(b),
+      ),
+    );
+    while (
+      rawNotes[endIndex] &&
+      !Clip.isNoteInClip(
+        noteToStartTickFn(rawNotes[endIndex]),
+        noteToEndTickFn(rawNotes[endIndex]),
+        startTick,
+        endTick,
+      )
+    ) {
+      endIndex -= 1;
+    }
+    if (endIndex < 0) {
+      return [];
+    }
+    if (endIndex < startIndex) {
+      return [];
+    }
+    return rawNotes.slice(startIndex, endIndex + 1);
   }
 
   /**
