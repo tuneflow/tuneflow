@@ -433,6 +433,22 @@ export class AutomationData {
     delete this.targetValues[tfAutomationTargetId];
   }
 
+  /** Remove all automations associated with a certain plugin. */
+  removeAutomationOfPlugin(pluginInstanceId: string) {
+    for (let i = this.targets.length - 1; i >= 0; i -= 1) {
+      const automationTarget = this.targets[i];
+      if (automationTarget.getPluginInstanceId() === pluginInstanceId) {
+        this.removeAutomation(automationTarget);
+      }
+    }
+    for (const tfAutomationTargetId of _.keys(this.targetValues)) {
+      const automationTarget = AutomationTarget.decodeAutomationTarget(tfAutomationTargetId);
+      if (automationTarget.getPluginInstanceId() === pluginInstanceId) {
+        this.removeAutomation(automationTarget);
+      }
+    }
+  }
+
   /**
    *
    * @param startTick Inclusive

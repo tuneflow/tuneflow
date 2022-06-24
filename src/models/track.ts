@@ -211,8 +211,21 @@ export class Track {
     return this.samplerPlugin;
   }
 
-  setSamplerPlugin(plugin: AudioPlugin) {
+  /**
+   *
+   * @param plugin
+   * @param clearAutomation Whether to remove existing track automation associated with the old plugin.
+   */
+  setSamplerPlugin(plugin: AudioPlugin, clearAutomation = true) {
+    const pluginTypeChanged =
+      (!this.samplerPlugin && !!plugin) ||
+      (!plugin && !!this.samplerPlugin) ||
+      (!!plugin && !!this.samplerPlugin && !plugin.matchesTfId(this.samplerPlugin.getTuneflowId()));
+    const oldPlugin = this.samplerPlugin;
     this.samplerPlugin = plugin;
+    if (pluginTypeChanged && oldPlugin && clearAutomation) {
+      this.automation.removeAutomationOfPlugin(oldPlugin.getInstanceId());
+    }
   }
 
   getAudioPlugins() {
