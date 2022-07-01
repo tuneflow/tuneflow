@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import {
   areTuneflowIdsEqual,
   areTuneflowIdsEqualIgnoreVersion,
@@ -11,10 +12,8 @@ export class AudioPlugin {
   private pluginFormatName: string;
   private pluginVersion: string;
   private isEnabled = true;
-  // @ts-ignore
   private localInstanceIdInternal: string;
-  // @ts-ignore
-  private base64StatesInternal: string;
+  private base64StatesInternal?: string;
 
   /**
    * DO NOT call the constructor directly, use Track.createAudioPlugin(tfId: string) instead.
@@ -33,6 +32,7 @@ export class AudioPlugin {
     this.manufacturerName = manufacturerName;
     this.pluginFormatName = pluginFormatName;
     this.pluginVersion = pluginVersion;
+    this.localInstanceIdInternal = AudioPlugin.generateAudioPluginInstanceIdInternal();
   }
 
   /**
@@ -92,5 +92,17 @@ export class AudioPlugin {
 
   getIsEnabled() {
     return this.isEnabled;
+  }
+
+  setBase64States(base64States?: string) {
+    this.base64StatesInternal = base64States;
+  }
+
+  getBase64States() {
+    return this.base64StatesInternal;
+  }
+
+  private static generateAudioPluginInstanceIdInternal() {
+    return nanoid(10);
   }
 }

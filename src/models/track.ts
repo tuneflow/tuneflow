@@ -5,6 +5,7 @@ import type { Song } from './song';
 import { Clip } from './clip';
 import { decodeAudioPluginTuneflowId } from '../utils';
 import { AutomationData } from './automation';
+import _ from 'underscore';
 
 /**
  * A track in the song that maps to an instrument.
@@ -178,8 +179,14 @@ export class Track {
     return this.solo;
   }
 
+  /**
+   * If set to true, track will be solo'ed and unmuted.
+   */
   setSolo(solo: boolean) {
     this.solo = solo;
+    if (solo && this.muted) {
+      this.muted = false;
+    }
   }
 
   getMuted() {
@@ -202,8 +209,6 @@ export class Track {
       pluginInfo.pluginFormatName,
       pluginInfo.pluginVersion,
     );
-    // @ts-ignore
-    plugin.localInstanceIdInternal = nanoid(10);
     return plugin;
   }
 
@@ -410,6 +415,14 @@ export class Track {
 
   getAutomation() {
     return this.automation;
+  }
+
+  /** Whether this track has any defined automation. */
+  hasAnyAutomation() {
+    return (
+      this.automation.getAutomationTargets().length > 0 &&
+      !_.isEmpty(this.automation.getAutomationTargetValues())
+    );
   }
 
   private static generateTrackIdInternal() {
