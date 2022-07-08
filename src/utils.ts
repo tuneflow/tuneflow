@@ -197,3 +197,40 @@ export class TickToSecondStepper {
 export function dbToVolumeValue(db: number) {
   return db > -100 ? Math.exp((db - 6) * (1 / 20)) : 0;
 }
+
+/**
+ *
+ * @param gain A value between 0 - 2, corresponding to -inf to +6dB, gain == 1 equals dB == 0.0
+ * @returns
+ */
+export function gainToDb(gain: number) {
+  if (gain <= 0) {
+    return -100;
+  }
+  return 20 * Math.log10(gain);
+}
+
+/**
+ * @param volume A value between 0 - 1, corresponding to -inf to +6 dB.
+ */
+export function volumeValueToDb(volume: number) {
+  return volume > 0 ? 20 * Math.log(volume) + 6 : -100.0;
+}
+
+/**
+ *
+ * @param volume A value between 0 - 1, corresponding to -inf to +6 dB.
+ * @returns
+ */
+export function volumeValueToGain(volume: number) {
+  return volume > 0 ? Math.pow(10, (20 * Math.log(volume) + 6) * (1 / 20)) : 0;
+}
+
+/**
+ *
+ * @param gain A value between 0 - 2, corresponding to -inf to +6dB, gain == 1 equals dB == 0.0
+ * @returns
+ */
+export function gainToVolumeValue(gain: number) {
+  return gain > 0 ? Math.exp((20 * Math.log10(gain) - 6) * (1 / 20)) : 0;
+}
