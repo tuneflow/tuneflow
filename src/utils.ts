@@ -192,3 +192,8 @@ export class TickToSecondStepper {
     return baseTempo.time + ticksDelta / ticksPerSecondSinceLastTempoChange;
   }
 }
+
+/** Maps a dB value to a volume value (0 - 1). */
+export function dbToVolumeValue(db: number) {
+  return db > -100 ? Math.exp((db - 6) * (1 / 20)) : 0;
+}

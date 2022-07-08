@@ -3,7 +3,7 @@ import { ge as greaterEqual, lt as lowerThan, le as lowerEqual } from 'binary-se
 import { AudioPlugin } from './audio_plugin';
 import type { Song } from './song';
 import { Clip } from './clip';
-import { decodeAudioPluginTuneflowId } from '../utils';
+import { dbToVolumeValue, decodeAudioPluginTuneflowId } from '../utils';
 import { AutomationData } from './automation';
 import _ from 'underscore';
 
@@ -38,7 +38,7 @@ export class Track {
     clips = [],
     instrument = new InstrumentInfo({ program: 0, isDrum: false }),
     suggestedInstruments = [],
-    volume = 1,
+    volume = dbToVolumeValue(0),
     solo = false,
     muted = false,
     rank = 0,
