@@ -189,7 +189,7 @@ export class AutomationValue {
   addPoint(tick: number, value: number, overwrite = false) {
     const newPoint: AutomationPoint = {
       tick,
-      value,
+      value: Math.max(0, Math.min(1, value)),
       id: this.getNextPointIdInternal(),
     };
     AutomationValue.orderedInsertPointInternal(this.points, newPoint, overwrite);
