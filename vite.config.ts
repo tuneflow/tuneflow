@@ -5,17 +5,13 @@ export default defineConfig({
   mode: 'production',
   root: __dirname,
   envDir: process.cwd(),
+  esbuild: {
+    drop: ['debugger', 'console'],
+  },
   build: {
     target: `chrome100`,
     outDir: 'dist',
     assetsDir: '.',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
     lib: {
       entry: 'src/index.ts',
       formats: ['cjs'],
@@ -26,6 +22,5 @@ export default defineConfig({
       },
     },
     emptyOutDir: false,
-    brotliSize: false,
   },
 });
