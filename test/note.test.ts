@@ -1,4 +1,4 @@
-import { Song, TuneflowPlugin } from '../src';
+import { Song, TrackType, TuneflowPlugin } from '../src';
 import type { SongAccess } from '../src';
 import { assertNotesAreEqual, createTestNotes } from '../src/test_utils';
 
@@ -19,13 +19,13 @@ describe('Note-related Tests', () => {
     song = new Song();
     // @ts-ignore
     song.setPluginContextInternal(testUtilsPlugin);
+    song.setResolution(480);
     song.createTempoChange({
       ticks: 0,
       bpm: 120,
     });
-    song.setResolution(480);
-    const track = song.createTrack({});
-    const clip1 = track.createClip({
+    const track = song.createTrack({ type: TrackType.MIDI_TRACK });
+    const clip1 = track.createMIDIClip({
       clipStartTick: 0,
     });
     clip1.createNote({

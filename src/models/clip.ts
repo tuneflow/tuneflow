@@ -2,12 +2,52 @@ import { nanoid } from 'nanoid';
 import { ge as greaterEqual, lt as lowerThan, gt as greaterThan } from 'binary-search-bounds';
 import type { Track } from './track';
 import { Note } from './note';
+import _ from 'underscore';
+import type { Song } from './song';
+
+export enum ClipType {
+  MIDI_CLIP = 1,
+  AUDIO_CLIP = 2,
+}
+
+/**
+ * Audio-related clip data.
+ */
+export interface AudioClipData {
+  /**
+   * The absolute file path of the audio.
+   */
+  audioFilePath: string;
+
+  /**
+   * The start tick of the audio.
+   *
+   * This is an absolute position that locates the start of the audio within the song.
+   *
+   * When the clip adjusts left or right boundaries, the start position of the audio
+   * will not change.
+   *
+   * When the clip moves, the audio will move along with the clip.
+   */
+  startTick: number;
+
+  /**
+   * The duration of the audio content. You can get this value in the plugin
+   * by using `readApis.readAudioBuffer` to read the audio file content as `AudioBuffer`, and then
+   * get the duration from `audioBuffer.duration`.
+   *
+   * Duration needs to be updated whenever audio file (path or content) changes.
+   */
+  duration: number;
+}
 
 /**
  * A clip is a piece in a track, and it contains notes and the clip range.
  * One track can contain one or many non-overlapping clips.
  */
 export class Clip {
+  /** The song that the clip belongs to, should always be provided. */
+  private song: Song;
   /** If the clip is dettached from any track, this field is going to be undefined. */
   private track?: Track;
   private id: string;
@@ -18,30 +58,90 @@ export class Clip {
   /** Inclusive end tick. */
   private clipEndTick = 0;
   private nextNoteIdInternal = 1;
+  private type: ClipType;
+  /** Audio related data if the clip type is AUDIO_CLIP. */
+  private audioClipData?: AudioClipData;
 
   /**
-   * IMPORTANT: Do not use the constructor directly, call createClip from tracks instead.
+   * IMPORTANT: Do not use the constructor directly, call `createClip` from tracks instead.
    */
   constructor({
-    track = undefined,
+    song,
+    type,
+    clipStartTick,
     id = Clip.generateClipIdInternal(),
-    clipStartTick = 0,
-    clipEndTick = 0,
+    track = undefined,
+    clipEndTick = undefined,
+    audioClipData = undefined,
   }: {
-    track?: Track;
+    /** The song that the clip belongs to. */
+    song: Song;
+    type: ClipType;
+    clipStartTick: number;
     id?: string;
-    clipStartTick?: number;
+    /** The track that the clip belongs to, can be left empty.*/
+    track?: Track;
     clipEndTick?: number;
+    /** Required if type is AUDIO_CLIP. */
+    audioClipData?: AudioClipData;
   }) {
+    this.song = song;
     this.track = track;
     this.id = id;
+    this.type = type;
     this.notes = [];
-    this.clipStartTick = clipStartTick;
-    this.clipEndTick = clipEndTick;
+    if (type === ClipType.AUDIO_CLIP) {
+      if (!audioClipData) {
+        throw new Error('Audio clip data must be provided for audio clips.');
+      }
+      this.audioClipData = {
+        audioFilePath: audioClipData.audioFilePath,
+        startTick: audioClipData.startTick,
+        duration: audioClipData.duration,
+      };
+
+      clipStartTick = _.isNumber(clipStartTick)
+        ? Math.max(clipStartTick, audioClipData.startTick)
+        : audioClipData.startTick;
+      const audioEndTick = this.getAudioEndTick() as number;
+      if (!_.isNumber(clipEndTick) || audioEndTick < clipEndTick) {
+        clipEndTick = audioEndTick;
+      }
+      this.clipStartTick = clipStartTick;
+      this.clipEndTick = clipEndTick;
+    } else if (type === ClipType.MIDI_CLIP) {
+      this.clipStartTick = clipStartTick;
+      if (!_.isNumber(clipEndTick)) {
+        throw new Error(`clip end tick must be provided when creating MIDI clip.`);
+      }
+      this.clipEndTick = clipEndTick;
+    }
   }
 
   getId() {
     return this.id;
+  }
+
+  getType() {
+    return this.type;
+  }
+
+  getAudioClipData() {
+    return this.audioClipData;
+  }
+
+  setAudioFile(filePath: string, startTick: number, duration: number) {
+    if (!this.audioClipData) {
+      this.audioClipData = {
+        audioFilePath: filePath,
+        startTick,
+        duration,
+      };
+    } else {
+      this.audioClipData.audioFilePath = filePath;
+      this.audioClipData.startTick = startTick;
+      this.audioClipData.duration = duration;
+    }
   }
 
   /**
@@ -57,6 +157,22 @@ export class Clip {
    */
   getRawNotes() {
     return this.notes;
+  }
+
+  getDuration() {
+    return this.song.tickToSeconds(this.clipEndTick) - this.song.tickToSeconds(this.clipStartTick);
+  }
+
+  /**
+   * Gets the audio's duration if the clip is AUDIO_CLIP.
+   *
+   * Returns undefined if the clip is not AUDIO_CLIP or audio clip data is missing.
+   */
+  getAudioDuration() {
+    if (this.type !== ClipType.AUDIO_CLIP || !this.audioClipData) {
+      return undefined;
+    }
+    return this.audioClipData.duration;
   }
 
   getClipStartTick() {
@@ -95,6 +211,10 @@ export class Clip {
     /** Whether to resolve clip conflict if the clip range is updated. */
     resolveClipConflict?: boolean;
   }) {
+    if (this.type !== ClipType.MIDI_CLIP) {
+      // Only MIDI clips can create notes.
+      return null;
+    }
     if (
       !Note.isValidPitch(pitch) ||
       !Note.isNoteRangeValid(startTick, endTick) ||
@@ -157,6 +277,10 @@ export class Clip {
   }
 
   private orderedInsertNote(noteList: Note[], newNote: Note) {
+    if (this.type !== ClipType.MIDI_CLIP) {
+      // Only MIDI clips can insert notes.
+      return;
+    }
     if (newNote.getClip() === this) {
       // Do not insert if the note is already in the list.
       return;
@@ -184,6 +308,10 @@ export class Clip {
    */
   adjustClipLeft(clipStartTick: number, resolveConflict = true) {
     clipStartTick = Math.max(0, clipStartTick);
+    if (this.type === ClipType.AUDIO_CLIP && this.audioClipData) {
+      // Clip boundary cannot exceed the audio's boundary.
+      clipStartTick = Math.max(clipStartTick, this.audioClipData.startTick);
+    }
     if (clipStartTick > this.clipEndTick) {
       this.deleteFromParent(/* deleteAssociatedTrackAutomation= */ true);
     } else {
@@ -210,6 +338,13 @@ export class Clip {
    * @param clipEndTick  The new end tick (inclusive) of the clip.
    */
   adjustClipRight(clipEndTick: number, resolveConflict = true) {
+    if (this.type === ClipType.AUDIO_CLIP) {
+      // Clip right boundary cannot exceed the audio's right boundary.
+      const audioEndTick = this.getAudioEndTick();
+      if (_.isNumber(audioEndTick)) {
+        clipEndTick = Math.min(clipEndTick, audioEndTick);
+      }
+    }
     if (clipEndTick < this.clipStartTick || clipEndTick < 0) {
       this.deleteFromParent(/* deleteAssociatedTrackAutomation= */ true);
     } else {
@@ -258,11 +393,42 @@ export class Clip {
     // Move the clip.
     const originalStartTick = this.clipStartTick;
     const originalEndTick = this.clipEndTick;
-    this.clipStartTick = newClipStartTick;
-    this.clipEndTick = newClipEndTick;
-    for (const note of this.notes) {
-      note.setStartTick(note.getStartTick() + offsetTick);
-      note.setEndTick(note.getEndTick() + offsetTick);
+
+    if (this.type === ClipType.MIDI_CLIP) {
+      this.clipStartTick = newClipStartTick;
+      this.clipEndTick = newClipEndTick;
+      for (const note of this.notes) {
+        note.setStartTick(note.getStartTick() + offsetTick);
+        note.setEndTick(note.getEndTick() + offsetTick);
+      }
+    } else if (this.type === ClipType.AUDIO_CLIP) {
+      if (!this.audioClipData) {
+        throw new Error('Cannot move audio clip without audio data');
+      }
+      // Let the content of the audio at the original clip start be S
+      // Let the clip start tick before move be T1, after move be T2.
+      // Moving an audio clip means:
+      // 1. S must be at T2 after move
+      // 2. Duration of the playable audio must remain unchanged.
+      const song = this.song;
+      // The clip's end position's time relative to the audio's start time should remain
+      // unchanged.
+      const originalAudioStartTime = song.tickToSeconds(this.audioClipData.startTick);
+      const originalStartTime = song.tickToSeconds(originalStartTick);
+      const originalEndTime = song.tickToSeconds(originalEndTick);
+      const playableAudioDuration = originalEndTime - originalStartTime;
+      const clipStartRelativeToAudioStart = originalStartTime - originalAudioStartTime;
+      // Use the raw updated clip tick here.
+      const newClipStartTime = song.tickToSeconds(this.clipStartTick + offsetTick);
+      const newAudioStartTime = newClipStartTime - clipStartRelativeToAudioStart;
+      const newClipEndTime = newClipStartTime + playableAudioDuration;
+      this.clipStartTick = newClipStartTick;
+      this.clipEndTick = song.secondsToTick(newClipEndTime);
+      this.audioClipData.startTick = song.secondsToTick(newAudioStartTime);
+      if (this.clipEndTick < 0) {
+        this.deleteFromParent(/* deleteAssociatedTrackAutomation= */ true);
+        return;
+      }
     }
 
     if (this.track) {
@@ -309,6 +475,23 @@ export class Clip {
       }
     }
     return notes;
+  }
+
+  /**
+   * Gets the current clip audio's end tick.
+   *
+   * Returns undefined if the clip is not audio clip or audio clip data is missing.
+   */
+  getAudioEndTick() {
+    if (this.type !== ClipType.AUDIO_CLIP || !this.audioClipData) {
+      return undefined;
+    }
+    const duration = this.getAudioDuration();
+    if (!_.isNumber(duration)) {
+      return undefined;
+    }
+    const audioStartTime = this.song.tickToSeconds(this.audioClipData.startTick);
+    return this.song.secondsToTick(audioStartTime + duration);
   }
 
   static getNotesInRange(rawNotes: Note[], startTick: number, endTick: number) {
@@ -488,19 +671,32 @@ export class Clip {
       this.adjustClipRight(overlappingStartTick - 1, /* resolveConflict= */ false);
 
       if (this.track) {
-        const rightClip = this.track.createClip({
-          clipStartTick: rightClipStartTick,
-          clipEndTick: rightClipEndTick,
-        });
-        const rightNotes = Clip.getNotesInRange(this.notes, rightClipStartTick, rightClipEndTick);
-        for (const rightNote of rightNotes) {
-          rightClip.createNote({
-            pitch: rightNote.getPitch(),
-            velocity: rightNote.getVelocity(),
-            startTick: rightNote.getStartTick(),
-            endTick: rightNote.getEndTick(),
-            updateClipRange: false,
-            resolveClipConflict: false,
+        if (this.type === ClipType.MIDI_CLIP) {
+          const rightClip = this.track.createMIDIClip({
+            clipStartTick: rightClipStartTick,
+            clipEndTick: rightClipEndTick,
+          });
+          const rightNotes = Clip.getNotesInRange(this.notes, rightClipStartTick, rightClipEndTick);
+          for (const rightNote of rightNotes) {
+            rightClip.createNote({
+              pitch: rightNote.getPitch(),
+              velocity: rightNote.getVelocity(),
+              startTick: rightNote.getStartTick(),
+              endTick: rightNote.getEndTick(),
+              updateClipRange: false,
+              resolveClipConflict: false,
+            });
+          }
+        } else if (this.type === ClipType.AUDIO_CLIP) {
+          const audioClipData = this.audioClipData as AudioClipData;
+          this.track.createAudioClip({
+            clipStartTick: rightClipStartTick,
+            clipEndTick: rightClipEndTick,
+            audioClipData: {
+              audioFilePath: audioClipData.audioFilePath,
+              startTick: audioClipData.startTick,
+              duration: audioClipData.duration,
+            },
           });
         }
       }

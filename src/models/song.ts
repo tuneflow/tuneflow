@@ -4,7 +4,7 @@ import * as _ from 'underscore';
 import type { TuneflowPlugin } from '../base_plugin';
 import { TempoEvent } from './tempo';
 import { TimeSignatureEvent } from './time_signature';
-import { Track } from './track';
+import { Track, TrackType } from './track';
 
 export class Song {
   private tracks: Track[];
@@ -54,9 +54,11 @@ export class Song {
    * Requires `createTrack` access.
    */
   createTrack({
+    type,
     index,
     rank,
   }: {
+    type: TrackType;
     /** Index to insert at. If left blank, appends to the end. */
     index?: number;
     /** The displayed rank which uniquely identifies a track. Internal use, do not set this. */
@@ -69,6 +71,7 @@ export class Song {
       this.nextTrackRank = Math.max(rank + 1, this.nextTrackRank);
     }
     const track = new Track({
+      type,
       song: this,
       uuid: this.getNextTrackId(),
       rank: rank == undefined || rank === null ? this.getNextTrackRank() : rank,
@@ -93,44 +96,43 @@ export class Song {
       trackIndex = undefined;
     }
     const newTrack = this.createTrack({
+      type: track.getType(),
       index: trackIndex,
     });
-    newTrack.setInstrument({
-      program: track.getInstrument().getProgram(),
-      isDrum: track.getInstrument().getIsDrum(),
-    });
-    for (const existingInstrument of track.getSuggestedInstruments()) {
-      newTrack.createSuggestedInstrument({
-        program: existingInstrument.getProgram(),
-        isDrum: existingInstrument.getIsDrum(),
-      });
-    }
     newTrack.setVolume(track.getVolume());
     newTrack.setPan(track.getPan());
     newTrack.setSolo(track.getSolo());
     newTrack.setMuted(track.getMuted());
-    const existingSamplerPlugin = track.getSamplerPlugin();
-    if (existingSamplerPlugin) {
-      newTrack.setSamplerPlugin(existingSamplerPlugin.clone(newTrack));
+    if (track.getType() === TrackType.MIDI_TRACK) {
+      const trackInstrument = track.getInstrument();
+      if (trackInstrument) {
+        newTrack.setInstrument({
+          program: trackInstrument.getProgram(),
+          isDrum: trackInstrument.getIsDrum(),
+        });
+      }
+
+      for (const existingInstrument of track.getSuggestedInstruments()) {
+        newTrack.createSuggestedInstrument({
+          program: existingInstrument.getProgram(),
+          isDrum: existingInstrument.getIsDrum(),
+        });
+      }
+
+      const existingSamplerPlugin = track.getSamplerPlugin();
+      if (existingSamplerPlugin) {
+        newTrack.setSamplerPlugin(existingSamplerPlugin.clone(newTrack));
+      }
+    } else if (track.getType() === TrackType.AUDIO_TRACK) {
+      // No-op.
     }
+
     for (const audioPlugin of track.getAudioPlugins()) {
       newTrack.addAudioPlugin(audioPlugin.clone(newTrack));
     }
     for (const clip of track.getClips()) {
-      const newClip = newTrack.createClip({
-        clipStartTick: clip.getClipStartTick(),
-        clipEndTick: clip.getClipEndTick(),
-      });
-      for (const note of clip.getRawNotes()) {
-        newClip.createNote({
-          pitch: note.getPitch(),
-          velocity: note.getVelocity(),
-          startTick: note.getStartTick(),
-          endTick: note.getEndTick(),
-          updateClipRange: false,
-          resolveClipConflict: false,
-        });
-      }
+      const newClip = newTrack.cloneClip(clip);
+      newTrack.insertClip(newClip);
     }
     return newTrack;
   }
@@ -196,6 +198,9 @@ export class Song {
     /** The new tempo in BPM(Beats-per-minute) format. */
     bpm: number;
   }): TempoEvent {
+    if (this.PPQ <= 0) {
+      throw new Error('Song resolution must be provided before creating tempo changes.');
+    }
     if (this.tempos.length === 0 && ticks !== 0) {
       throw new Error('The first tempo event must be at tick 0');
     }
@@ -311,36 +316,45 @@ export class Song {
   }
 
   tickToSeconds(tick: number) {
+    return Song.tickToSecondsImpl(tick, this.getTempoChanges(), this.getResolution());
+  }
+
+  static tickToSecondsImpl(tick: number, tempos: TempoEvent[], resolution: number) {
     if (tick === 0) {
       return 0;
     }
-    const baseTempoIndex = lowerThan(
-      this.getTempoChanges(),
+    let baseTempoIndex = lowerThan(
+      tempos,
       // @ts-ignore
       { getTicks: () => tick },
       (a, b) => a.getTicks() - b.getTicks(),
     );
     if (baseTempoIndex == -1) {
-      return -1;
+      // If no tempo is found before the tick, use the first tempo.
+      baseTempoIndex = 0;
     }
-    const baseTempoChange = this.getTempoChanges()[baseTempoIndex];
+    const baseTempoChange = tempos[baseTempoIndex];
     const ticksDelta = tick - baseTempoChange.getTicks();
     const ticksPerSecondSinceLastTempoChange = Song.tempoBPMToTicksPerSecond(
       baseTempoChange.getBpm() as number,
-      this.getResolution(),
+      resolution,
     );
     return baseTempoChange.getTime() + ticksDelta / ticksPerSecondSinceLastTempoChange;
   }
 
   secondsToTick(seconds: number) {
-    const baseTempoIndex = lowerThan(
+    if (seconds === 0) {
+      return 0;
+    }
+    let baseTempoIndex = lowerThan(
       this.getTempoChanges(),
       // @ts-ignore
       { getTime: () => seconds },
       (a, b) => a.getTime() - b.getTime(),
     );
     if (baseTempoIndex == -1) {
-      return -1;
+      // If no tempo is found before the time, use the first tempo.
+      baseTempoIndex = 0;
     }
     const baseTempoChange = this.getTempoChanges()[baseTempoIndex];
     const timeDelta = seconds - baseTempoChange.getTime();

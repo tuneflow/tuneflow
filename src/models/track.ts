@@ -2,10 +2,16 @@ import { nanoid } from 'nanoid';
 import { ge as greaterEqual, lt as lowerThan, le as lowerEqual } from 'binary-search-bounds';
 import { AudioPlugin } from './audio_plugin';
 import type { Song } from './song';
-import { Clip } from './clip';
+import { Clip, ClipType } from './clip';
+import type { AudioClipData } from './clip';
 import { dbToVolumeValue, decodeAudioPluginTuneflowId } from '../utils';
 import { AutomationData } from './automation';
 import _ from 'underscore';
+
+export enum TrackType {
+  MIDI_TRACK = 1,
+  AUDIO_TRACK = 2,
+}
 
 /**
  * A track in the song that maps to an instrument.
@@ -13,7 +19,7 @@ import _ from 'underscore';
  * It contains clips, instrument information, play status(volume, muted, etc.), and more.
  */
 export class Track {
-  private insturment: InstrumentInfo;
+  private insturment?: InstrumentInfo;
   /** Clips sorted by their start tick. */
   private clips: Clip[];
   private suggestedInstruments: InstrumentInfo[];
@@ -27,16 +33,18 @@ export class Track {
   private audioPlugins: AudioPlugin[] = [];
   private song: Song;
   private automation: AutomationData;
+  private type: TrackType;
 
   /**
    * IMPORTANT: Do not use the constructor directly, call
    * createTrack from a song instead.
    */
   constructor({
+    type,
     song,
     uuid = Track.generateTrackIdInternal(),
     clips = [],
-    instrument = new InstrumentInfo({ program: 0, isDrum: false }),
+    instrument,
     suggestedInstruments = [],
     volume = dbToVolumeValue(0),
     solo = false,
@@ -44,6 +52,7 @@ export class Track {
     rank = 0,
     pan = 0,
   }: {
+    type: TrackType;
     song: Song;
     /**
      * The universal-unique identifier of the track.
@@ -69,6 +78,7 @@ export class Track {
     pan?: number;
   }) {
     this.song = song;
+    this.type = type;
     this.insturment = instrument;
     this.clips = [...clips];
     this.suggestedInstruments = [...suggestedInstruments];
@@ -79,6 +89,14 @@ export class Track {
     this.rank = rank;
     this.pan = pan;
     this.automation = new AutomationData();
+  }
+
+  getType() {
+    return this.type;
+  }
+
+  getSong() {
+    return this.song;
   }
 
   getInstrument() {
@@ -102,6 +120,9 @@ export class Track {
      */
     isDrum: boolean;
   }) {
+    if (this.type !== TrackType.MIDI_TRACK) {
+      return;
+    }
     this.insturment = new InstrumentInfo({ program, isDrum });
   }
 
@@ -130,6 +151,9 @@ export class Track {
      */
     isDrum: boolean;
   }) {
+    if (this.type !== TrackType.MIDI_TRACK) {
+      return;
+    }
     const instrumentInfo = new InstrumentInfo({ program, isDrum });
     this.suggestedInstruments.push(instrumentInfo);
     return instrumentInfo;
@@ -222,6 +246,9 @@ export class Track {
    * @param clearAutomation Whether to remove existing track automation associated with the old plugin.
    */
   setSamplerPlugin(plugin: AudioPlugin, clearAutomation = true) {
+    if (this.type !== TrackType.MIDI_TRACK) {
+      return;
+    }
     const pluginTypeChanged =
       (!this.samplerPlugin && !!plugin) ||
       (!plugin && !!this.samplerPlugin) ||
@@ -292,8 +319,8 @@ export class Track {
     return overlappingClips;
   }
 
-  /** Creates a clip and optionally inserts it into the track. */
-  createClip({
+  /** Creates a MIDI clip and optionally inserts it into the track. */
+  createMIDIClip({
     clipStartTick,
     clipEndTick = undefined,
     insertClip = true,
@@ -306,7 +333,7 @@ export class Track {
     /** Whether to insert the created clip into the track. */
     insertClip?: boolean;
   }) {
-    if (clipStartTick === undefined || clipStartTick === null) {
+    if (!_.isNumber(clipStartTick)) {
       throw new Error('clipStartTick must be specified when creating a clip.');
     }
     const newClipEndTick =
@@ -319,9 +346,48 @@ export class Track {
     const clip = new Clip({
       // @ts-ignore
       id: Clip.generateClipIdInternal(),
+      type: ClipType.MIDI_CLIP,
+      song: this.song,
       track: undefined,
       clipStartTick,
       clipEndTick: newClipEndTick,
+    });
+    if (insertClip) {
+      this.insertClip(clip);
+    }
+
+    return clip;
+  }
+
+  /** Creates an audio clip and optionally inserts it into the track. */
+  createAudioClip({
+    clipStartTick,
+    audioClipData,
+    clipEndTick,
+    insertClip = true,
+  }: {
+    /**
+     * The start of the clip, must be specified.
+     */
+    clipStartTick: number;
+    /** The audio-related data, required if type is AUDIO_CLIP. */
+    audioClipData: AudioClipData;
+    clipEndTick?: number;
+    /** Whether to insert the created clip into the track. */
+    insertClip?: boolean;
+  }) {
+    if (!_.isNumber(clipStartTick)) {
+      throw new Error('clipStartTick must be specified when creating a clip.');
+    }
+    const clip = new Clip({
+      // @ts-ignore
+      id: Clip.generateClipIdInternal(),
+      type: ClipType.AUDIO_CLIP,
+      song: this.song,
+      track: undefined,
+      clipStartTick,
+      clipEndTick,
+      audioClipData,
     });
     if (insertClip) {
       this.insertClip(clip);
@@ -356,22 +422,34 @@ export class Track {
    * @returns The cloned clip.
    */
   cloneClip(clip: Clip) {
-    const newClip = this.createClip({
-      clipStartTick: clip.getClipStartTick(),
-      clipEndTick: clip.getClipEndTick(),
-      insertClip: false,
-    });
-    for (const note of clip.getRawNotes()) {
-      newClip.createNote({
-        pitch: note.getPitch(),
-        velocity: note.getVelocity(),
-        startTick: note.getStartTick(),
-        endTick: note.getEndTick(),
-        updateClipRange: false,
-        resolveClipConflict: false,
+    if (clip.getType() === ClipType.MIDI_CLIP) {
+      const newClip = this.createMIDIClip({
+        clipStartTick: clip.getClipStartTick(),
+        clipEndTick: clip.getClipEndTick(),
+        insertClip: false,
       });
+      for (const note of clip.getRawNotes()) {
+        newClip.createNote({
+          pitch: note.getPitch(),
+          velocity: note.getVelocity(),
+          startTick: note.getStartTick(),
+          endTick: note.getEndTick(),
+          updateClipRange: false,
+          resolveClipConflict: false,
+        });
+      }
+      return newClip;
+    } else if (clip.getType() === ClipType.AUDIO_CLIP) {
+      const newClip = this.createAudioClip({
+        clipStartTick: clip.getClipStartTick(),
+        clipEndTick: clip.getClipEndTick(),
+        audioClipData: clip.getAudioClipData() as AudioClipData,
+        insertClip: false,
+      });
+      return newClip;
+    } else {
+      throw new Error(`Unsupported clip type ${clip.getType()}`);
     }
-    return newClip;
   }
 
   /**

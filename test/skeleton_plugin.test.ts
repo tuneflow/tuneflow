@@ -1,5 +1,9 @@
-import type { SongAccess } from '../src';
-import { TuneflowPipeline, Song, TuneflowPlugin } from '../src';
+import { TrackType, TuneflowPipeline, Song, TuneflowPlugin } from '../src';
+import type { SongAccess, ReadAPIs } from '../src';
+
+const MOCK_READ_APIS: ReadAPIs = {
+  readAudioBuffer: async () => null,
+};
 
 describe('Skeleton Tuneflow', () => {
   class TestUtilsPlugin extends TuneflowPlugin {
@@ -30,7 +34,7 @@ describe('Skeleton Tuneflow', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async run(song: Song, inputs: any[]): Promise<void> {
-      song.createTrack({});
+      song.createTrack({ type: TrackType.MIDI_TRACK });
     }
   }
 
@@ -53,13 +57,13 @@ describe('Skeleton Tuneflow', () => {
   });
 
   it('finishes correctly', async () => {
+    song.setResolution(480);
     song.createTempoChange({
       ticks: 0,
       bpm: 120,
     });
-    song.setResolution(480);
-    const track = song.createTrack({});
-    const clip = track.createClip({
+    const track = song.createTrack({ type: TrackType.MIDI_TRACK });
+    const clip = track.createMIDIClip({
       clipStartTick: 0,
     });
     clip.createNote({
@@ -72,6 +76,8 @@ describe('Skeleton Tuneflow', () => {
     pipeline.setOriginalSong(song);
     // @ts-ignore
     pipeline.cloneSongFnInternal = (song: Song) => song;
+    // @ts-ignore
+    pipeline.readApisInternal = MOCK_READ_APIS;
     pipeline.addPluginAt(new CreateTrackPlugin(), 0);
     expect(song.getTracks().length).toBe(1);
     await pipeline.run();
@@ -85,7 +91,7 @@ describe('Skeleton Tuneflow', () => {
 
     it('throws error if calling restricted methods on song without setting plugin context.', async () => {
       expect(() => {
-        song.createTrack({});
+        song.createTrack({ type: TrackType.MIDI_TRACK });
       }).toThrow();
     });
 
@@ -96,6 +102,8 @@ describe('Skeleton Tuneflow', () => {
       pipeline.setOriginalSong(song);
       // @ts-ignore
       pipeline.cloneSongFnInternal = (song: Song) => song;
+      // @ts-ignore
+      pipeline.readApisInternal = MOCK_READ_APIS;
       expect(pipeline.run()).rejects.toBeTruthy();
       expect(song.getTracks().length).toBe(0);
     });

@@ -3,6 +3,7 @@ import {
   AutomationTargetType,
   AutomationValue,
   Song,
+  TrackType,
   TuneflowPlugin,
 } from '../src';
 import type { SongAccess } from '../src';
@@ -24,12 +25,12 @@ describe('Automation-related Tests', () => {
     song = new Song();
     // @ts-ignore
     song.setPluginContextInternal(testUtilsPlugin);
+    song.setResolution(480);
     song.createTempoChange({
       ticks: 0,
       bpm: 120,
     });
-    song.setResolution(480);
-    song.createTrack({});
+    song.createTrack({ type: TrackType.MIDI_TRACK });
   });
 
   describe('AutomationTarget', () => {

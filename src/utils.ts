@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import type { Song } from './models/song';
+import type { TempoEvent } from './models/tempo';
 
 function midiToPitchClass(midi: number): string {
   const scaleIndexToNote = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -156,16 +156,15 @@ export class TickToSecondStepper {
   private currentTempoIndex = 0;
   private ticksPerSecondAtTempoTick: { [tick: number]: number } = {};
 
-  constructor(song: Song) {
+  constructor(tempos: TempoEvent[], resolution: number) {
     // Do not directly use anything from the song as it might
     // be a ref and accessing a ref is much more time consuming.
-    for (const tempo of song.getTempoChanges()) {
+    for (const tempo of tempos) {
       this.tempoInfos.push({
         ticks: tempo.getTicks(),
         time: tempo.getTime(),
       });
-      this.ticksPerSecondAtTempoTick[tempo.getTicks()] =
-        (tempo.getBpm() * song.getResolution()) / 60;
+      this.ticksPerSecondAtTempoTick[tempo.getTicks()] = (tempo.getBpm() * resolution) / 60;
     }
   }
 
@@ -185,7 +184,8 @@ export class TickToSecondStepper {
       baseTempo = this.tempoInfos[this.currentTempoIndex];
     }
     if (baseTempo.ticks > ticks) {
-      console.error(`Cannot find any tempo earlier than tick ${ticks}, this should not happen.`);
+      console.warn(`Cannot find any tempo earlier than tick ${ticks}, using the first tempo.`);
+      baseTempo = this.tempoInfos[0];
     }
     const ticksDelta = ticks - baseTempo.ticks;
     const ticksPerSecondSinceLastTempoChange = this.ticksPerSecondAtTempoTick[baseTempo.ticks];

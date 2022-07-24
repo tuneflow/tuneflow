@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import type { TuneflowPlugin } from './base_plugin';
+import type { ReadAPIs, TuneflowPlugin } from './base_plugin';
 import type { Song } from './models/song';
 
 export class TuneflowPipeline {
@@ -10,6 +10,9 @@ export class TuneflowPipeline {
   private originalSong?: Song;
   // @ts-ignore
   private cloneSongFnInternal: Function;
+  /** Provide additional APIs for plugins to read required data, e.g. read audio file content. */
+  // @ts-ignore
+  private readApisInternal: ReadAPIs;
 
   /** Inserts a plugin to the end. */
   addPlugin(plugin: TuneflowPlugin) {
@@ -109,7 +112,7 @@ export class TuneflowPipeline {
       // @ts-ignore
       inputSong.setPluginContextInternal(plugin);
       try {
-        await plugin.run(inputSong, plugin.getParamsInternal());
+        await plugin.run(inputSong, plugin.getParamsInternal(), this.readApisInternal);
         // @ts-ignore
         inputSong.clearPluginContextInternal();
       } catch (e: any) {

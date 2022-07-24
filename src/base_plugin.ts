@@ -6,6 +6,10 @@ import { WidgetType } from '.';
 
 type RunParameters = { [paramName: string]: any };
 
+export interface ReadAPIs {
+  readAudioBuffer: (audioFilePath: string) => Promise<AudioBuffer | null>;
+}
+
 /**
  * The base class of a plugin.
  *
@@ -115,6 +119,7 @@ export class TuneflowPlugin {
    * @param song The song that is being processed. You can directly modify the song
    * by calling its methods.
    * @param params The results collected from user input specified by the `params` method.
+   * @param readApis The APIs to read data.
    *
    */
   async run(
@@ -122,6 +127,8 @@ export class TuneflowPlugin {
     song: Song,
     // eslint-disable-next-line
     params: RunParameters,
+    // eslint-disable-next-line
+    readApis: ReadAPIs,
   ): Promise<void> {}
 
   // ============ PUBLIC NO OVERWRITE ================

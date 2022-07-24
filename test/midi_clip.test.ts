@@ -1,9 +1,16 @@
-import { AutomationTarget, AutomationTargetType, Clip, Song, TuneflowPlugin } from '../src';
+import {
+  AutomationTarget,
+  AutomationTargetType,
+  Clip,
+  Song,
+  TrackType,
+  TuneflowPlugin,
+} from '../src';
 import type { Note, AutomationValue, SongAccess } from '../src';
 
 import { assertClipRange, assertNotesAreEqual, createTestNotes } from '../src/test_utils';
 
-describe('Clip-related Tests', () => {
+describe('MIDI Clip-related Tests', () => {
   class TestUtilsPlugin extends TuneflowPlugin {
     songAccess(): SongAccess {
       return {
@@ -20,13 +27,13 @@ describe('Clip-related Tests', () => {
     song = new Song();
     // @ts-ignore
     song.setPluginContextInternal(testUtilsPlugin);
+    song.setResolution(480);
     song.createTempoChange({
       ticks: 0,
       bpm: 120,
     });
-    song.setResolution(480);
-    const track = song.createTrack({});
-    const clip1 = track.createClip({
+    const track = song.createTrack({ type: TrackType.MIDI_TRACK });
+    const clip1 = track.createMIDIClip({
       clipStartTick: 0,
     });
     clip1.createNote({
@@ -49,7 +56,7 @@ describe('Clip-related Tests', () => {
     });
     clip1.adjustClipLeft(0);
     clip1.adjustClipRight(15);
-    const clip2 = track.createClip({
+    const clip2 = track.createMIDIClip({
       clipStartTick: 21,
     });
     clip2.createNote({
@@ -72,7 +79,7 @@ describe('Clip-related Tests', () => {
     });
     clip2.adjustClipLeft(21);
     clip2.adjustClipRight(30);
-    const clip3 = track.createClip({
+    const clip3 = track.createMIDIClip({
       clipStartTick: 40,
     });
     clip3.createNote({
@@ -962,7 +969,7 @@ describe('Clip-related Tests', () => {
   describe('Insert clip', () => {
     it('Insert clip - no overlapping', async () => {
       const track = song.getTracks()[0];
-      track.createClip({
+      track.createMIDIClip({
         clipStartTick: 32,
         clipEndTick: 38,
       });
@@ -979,7 +986,7 @@ describe('Clip-related Tests', () => {
 
     it('Insert clip - overlaps with left and right', async () => {
       const track = song.getTracks()[0];
-      track.createClip({
+      track.createMIDIClip({
         clipStartTick: 25,
         clipEndTick: 45,
       });
@@ -996,7 +1003,7 @@ describe('Clip-related Tests', () => {
 
     it('Insert clip - overlaps with whole clips', async () => {
       const track = song.getTracks()[0];
-      track.createClip({
+      track.createMIDIClip({
         clipStartTick: 21,
         clipEndTick: 65,
       });

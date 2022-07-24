@@ -1,8 +1,10 @@
 export { TuneflowPlugin } from './base_plugin';
+export type { ReadAPIs } from './base_plugin';
 export { TuneflowPipeline } from './pipeline';
 export { Song } from './models/song';
-export { Track } from './models/track';
-export { Clip } from './models/clip';
+export { Track, TrackType } from './models/track';
+export { Clip, ClipType } from './models/clip';
+export type { AudioClipData } from './models/clip';
 export { Note } from './models/note';
 export {
   AutomationTarget,
