@@ -7,7 +7,7 @@ import { WidgetType } from '.';
 type RunParameters = { [paramName: string]: any };
 
 export interface ReadAPIs {
-  readAudioBuffer: (audioFilePath: string) => Promise<AudioBuffer | null>;
+  readAudioBuffer: (audioFile: string | File) => Promise<AudioBuffer | null>;
 }
 
 /**
