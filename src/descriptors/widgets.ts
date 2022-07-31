@@ -1,3 +1,4 @@
+import type { TrackType } from '../models/track';
 import type { LabelText } from './text';
 
 export enum WidgetType {
@@ -55,6 +56,8 @@ export interface InputWidgetConfig {
 export interface TrackSelectorWidgetConfig {
   /** Whether to always show the track info. Default to false. */
   alwaysShowTrackInfo?: boolean;
+  /** If specified, only the allowed types of tracks can be selected. */
+  allowedTrackTypes?: TrackType[];
 }
 
 export interface PitchWidgetConfig {
