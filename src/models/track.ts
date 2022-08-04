@@ -79,7 +79,14 @@ export class Track {
   }) {
     this.song = song;
     this.type = type;
-    this.insturment = instrument;
+    if (instrument) {
+      this.insturment = instrument;
+    } else if (type === TrackType.MIDI_TRACK) {
+      this.insturment = new InstrumentInfo({
+        program: 0,
+        isDrum: false,
+      });
+    }
     this.clips = [...clips];
     this.suggestedInstruments = [...suggestedInstruments];
     this.uuid = uuid;

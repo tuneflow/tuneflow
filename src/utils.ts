@@ -11,7 +11,7 @@ function midiToPitchClass(midi: number): string {
  * Convert a midi note into a pitch
  */
 export function midiNumberToPitch(midi: number): string {
-  const octave = Math.floor(midi / 12) - 1;
+  const octave = Math.floor(midi / 12) - 2;
   return midiToPitchClass(midi) + octave.toString();
 }
 
@@ -168,6 +168,32 @@ export class TickToSecondStepper {
     }
   }
 
+  secondsToTick(timeInSeconds: number) {
+    let baseTempo = this.tempoInfos[this.currentTempoIndex];
+    // Move to the closest tempo before or at the tick.
+    while (
+      this.tempoInfos[this.currentTempoIndex + 1] &&
+      this.tempoInfos[this.currentTempoIndex + 1].time <= timeInSeconds
+    ) {
+      this.currentTempoIndex += 1;
+      baseTempo = this.tempoInfos[this.currentTempoIndex];
+    }
+    // If the current tempo is later than the current tick, move back.
+    while (baseTempo.time > timeInSeconds && this.currentTempoIndex > 0) {
+      this.currentTempoIndex -= 1;
+      baseTempo = this.tempoInfos[this.currentTempoIndex];
+    }
+    if (baseTempo.time > timeInSeconds) {
+      console.warn(
+        `Cannot find any tempo earlier than time ${timeInSeconds}, using the first tempo.`,
+      );
+      baseTempo = this.tempoInfos[0];
+    }
+    const timeDelta = timeInSeconds - baseTempo.time;
+    const ticksPerSecondSinceLastTempoChange = this.ticksPerSecondAtTempoTick[baseTempo.ticks];
+    return Math.round(baseTempo.ticks + timeDelta * ticksPerSecondSinceLastTempoChange);
+  }
+
   tickToSeconds(ticks: number) {
     let baseTempo = this.tempoInfos[this.currentTempoIndex];
     // Move to the closest tempo before or at the tick.
@@ -233,4 +259,22 @@ export function volumeValueToGain(volume: number) {
  */
 export function gainToVolumeValue(gain: number) {
   return gain > 0 ? Math.exp((20 * Math.log10(gain) - 6) * (1 / 20)) : 0;
+}
+
+export function remapRange(
+  value: number,
+  originalStart: number,
+  originalEnd: number,
+  newStart: number,
+  newEnd: number,
+) {
+  return ((value - originalStart) / (originalEnd - originalStart)) * (newEnd - newStart) + newStart;
+}
+
+/**
+ *
+ * @param pitch A number from 0 to 127.
+ */
+export function pitchToHz(pitch: number) {
+  return 440 * Math.pow(2, (pitch - 69) / 12);
 }
