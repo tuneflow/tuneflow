@@ -1,6 +1,6 @@
 {
   "name": "tuneflow",
-  "version": "0.23.0",
+  "version": "0.23.1",
   "description": "Programmable, extensible music composition & arrangement",
   "main": "src/index.ts",
   "scripts": {
