@@ -315,6 +315,15 @@ export class Song {
     return this.tickToSeconds(this.getLastTick());
   }
 
+  /**
+   * This is the measurement for drawing beats based on the time signature.
+   * This should not be used to calculate timing info since the BPM
+   * means quater notes per minute.
+   */
+  getTicksPerBeat() {
+    return this.getResolution() * (4 / this.getTimeSignatures()[0].getDenominator());
+  }
+
   tickToSeconds(tick: number) {
     return Song.tickToSecondsImpl(tick, this.getTempoChanges(), this.getResolution());
   }
@@ -413,8 +422,8 @@ export class Song {
     }
   }
 
-  private static tempoBPMToTicksPerSecond(tempoBPM: number, ticksPerBeat: number) {
-    return (tempoBPM * ticksPerBeat) / 60;
+  private static tempoBPMToTicksPerSecond(tempoBPM: number, PPQ: number) {
+    return (tempoBPM * PPQ) / 60;
   }
 
   /**
