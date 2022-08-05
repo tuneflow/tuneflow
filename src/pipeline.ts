@@ -13,22 +13,40 @@ export class TuneflowPipeline {
   /** Provide additional APIs for plugins to read required data, e.g. read audio file content. */
   // @ts-ignore
   private readApisInternal: ReadAPIs;
+  private activePluginIndex = -1;
 
-  /** Inserts a plugin to the end. */
-  addPlugin(plugin: TuneflowPlugin) {
-    this.plugins.push(plugin);
-    this.maintainPluginListSize();
-  }
-
-  /** Inserts a plugin at index. */
-  addPluginAt(plugin: TuneflowPlugin, index: number) {
-    this.plugins.splice(index, 0, plugin);
-    this.maintainPluginListSize();
-  }
-
-  /** Removes a plugin from the plugin list. */
-  removePlugin(plugin: TuneflowPlugin) {
-    this.plugins.splice(this.plugins.indexOf(plugin), 1);
+  /**
+   * Adds a plugin as the active plugin.
+   *
+   * * If the active plugin is rollbackable, adds the plugin after it.
+   * * If the active plugin is not rollbackable, removes the unrollbackable plugin and add the new
+   *   plugin at its position.
+   *
+   * Removes all the plugins after the insert position.
+   * @return The insert position of the plugin.
+   */
+  addAsOrReplaceActivePlugin(plugin: TuneflowPlugin) {
+    let insertIndex: number;
+    if (this.activePluginIndex <= -1) {
+      insertIndex = 0;
+    } else {
+      // @ts-ignore
+      if (this.plugins[this.activePluginIndex].isRollbackable) {
+        // The active plugin is rollbackable, insert the new plugin after it.
+        insertIndex = this.activePluginIndex + 1;
+      } else {
+        // The active plugin is not rollbackable, replace it with the new plugin.
+        insertIndex = this.activePluginIndex;
+      }
+    }
+    // Remove all plugins starting from the insert index.
+    if (this.plugins.length > 0) {
+      this.plugins.splice(insertIndex, this.plugins.length - insertIndex);
+    }
+    // Add the new plugin at insert index.
+    this.addPluginAt(plugin, insertIndex);
+    // Find the insert position as the plugin list might have changed due to length maintainence.
+    return this.getPluginIndexByPluginInstanceId(plugin.instanceId);
   }
 
   /** Gets all plugins in execution order. */
@@ -52,11 +70,11 @@ export class TuneflowPipeline {
   }
 
   /**
-   * Runs the pipeline and modifies the song.
+   * Runs a plugin.
    *
    * TODO: Add timeout.
    *
-   * @param dirtyIndex The index of the first dirty plugin.
+   * @param dirtyIndex The index of the dirty plugin.
    * @returns If successful, returns the updated song instance. Otherwise return null.
    */
   async run(dirtyIndex = 0): Promise<Song | null> {
@@ -68,17 +86,12 @@ export class TuneflowPipeline {
     }
 
     dirtyIndex = Math.max(0, dirtyIndex);
+    this.setActivePluginIndex(dirtyIndex);
     this.threwErrorInLastRun = false;
 
     // Jump to the latest cached song before dirtyIndex if available.
-    let inputSong: Song;
     const cachedPluginIndex = this.getIndexOfLatestPluginWithCacheBeforeIndex(dirtyIndex);
-    if (cachedPluginIndex >= 0) {
-      // @ts-ignore
-      inputSong = await this.cloneSong(this.plugins[cachedPluginIndex].songCacheInternal as Song);
-    } else {
-      inputSong = await this.cloneSong(this.originalSong);
-    }
+    const inputSong = await this.cloneCachedSongAtPluginIndex(cachedPluginIndex);
 
     // Clear plugin cache from dirtyIndex since we will recompute.
     for (let i = dirtyIndex; i < this.plugins.length; i += 1) {
@@ -142,6 +155,17 @@ export class TuneflowPipeline {
   }
 
   /**
+   * Activate an already executed plugin.
+   *
+   * This will not affect plugins later than this plugin
+   * since we should be able to rollforward.
+   */
+  restoreCachedPlugin(index: number) {
+    this.setActivePluginIndex(index);
+    return this.cloneCachedSongAtPluginIndex(index);
+  }
+
+  /**
    * Returns an exactly same song with the same ids for everything.
    *
    * @param song
@@ -154,37 +178,35 @@ export class TuneflowPipeline {
     return this.cloneSongFnInternal(song);
   }
 
+  getActivePluginIndex() {
+    return this.activePluginIndex;
+  }
+
+  private setActivePluginIndex(index: number) {
+    console.log('current active plugin index', index);
+    this.activePluginIndex = index;
+  }
+
+  private async cloneCachedSongAtPluginIndex(index: number) {
+    if (index >= 0) {
+      // @ts-ignore
+      return await this.cloneSong(this.plugins[index].songCacheInternal as Song);
+    } else {
+      if (!this.originalSong) {
+        throw new Error('Original song is not avaiable to clone.');
+      }
+      return await this.cloneSong(this.originalSong);
+    }
+  }
+
   /**
-   * Reset all plugins in the pipeline.
+   * Resets the pipeline.
    */
   reset() {
-    for (const plugin of this.plugins) {
-      plugin.resetInternal();
-    }
-  }
-
-  /**
-   * Remove all plugins from the pipeline.
-   */
-  clear() {
     this.plugins.splice(0, this.plugins.length);
     this.originalSong = undefined;
-  }
-
-  movePluginUp(plugin: TuneflowPlugin) {
-    const pluginIndex = this.getPluginIndexByPluginInstanceId(plugin.instanceId);
-    if (pluginIndex <= 0) {
-      return;
-    }
-    this.plugins.splice(pluginIndex - 1, 0, this.plugins.splice(pluginIndex, 1)[0]);
-  }
-
-  movePluginDown(plugin: TuneflowPlugin) {
-    const pluginIndex = this.getPluginIndexByPluginInstanceId(plugin.instanceId);
-    if (pluginIndex < 0 || pluginIndex >= this.plugins.length - 1) {
-      return;
-    }
-    this.plugins.splice(pluginIndex, 0, this.plugins.splice(pluginIndex + 1, 1)[0]);
+    this.activePluginIndex = -1;
+    this.threwErrorInLastRun = false;
   }
 
   isPluginFunctioning(plugin: TuneflowPlugin) {
@@ -198,15 +220,6 @@ export class TuneflowPipeline {
 
   getThrewErrorInLastRun() {
     return this.threwErrorInLastRun;
-  }
-
-  getLastFunctioningPlugin() {
-    for (let i = this.plugins.length - 1; i >= 0; i -= 1) {
-      if (this.isPluginFunctioning(this.plugins[i])) {
-        return this.plugins[i];
-      }
-    }
-    return null;
   }
 
   getPluginCache(plugin: TuneflowPlugin) {
@@ -227,7 +240,7 @@ export class TuneflowPipeline {
   }
 
   /**
-   * Searches from index - 1 to 0 and return the index of the first plugin found with cache.
+   * Searches from (index - 1) to 0 and return the index of the first plugin found with cache.
    * @param index
    * @returns
    */
@@ -244,5 +257,10 @@ export class TuneflowPipeline {
     while (this.plugins.length > this.maxNumPluginsToKeep && this.plugins.length > 0) {
       this.plugins.shift();
     }
+  }
+
+  private addPluginAt(plugin: TuneflowPlugin, index: number) {
+    this.plugins.splice(index, 0, plugin);
+    this.maintainPluginListSize();
   }
 }
