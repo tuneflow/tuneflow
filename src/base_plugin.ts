@@ -25,6 +25,9 @@ export class TuneflowPlugin {
   /** Cache for the Song instance that was successfully produced in the last pipeline run. */
   // @ts-ignore
   private songCacheInternal?: Song;
+  /** The execution progress. */
+  private progress: number | null = null;
+  private isExecuting = false;
 
   // ============ PUBLIC OVERWRITABLE ================
 
@@ -241,6 +244,25 @@ export class TuneflowPlugin {
    */
   public static getPrefixedArtifactId(artifactId: string) {
     return `${this.id()}.${artifactId}`;
+  }
+
+  /** Sets the current execution progress (0 - 1). */
+  public setProgress(progress: number | null) {
+    this.progress = progress;
+  }
+
+  /**
+   * Gets the current execution progress.
+   *
+   * Only numeric return is considered valid.
+   */
+  public getProgress() {
+    return this.progress;
+  }
+
+  /** Whether the `run` method is running. */
+  public getIsExecuting() {
+    return this.isExecuting;
   }
 
   // ============ INTERNAL BELOW ================

@@ -125,14 +125,21 @@ export class TuneflowPipeline {
       // @ts-ignore
       inputSong.setPluginContextInternal(plugin);
       try {
+        // @ts-ignore
+        plugin.isExecuting = true;
+        plugin.setProgress(null);
         await plugin.run(inputSong, plugin.getParamsInternal(), this.readApisInternal);
         // @ts-ignore
         inputSong.clearPluginContextInternal();
+        // @ts-ignore
+        plugin.isExecuting = false;
       } catch (e: any) {
         console.error(e);
         this.threwErrorInLastRun = true;
         // @ts-ignore
         inputSong.clearPluginContextInternal();
+        // @ts-ignore
+        plugin.isExecuting = false;
         // Rollback song to the last successful plugin cache.
         const pluginIndex = this.getIndexOfLatestPluginWithCacheBeforeIndex(i);
         if (pluginIndex >= 0) {
