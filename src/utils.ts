@@ -278,3 +278,5 @@ export function remapRange(
 export function pitchToHz(pitch: number) {
   return 440 * Math.pow(2, (pitch - 69) / 12);
 }
+
+export const AudioContextFunc = window.AudioContext || (window as any).webkitAudioContext;

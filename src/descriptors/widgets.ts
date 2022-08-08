@@ -18,6 +18,7 @@ export enum WidgetType {
   None = 11,
   FileSelector = 12,
   MultiSourceAudioSelector = 13,
+  AudioRecorder = 14,
 }
 
 /**
