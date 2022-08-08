@@ -214,6 +214,16 @@ export class TuneflowPlugin {
             return false;
           }
           break;
+        case WidgetType.MultiSourceAudioSelector:
+          if (
+            paramResult === undefined ||
+            paramResult === null ||
+            paramResult.audioInfo === undefined ||
+            paramResult.audioInfo === null
+          ) {
+            return false;
+          }
+          break;
         case WidgetType.None:
           if (paramResult === undefined || paramResult === null) {
             return false;

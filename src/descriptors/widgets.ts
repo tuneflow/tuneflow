@@ -17,6 +17,7 @@ export enum WidgetType {
   /** Does not render a widget. */
   None = 11,
   FileSelector = 12,
+  MultiSourceAudioSelector = 13,
 }
 
 /**
@@ -105,4 +106,19 @@ export interface InputNumberWidgetConfig {
 export interface FileSelectorWidgetConfig {
   /** The extensions (without ".") that are allowed to choose. */
   allowedExtensions: string[];
+}
+
+export interface MultiSourceAudioSelectorResult {
+  sourceType: 'file' | 'audioTrack' | 'record';
+  /**
+   * Result type will be:
+   * * `File` if `sourceType` is 'file'
+   * * trackId if `sourceType` is 'audioTrack'
+   * * `AudioBuffer` if `sourceType` is 'record'
+   */
+  audioInfo: File | string | AudioBuffer;
+}
+
+export async function getFileContentFromFileSelector(file: File) {
+  return file.arrayBuffer();
 }
