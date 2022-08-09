@@ -5,6 +5,9 @@ import type { TuneflowPlugin } from '../base_plugin';
 import { TempoEvent } from './tempo';
 import { TimeSignatureEvent } from './time_signature';
 import { Track, TrackType } from './track';
+import { Midi } from '@tonejs/midi';
+import { AutomationTarget, AutomationTargetType } from './automation';
+import type { AutomationValue } from './automation';
 
 export class Song {
   private tracks: Track[];
@@ -374,6 +377,104 @@ export class Song {
     return Math.round(baseTempoChange.getTicks() + timeDelta * ticksPerSecondSinceLastTempoChange);
   }
 
+  static importMIDI(
+    song: Song,
+    fileBuffer: ArrayBuffer,
+    insertAtTick = 0,
+    overwriteTemposAndTimeSignatures = false,
+  ) {
+    const midi = new Midi(fileBuffer);
+    const insertOffset = insertAtTick;
+    // For songs that are not 480 PPQ, we need to convert the ticks
+    // so that the beats and time remain unchanged.
+    const ppqScaleFactor = 480 / midi.header.ppq;
+    // Optionally overwrite tempos and time signatures.
+    if (overwriteTemposAndTimeSignatures) {
+      // Time signatures need to be imported before tempos.
+      const newTimeSignatureEvents = [];
+      for (const rawTimeSignatureEvent of midi.header.timeSignatures) {
+        newTimeSignatureEvents.push(
+          new TimeSignatureEvent({
+            ticks: insertOffset + scaleIntBy(rawTimeSignatureEvent.ticks, ppqScaleFactor),
+            numerator: rawTimeSignatureEvent.timeSignature[0],
+            denominator: rawTimeSignatureEvent.timeSignature[1],
+          }),
+        );
+      }
+      song.overwriteTimeSignatures(newTimeSignatureEvents);
+      const newTempoEvents = [];
+      if (insertOffset > 0) {
+        // Insert a default tempo event at the beginning.
+        newTempoEvents.push(
+          new TempoEvent({
+            ticks: 0,
+            time: 0,
+            bpm: 120,
+          }),
+        );
+      }
+      for (const rawTempoEvent of midi.header.tempos) {
+        newTempoEvents.push(
+          new TempoEvent({
+            ticks: insertOffset + scaleIntBy(rawTempoEvent.ticks, ppqScaleFactor),
+            time: rawTempoEvent.time as number,
+            bpm: rawTempoEvent.bpm,
+          }),
+        );
+      }
+      song.overwriteTempoChanges(newTempoEvents);
+    }
+
+    // Add tracks and notes.
+    for (const track of midi.tracks) {
+      const songTrack = song.createTrack({ type: TrackType.MIDI_TRACK });
+      songTrack.setInstrument({
+        program: track.instrument.number,
+        isDrum: track.instrument.percussion,
+      });
+      const trackClip = songTrack.createMIDIClip({ clipStartTick: insertOffset });
+      let minStartTick = Number.MAX_SAFE_INTEGER;
+      // Add notes.
+      for (const note of track.notes) {
+        trackClip.createNote({
+          pitch: note.midi,
+          velocity: Math.round(note.velocity * 127),
+          startTick: insertOffset + scaleIntBy(note.ticks, ppqScaleFactor),
+          endTick: insertOffset + scaleIntBy(note.ticks + note.durationTicks, ppqScaleFactor),
+        });
+        minStartTick = Math.min(
+          minStartTick,
+          insertOffset + scaleIntBy(note.ticks, ppqScaleFactor),
+        );
+      }
+      // Add volume automation.
+      if (track.controlChanges[7]) {
+        const volumeTarget = new AutomationTarget(AutomationTargetType.VOLUME);
+        songTrack.getAutomation().addAutomation(volumeTarget);
+        const volumeTargetValue = songTrack
+          .getAutomation()
+          .getAutomationValueByTarget(volumeTarget) as AutomationValue;
+        for (const cc of track.controlChanges[7]) {
+          volumeTargetValue.addPoint(insertOffset + scaleIntBy(cc.ticks, ppqScaleFactor), cc.value);
+        }
+      }
+      // Add pan automation.
+      if (track.controlChanges[10]) {
+        const panTarget = new AutomationTarget(AutomationTargetType.PAN);
+        songTrack.getAutomation().addAutomation(panTarget);
+        const panTargetValue = songTrack
+          .getAutomation()
+          .getAutomationValueByTarget(panTarget) as AutomationValue;
+        for (const cc of track.controlChanges[10]) {
+          panTargetValue.addPoint(insertOffset + scaleIntBy(cc.ticks, ppqScaleFactor), cc.value);
+        }
+      }
+      if (minStartTick !== Number.MAX_SAFE_INTEGER) {
+        trackClip.adjustClipLeft(minStartTick);
+      }
+    }
+  }
+
   protected setPluginContextInternal(plugin: TuneflowPlugin) {
     this.pluginContext = {
       plugin,
@@ -441,4 +542,8 @@ export class Song {
 interface PluginContext {
   plugin: TuneflowPlugin;
   numTracksCreatedByPlugin: number;
+}
+
+function scaleIntBy(val: number, factor: number) {
+  return Math.round(val * factor);
 }
