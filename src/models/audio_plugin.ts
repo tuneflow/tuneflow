@@ -105,4 +105,6 @@ export class AudioPlugin {
   private static generateAudioPluginInstanceIdInternal() {
     return nanoid(10);
   }
+
+  static DEFAULT_SYNTH = new AudioPlugin('Synth', 'TuneFlow', 'internal', '1.0');
 }
