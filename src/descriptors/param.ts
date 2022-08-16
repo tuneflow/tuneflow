@@ -54,4 +54,7 @@ export enum InjectSource {
 
   /** The ids of the notes that is being edited in the MIDI editor. */
   EditingNoteIds = 5,
+
+  /** A number that represents the start tick of the beat where the playhead is at. */
+  TickAtPlayheadSnappedToBeat = 6,
 }
