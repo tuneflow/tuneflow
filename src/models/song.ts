@@ -84,7 +84,7 @@ export class Song {
       rank: rank == undefined || rank === null ? this.getNextTrackRank() : rank,
     });
     if (assignDefaultSamplerPlugin && type === TrackType.MIDI_TRACK) {
-      track.setSamplerPlugin(track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH.getTuneflowId()));
+      track.setSamplerPlugin(track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID));
     }
     if (index !== undefined && index !== null) {
       this.tracks.splice(index, 0, track);
