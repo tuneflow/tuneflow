@@ -434,7 +434,10 @@ export class Song {
 
     // Add tracks and notes.
     for (const track of midi.tracks) {
-      const songTrack = song.createTrack({ type: TrackType.MIDI_TRACK });
+      const songTrack = song.createTrack({
+        type: TrackType.MIDI_TRACK,
+        assignDefaultSamplerPlugin: true,
+      });
       songTrack.setInstrument({
         program: track.instrument.number,
         isDrum: track.instrument.percussion,
