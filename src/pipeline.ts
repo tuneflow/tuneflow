@@ -99,10 +99,10 @@ export class TuneflowPipeline {
       delete this.plugins[i].songCacheInternal;
     }
 
-    for (let i = 0; i <= cachedPluginIndex; i += 1) {
-      const plugin = this.plugins[i];
+    for (let i = 0; i < this.plugins.length; i += 1) {
+      // Mark all plugins to be rerun as unrollbackable.
       // @ts-ignore
-      plugin.isRollbackable = true;
+      this.plugins[i].isRollbackable = i <= cachedPluginIndex;
     }
 
     // Run dirty plugins.
