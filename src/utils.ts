@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import { isProxy, isRef, toRaw } from 'vue';
 import type { TempoEvent } from './models/tempo';
 
 function midiToPitchClass(midi: number): string {
@@ -277,4 +278,8 @@ export function remapRange(
  */
 export function pitchToHz(pitch: number) {
   return 440 * Math.pow(2, (pitch - 69) / 12);
+}
+
+export function maybeToRaw<T>(obj: T): T {
+  return isProxy(obj) || isRef(obj) ? toRaw(obj) : obj;
 }
