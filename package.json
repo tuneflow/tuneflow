@@ -1,6 +1,6 @@
 {
   "name": "tuneflow",
-  "version": "0.25.1",
+  "version": "0.25.7",
   "description": "Programmable, extensible music composition & arrangement",
   "main": "src/index.ts",
   "scripts": {
@@ -43,7 +43,8 @@
     "underscore": "^1.13.2",
     "binary-search-bounds": "^2.0.5",
     "lodash.clonedeep": "^4.5.0",
-    "nanoid": "^3.3.2"
+    "nanoid": "^3.3.2",
+    "vue": "*"
   },
   "devDependencies": {
     "@types/jest": "^28.1.1",

@@ -8,6 +8,7 @@ import { Track, TrackType } from './track';
 import { Midi } from '@tonejs/midi';
 import { AutomationTarget, AutomationTargetType } from './automation';
 import type { AutomationValue } from './automation';
+import { AudioPlugin } from './audio_plugin';
 
 export class Song {
   private tracks: Track[];
@@ -60,12 +61,15 @@ export class Song {
     type,
     index,
     rank,
+    assignDefaultSamplerPlugin = false,
   }: {
     type: TrackType;
     /** Index to insert at. If left blank, appends to the end. */
     index?: number;
     /** The displayed rank which uniquely identifies a track. Internal use, do not set this. */
     rank?: number;
+    /** Whether to assign a default sampler plugin if type is `MIDI_TRACK`. */
+    assignDefaultSamplerPlugin?: boolean;
   }): Track {
     this.checkAccess('createTrack');
     if (rank == undefined || rank === null) {
@@ -79,6 +83,9 @@ export class Song {
       uuid: this.getNextTrackId(),
       rank: rank == undefined || rank === null ? this.getNextTrackRank() : rank,
     });
+    if (assignDefaultSamplerPlugin && type === TrackType.MIDI_TRACK) {
+      track.setSamplerPlugin(track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID));
+    }
     if (index !== undefined && index !== null) {
       this.tracks.splice(index, 0, track);
     } else {
@@ -427,7 +434,10 @@ export class Song {
 
     // Add tracks and notes.
     for (const track of midi.tracks) {
-      const songTrack = song.createTrack({ type: TrackType.MIDI_TRACK });
+      const songTrack = song.createTrack({
+        type: TrackType.MIDI_TRACK,
+        assignDefaultSamplerPlugin: true,
+      });
       songTrack.setInstrument({
         program: track.instrument.number,
         isDrum: track.instrument.percussion,

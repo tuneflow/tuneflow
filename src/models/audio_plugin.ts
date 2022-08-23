@@ -106,5 +106,5 @@ export class AudioPlugin {
     return nanoid(10);
   }
 
-  static DEFAULT_SYNTH = new AudioPlugin('Synth', 'TuneFlow', 'internal', '1.0');
+  static DEFAULT_SYNTH_TFID = getAudioPluginTuneflowId('TuneFlow', 'VST3', 'TFSynth', '1.0.0');
 }
