@@ -326,9 +326,10 @@ export class Song {
   }
 
   /**
-   * This is the measurement for drawing beats based on the time signature.
-   * This should not be used to calculate timing info, for that purpose, use
-   * `getResolution()` instead which is the number of ticks per quater note.
+   * This is the number of ticks per beat based on the time signature.
+   *
+   * This should be distinguished from `getResolution()`, which is
+   * the number of ticks per quater note.
    */
   getTicksPerBeat() {
     return this.getResolution() * (4 / this.getTimeSignatures()[0].getDenominator());

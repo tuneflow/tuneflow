@@ -19,6 +19,7 @@ export enum WidgetType {
   FileSelector = 12,
   MultiSourceAudioSelector = 13,
   AudioRecorder = 14,
+  SelectList = 15,
 }
 
 /**
@@ -34,10 +35,10 @@ export interface WidgetDescriptor {
     | PitchWidgetConfig
     | TrackPitchSelectorWidgetConfig
     | InstrumentSelectorWidgetConfig
-    | SelectWidgetConfig
     | SwitchWidgetConfig
     | InputNumberWidgetConfig
     | FileSelectorWidgetConfig
+    | SelectListWidgetConfig
     | undefined
     | null;
 }
@@ -88,6 +89,14 @@ export interface SelectWidgetConfig {
   allowSearch?: boolean;
   placeholder?: LabelText;
   /** https://arco.design/vue/component/select#virtual-list */
+  virtualListProps?: any;
+}
+
+export interface SelectListWidgetConfig {
+  options: SelectWidgetOption[];
+  maxHeight?: number;
+  size?: string;
+  /** https://arco.design/vue/component/list */
   virtualListProps?: any;
 }
 

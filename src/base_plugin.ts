@@ -79,8 +79,12 @@ export class TuneflowPlugin {
     return true;
   }
 
-  /** Initializes the plugin instance. */
-  async init() {}
+  /**
+   * Initializes the plugin instance.
+   * @param song The current version of the song, read-only.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async init(song: Song) {}
 
   /**
    * Specify params to get from user input.
@@ -138,11 +142,12 @@ export class TuneflowPlugin {
 
   /**
    * Creates a plugin instance and initializes it.
+   * @param song The current version of the song.
    */
-  public static async create() {
+  public static async create(song: Song) {
     const plugin = new this();
     plugin.resetInternal();
-    await plugin.init();
+    await plugin.init(song);
     return plugin;
   }
 
@@ -184,6 +189,7 @@ export class TuneflowPlugin {
         case WidgetType.Slider:
         case WidgetType.TrackSelector:
         case WidgetType.Select:
+        case WidgetType.SelectList:
         case WidgetType.Switch:
         case WidgetType.InputNumber:
         case WidgetType.FileSelector:

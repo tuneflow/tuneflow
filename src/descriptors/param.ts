@@ -37,6 +37,13 @@ export interface ParamDescriptor {
    * you can use initPluginInstance.
    */
   injectFrom?: InjectSource;
+
+  /**
+   * If set to true, this param can still be adjusted
+   * when the plugin is applied. However, changing the param
+   * will invalidate all the changes after this plugin.
+   */
+  adjustableWhenPluginIsApplied?: boolean;
 }
 
 export enum InjectSource {
