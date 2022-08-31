@@ -11,6 +11,7 @@ import type { AutomationValue } from './automation';
 import { AudioPlugin } from './audio_plugin';
 
 export class Song {
+  private masterTrack?: Track;
   private tracks: Track[];
   private PPQ: number;
   private tempos: TempoEvent[];
@@ -23,6 +24,18 @@ export class Song {
     this.PPQ = 0;
     this.tempos = [];
     this.timeSignatures = [];
+  }
+
+  getMasterTrack() {
+    if (!this.masterTrack) {
+      this.masterTrack = new Track({
+        type: TrackType.MASTER_TRACK,
+        song: this,
+        // @ts-ignore
+        uuid: Track.generateTrackIdInternal(),
+      });
+    }
+    return this.masterTrack;
   }
 
   /**

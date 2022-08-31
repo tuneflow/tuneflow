@@ -11,6 +11,7 @@ import _ from 'underscore';
 export enum TrackType {
   MIDI_TRACK = 1,
   AUDIO_TRACK = 2,
+  MASTER_TRACK = 3,
 }
 
 /**
