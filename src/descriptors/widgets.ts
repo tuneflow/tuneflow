@@ -98,6 +98,7 @@ export interface SelectListWidgetConfig {
   size?: string;
   /** https://arco.design/vue/component/list */
   virtualListProps?: any;
+  allowSearch?: boolean;
 }
 
 export interface SwitchWidgetConfig {

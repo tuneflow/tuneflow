@@ -3,6 +3,7 @@ import type { SongAccess, ReadAPIs } from '../src';
 
 const MOCK_READ_APIS: ReadAPIs = {
   readAudioBuffer: async () => null,
+  translateLabel: (label: any) => label,
 };
 
 describe('Skeleton Tuneflow', () => {

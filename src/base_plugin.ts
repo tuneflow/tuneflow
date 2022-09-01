@@ -7,7 +7,8 @@ import { WidgetType } from '.';
 type RunParameters = { [paramName: string]: any };
 
 export interface ReadAPIs {
-  readAudioBuffer: (audioFile: string | File) => Promise<AudioBuffer | null>;
+  readAudioBuffer: (audioFile: string | File) => Promise<AudioBuffer | null | undefined>;
+  translateLabel: (label: LabelText) => string;
 }
 
 /**
@@ -81,10 +82,14 @@ export class TuneflowPlugin {
 
   /**
    * Initializes the plugin instance.
+   *
+   * Override this method to initialize your plugin before it starts running.
+   *
    * @param song The current version of the song, read-only.
+   * @param readApis Apis to read data.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async init(song: Song) {}
+  protected async init(song: Song, readApis: ReadAPIs) {}
 
   /**
    * Specify params to get from user input.
@@ -144,10 +149,10 @@ export class TuneflowPlugin {
    * Creates a plugin instance and initializes it.
    * @param song The current version of the song.
    */
-  public static async create(song: Song) {
+  public static async create(song: Song, readApis: ReadAPIs) {
     const plugin = new this();
     plugin.resetInternal();
-    await plugin.init(song);
+    await plugin.init(song, readApis);
     return plugin;
   }
 
@@ -250,7 +255,7 @@ export class TuneflowPlugin {
    * @returns The unique identifier for the plugin CLASS, which is the combination of providerId and moduleId. NOTE: this is not the id of the plugin instance.
    */
   public static id(): string {
-    return `${this.providerId()}.${this.pluginId()}`;
+    return `${this.providerId()}^_^${this.pluginId()}`;
   }
 
   /**
