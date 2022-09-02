@@ -503,6 +503,11 @@ export class Track {
     return this.automation;
   }
 
+  /** Sets the automation data of this track as a copy of the given automation data. */
+  setAutomation(newAutomation: AutomationData) {
+    this.automation = newAutomation.clone();
+  }
+
   /** Whether this track has any defined automation. */
   hasAnyAutomation() {
     return (

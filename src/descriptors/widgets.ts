@@ -90,6 +90,16 @@ export interface SelectWidgetConfig {
   placeholder?: LabelText;
   /** https://arco.design/vue/component/select#virtual-list */
   virtualListProps?: any;
+  /**
+   * Whether to populate the options with the styles that
+   * TuneFlow can generate.
+   */
+  populateOptionsWithGeneratableStyles?: boolean;
+  /**
+   * Whether to populate the options with the tempo settings that
+   * TuneFlow can generate with.
+   */
+  populateOptionsWithGeneratableTempos?: boolean;
 }
 
 export interface SelectListWidgetConfig {

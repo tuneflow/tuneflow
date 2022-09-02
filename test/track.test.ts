@@ -1,5 +1,13 @@
-import { AudioPlugin, dbToVolumeValue, Song, TrackType, TuneflowPlugin } from '../src';
-import type { SongAccess } from '../src';
+import {
+  AudioPlugin,
+  AutomationTarget,
+  AutomationTargetType,
+  dbToVolumeValue,
+  Song,
+  TrackType,
+  TuneflowPlugin,
+} from '../src';
+import type { SongAccess, AutomationValue } from '../src';
 import type { InstrumentInfo } from '../src/models/track';
 
 describe('Track-related Tests', () => {
@@ -132,6 +140,24 @@ describe('Track-related Tests', () => {
       track.setPan(60);
       track.setSolo(true);
       track.setMuted(true);
+      const trackClip = track.createMIDIClip({
+        clipStartTick: 0,
+        clipEndTick: 100,
+        insertClip: true,
+      });
+      trackClip.createNote({
+        pitch: 64,
+        velocity: 80,
+        startTick: 1,
+        endTick: 10,
+      });
+      const volumeAutomationTarget = new AutomationTarget(AutomationTargetType.VOLUME);
+      track.getAutomation().addAutomation(volumeAutomationTarget);
+      const automationValue = track
+        .getAutomation()
+        .getOrCreateAutomationValueById(volumeAutomationTarget.toTfAutomationTargetId());
+      automationValue.setDisabled(true);
+      automationValue.addPoint(3, 0.5, false);
       const clonedTrack = song.cloneTrack(track);
       const clonedTrackInstrument = clonedTrack.getInstrument();
       expect(clonedTrackInstrument).toBeTruthy();
@@ -149,6 +175,23 @@ describe('Track-related Tests', () => {
       expect(clonedTrack.getPan()).toBe(60);
       expect(clonedTrack.getSolo()).toBe(true);
       expect(clonedTrack.getMuted()).toBe(true);
+      expect(clonedTrack.getClips().length).toBe(1);
+      expect(clonedTrack.getClips()[0].getNotes().length).toBe(1);
+      expect(clonedTrack.getClips()[0].getNotes()[0].getPitch()).toBe(64);
+      expect(clonedTrack.getClips()[0].getNotes()[0].getVelocity()).toBe(80);
+      expect(clonedTrack.getClips()[0].getNotes()[0].getStartTick()).toBe(1);
+      expect(clonedTrack.getClips()[0].getNotes()[0].getEndTick()).toBe(10);
+      expect(clonedTrack.getAutomation().getAutomationTargets().length).toBe(1);
+      expect(clonedTrack.getAutomation().getAutomationTargets()[0].toTfAutomationTargetId()).toBe(
+        volumeAutomationTarget.toTfAutomationTargetId(),
+      );
+      const clonedAutomationValue = clonedTrack
+        .getAutomation()
+        .getAutomationValueById(volumeAutomationTarget.toTfAutomationTargetId()) as AutomationValue;
+      expect(clonedAutomationValue.getDisabled()).toBe(true);
+      expect(clonedAutomationValue.getPoints().length).toBe(1);
+      expect(clonedAutomationValue.getPoints()[0].tick).toBe(3);
+      expect(clonedAutomationValue.getPoints()[0].value).toBeCloseTo(0.5);
     });
   });
 });

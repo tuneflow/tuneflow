@@ -157,6 +157,10 @@ export class Song {
       const newClip = newTrack.cloneClip(clip);
       newTrack.insertClip(newClip);
     }
+    // Clone automation.
+    if (track.hasAnyAutomation()) {
+      newTrack.setAutomation(track.getAutomation());
+    }
     return newTrack;
   }
 

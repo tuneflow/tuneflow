@@ -247,6 +247,15 @@ export class AutomationValue {
     );
   }
 
+  moveAllPoints(offsetTick: number, offsetValue: number, overwriteValuesInDragArea = true) {
+    this.movePoints(
+      this.points.map(point => point.id),
+      offsetTick,
+      offsetValue,
+      overwriteValuesInDragArea,
+    );
+  }
+
   /**
    *
    * @param pointIds
@@ -319,6 +328,15 @@ export class AutomationValue {
     if (Math.abs(offsetTick) > 0) {
       this.points.sort((a, b) => a.tick - b.tick);
     }
+  }
+
+  clone() {
+    const newAutomationValue = new AutomationValue();
+    newAutomationValue.setDisabled(this.disabled);
+    for (const point of this.points) {
+      newAutomationValue.addPoint(point.tick, point.value, /* overwrite= */ false);
+    }
+    return newAutomationValue;
   }
 
   private getNextPointIdInternal() {
@@ -482,5 +500,18 @@ export class AutomationData {
         /* overwriteValuesInDragArea= */ false,
       );
     }
+  }
+
+  /** Creates a clone of this automation data. */
+  clone() {
+    const newAutomationData = new AutomationData();
+    for (const target of this.targets) {
+      newAutomationData.addAutomation(target.clone());
+    }
+    for (const tfAutomationTargetId of _.keys(this.targetValues)) {
+      const targetValue = this.targetValues[tfAutomationTargetId] as AutomationValue;
+      newAutomationData.targetValues[tfAutomationTargetId] = targetValue.clone();
+    }
+    return newAutomationData;
   }
 }
