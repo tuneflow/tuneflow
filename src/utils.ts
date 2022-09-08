@@ -68,7 +68,7 @@ export function pitchToMidiNumber(note: string): number {
   const octave = split[2];
   // @ts-ignore
   const index = noteToScaleIndex[pitch.toLowerCase()];
-  return index + (parseInt(octave, 10) + 1) * 12;
+  return index + (parseInt(octave, 10) + 2) * 12;
 }
 
 /**
