@@ -581,6 +581,8 @@ export class Clip {
    * Note is in the clip when:
    * * The note starts at or after the clip start.
    * * The note has overlapping part with the clip.
+   * * The overlapping part is greater than 1 tick, i.e. the note does not
+   *   start from the end of the clip or end at the start of the clip.
    * @param noteStartTick
    * @param noteEndTick
    * @param clipStartTick
@@ -596,8 +598,8 @@ export class Clip {
     return (
       // If the clip starts at 0, notes that start before 0 will start at 0.
       (noteStartTick >= clipStartTick || (clipStartTick === 0 && noteStartTick <= 0)) &&
-      noteStartTick <= clipEndTick &&
-      noteEndTick >= noteStartTick
+      noteStartTick < clipEndTick &&
+      noteEndTick > noteStartTick
     );
   }
 

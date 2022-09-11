@@ -58,7 +58,7 @@ describe('Note-related Tests', () => {
       const clip1 = track.getClips()[0];
       expect(clip1).toBeTruthy();
       expect(clip1.getRawNotes().length).toBe(3);
-      expect(clip1.getNotes().length).toBe(2);
+      expect(clip1.getNotes().length).toBe(1);
       assertNotesAreEqual(
         clip1.getRawNotes(),
         createTestNotes(
@@ -94,12 +94,6 @@ describe('Note-related Tests', () => {
               pitch: 68,
               velocity: 80,
               startTick: 14,
-              endTick: 20,
-            },
-            {
-              pitch: 66,
-              velocity: 80,
-              startTick: 15,
               endTick: 20,
             },
           ],
@@ -257,6 +251,7 @@ describe('Note-related Tests', () => {
       const clip1 = track.getClips()[0];
       expect(clip1).toBeTruthy();
       expect(clip1.getRawNotes().length).toBe(3);
+      expect(clip1.getNotes().length).toBe(1);
 
       const note2 = clip1.getRawNotes()[1];
       note2.deleteFromParent();
@@ -281,20 +276,7 @@ describe('Note-related Tests', () => {
           clip1,
         ),
       );
-      assertNotesAreEqual(
-        clip1.getNotes(),
-        createTestNotes(
-          [
-            {
-              pitch: 66,
-              velocity: 80,
-              startTick: 15,
-              endTick: 20,
-            },
-          ],
-          clip1,
-        ),
-      );
+      expect(clip1.getNotes().length).toBe(0);
     });
   });
 
@@ -321,6 +303,7 @@ describe('Note-related Tests', () => {
       const clip1 = track.getClips()[0];
       expect(clip1).toBeTruthy();
       expect(clip1.getRawNotes().length).toBe(3);
+      expect(clip1.getNotes().length).toBe(1);
 
       const note2 = clip1.getRawNotes()[1];
       note2.moveNote(-9999);
@@ -329,7 +312,7 @@ describe('Note-related Tests', () => {
 
       // Verify the the note is deleted.
       expect(clip1.getRawNotes().length).toBe(2);
-      expect(clip1.getNotes().length).toBe(1);
+      expect(clip1.getNotes().length).toBe(0);
       assertNotesAreEqual(
         clip1.getRawNotes(),
         createTestNotes(
@@ -350,20 +333,6 @@ describe('Note-related Tests', () => {
           clip1,
         ),
       );
-      assertNotesAreEqual(
-        clip1.getNotes(),
-        createTestNotes(
-          [
-            {
-              pitch: 66,
-              velocity: 80,
-              startTick: 15,
-              endTick: 20,
-            },
-          ],
-          clip1,
-        ),
-      );
     });
 
     it('Do not delete the note if moved to the left of the clip', async () => {
@@ -372,6 +341,7 @@ describe('Note-related Tests', () => {
       const clip1 = track.getClips()[0];
       expect(clip1).toBeTruthy();
       expect(clip1.getRawNotes().length).toBe(3);
+      expect(clip1.getNotes().length).toBe(1);
       expect(clip1.getClipStartTick()).toBe(5);
 
       const note2 = clip1.getRawNotes()[1];
@@ -383,7 +353,7 @@ describe('Note-related Tests', () => {
 
       // Verify the note is not deleted and is not included in the clip's range.
       expect(clip1.getRawNotes().length).toBe(3);
-      expect(clip1.getNotes().length).toBe(1);
+      expect(clip1.getNotes().length).toBe(0);
       assertNotesAreEqual(
         clip1.getRawNotes(),
         createTestNotes(
@@ -410,20 +380,6 @@ describe('Note-related Tests', () => {
           clip1,
         ),
       );
-      assertNotesAreEqual(
-        clip1.getNotes(),
-        createTestNotes(
-          [
-            {
-              pitch: 66,
-              velocity: 80,
-              startTick: 15,
-              endTick: 20,
-            },
-          ],
-          clip1,
-        ),
-      );
     });
 
     it('Do not delete the note if moved to the right of the clip', async () => {
@@ -432,6 +388,7 @@ describe('Note-related Tests', () => {
       const clip1 = track.getClips()[0];
       expect(clip1).toBeTruthy();
       expect(clip1.getRawNotes().length).toBe(3);
+      expect(clip1.getNotes().length).toBe(1);
       expect(clip1.getClipStartTick()).toBe(5);
       expect(clip1.getClipEndTick()).toBe(15);
 
@@ -446,7 +403,7 @@ describe('Note-related Tests', () => {
       // Verify the the note is not deleted and that it is not
       // included in the clip's range.
       expect(clip1.getRawNotes().length).toBe(3);
-      expect(clip1.getNotes().length).toBe(1);
+      expect(clip1.getNotes().length).toBe(0);
       assertNotesAreEqual(
         clip1.getRawNotes(),
         createTestNotes(
@@ -468,20 +425,6 @@ describe('Note-related Tests', () => {
               velocity: 80,
               startTick: 16,
               endTick: 22,
-            },
-          ],
-          clip1,
-        ),
-      );
-      assertNotesAreEqual(
-        clip1.getNotes(),
-        createTestNotes(
-          [
-            {
-              pitch: 66,
-              velocity: 80,
-              startTick: 15,
-              endTick: 20,
             },
           ],
           clip1,

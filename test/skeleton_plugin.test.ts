@@ -98,7 +98,7 @@ describe('Skeleton Tuneflow', () => {
       }).toThrow();
     });
 
-    it('throws error if plugin calls restricted methods without getting access.', async () => {
+    it('marks has error if plugin calls restricted methods without getting access.', async () => {
       const pipeline = new TuneflowPipeline();
       pipeline.addAsOrReplaceActivePlugin(new NoAccessCreateTrackPlugin());
       expect(song.getTracks().length).toBe(0);
@@ -107,7 +107,8 @@ describe('Skeleton Tuneflow', () => {
       pipeline.cloneSongFnInternal = (song: Song) => song;
       // @ts-ignore
       pipeline.readApisInternal = MOCK_READ_APIS;
-      expect(pipeline.run()).rejects.toBeTruthy();
+      await pipeline.run();
+      expect(pipeline.getThrewErrorInLastRun()).toBeTruthy();
       expect(song.getTracks().length).toBe(0);
     });
   });

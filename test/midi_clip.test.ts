@@ -161,7 +161,7 @@ describe('MIDI Clip-related Tests', () => {
           /* clipStartTick= */ 6,
           /* clipEndTick= */ 12,
         ),
-      ).toBeTruthy();
+      ).toBeFalsy();
       expect(
         Clip.isNoteInClip(
           /* noteStartTick= */ 13,
@@ -219,12 +219,6 @@ describe('MIDI Clip-related Tests', () => {
               pitch: 68,
               velocity: 80,
               startTick: 14,
-              endTick: 20,
-            },
-            {
-              pitch: 66,
-              velocity: 80,
-              startTick: 15,
               endTick: 20,
             },
           ],
