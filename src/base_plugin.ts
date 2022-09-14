@@ -179,76 +179,68 @@ export class TuneflowPlugin {
    */
   public hasAllParamsSet(): boolean {
     for (const paramName of _.keys(this.params())) {
-      if (this.params()[paramName].optional) {
-        continue;
-      }
-      const paramResult = this.paramsResultInternal[paramName];
-      if (paramResult === undefined || paramResult === null) {
+      const paramProvided = this.isParamProvided(paramName);
+      if (!paramProvided) {
         return false;
-      }
-      // If the param is a non-primitive value(like an object),
-      // we need to do additional check.
-      const paramDescriptor = this.params()[paramName];
-      const paramWidgetType = paramDescriptor.widget.type;
-      switch (paramWidgetType) {
-        case WidgetType.Input:
-        case WidgetType.Pitch:
-        case WidgetType.Slider:
-        case WidgetType.TrackSelector:
-        case WidgetType.Select:
-        case WidgetType.SelectList:
-        case WidgetType.Switch:
-        case WidgetType.InputNumber:
-        case WidgetType.FileSelector:
-          // Nothing else to check.
-          break;
-        case WidgetType.MultiTrackSelector:
-          if (paramResult.length === 0) {
-            return false;
-          }
-          break;
-        case WidgetType.TrackPitchSelector:
-          if (
-            paramResult.track === undefined ||
-            paramResult.track === null ||
-            paramResult.pitch === undefined ||
-            paramResult.pitch === null
-          ) {
-            return false;
-          }
-          break;
-        case WidgetType.InstrumentSelector:
-          if (
-            paramResult.program === undefined ||
-            paramResult.program === null ||
-            paramResult.isDrum === undefined ||
-            paramResult.isDrum === null
-          ) {
-            return false;
-          }
-          break;
-        case WidgetType.MultiSourceAudioSelector:
-          if (
-            paramResult === undefined ||
-            paramResult === null ||
-            paramResult.audioInfo === undefined ||
-            paramResult.audioInfo === null
-          ) {
-            return false;
-          }
-          break;
-        case WidgetType.None:
-          if (paramResult === undefined || paramResult === null) {
-            return false;
-          }
-          break;
-        default:
-          throw new Error(
-            `Param nullness check needs to be implemented for widget type ${paramWidgetType}. Either use default nullness check or define custom logic.`,
-          );
       }
     }
     return true;
+  }
+
+  public isParamProvided(paramName: string) {
+    if (this.params()[paramName].optional) {
+      return true;
+    }
+    const paramResult = this.paramsResultInternal[paramName];
+    if (paramResult === undefined || paramResult === null) {
+      return false;
+    }
+    // If the param is a non-primitive value(like an object),
+    // we need to do additional check.
+    const paramDescriptor = this.params()[paramName];
+    const paramWidgetType = paramDescriptor.widget.type;
+    switch (paramWidgetType) {
+      case WidgetType.Input:
+      case WidgetType.Pitch:
+      case WidgetType.Slider:
+      case WidgetType.TrackSelector:
+      case WidgetType.Select:
+      case WidgetType.SelectList:
+      case WidgetType.Switch:
+      case WidgetType.InputNumber:
+      case WidgetType.FileSelector:
+        // Nothing else to check.
+        return true;
+      case WidgetType.MultiTrackSelector:
+        return paramResult.length > 0;
+      case WidgetType.TrackPitchSelector:
+        return (
+          paramResult.track !== undefined &&
+          paramResult.track !== null &&
+          paramResult.pitch !== undefined &&
+          paramResult.pitch !== null
+        );
+      case WidgetType.InstrumentSelector:
+        return (
+          paramResult.program !== undefined &&
+          paramResult.program !== null &&
+          paramResult.isDrum !== undefined &&
+          paramResult.isDrum !== null
+        );
+      case WidgetType.MultiSourceAudioSelector:
+        return (
+          paramResult !== undefined &&
+          paramResult !== null &&
+          paramResult.audioInfo !== undefined &&
+          paramResult.audioInfo !== null
+        );
+      case WidgetType.None:
+        return paramResult !== undefined && paramResult !== null;
+      default:
+        throw new Error(
+          `Param nullness check needs to be implemented for widget type ${paramWidgetType}. Either use default nullness check or define custom logic.`,
+        );
+    }
   }
 
   /**
