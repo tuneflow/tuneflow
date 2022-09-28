@@ -11,7 +11,7 @@
     "lint:tsc": "vue-tsc --noEmit --skipLibCheck",
     "prepare": "husky install",
     "test": "jest",
-    "build": "vite build --config vite.config.ts"
+    "build": "vite build --config vite.config.ts;vite build --config vite.server.config.ts"
   },
   "repository": {
     "type": "git",
