@@ -27,7 +27,7 @@
   "license": "MIT",
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint-staged;npm run lint:tsc;npm run build;git add dist/index.js;"
+      "pre-commit": "npm run lint-staged;npm run lint:tsc;npm run build;git add dist/index.js;git add dist/index.server.js;"
     }
   },
   "lint-staged": {
