@@ -479,25 +479,39 @@ export class Song {
         );
       }
       // Add volume automation.
-      if (track.controlChanges[7]) {
-        const volumeTarget = new AutomationTarget(AutomationTargetType.VOLUME);
-        songTrack.getAutomation().addAutomation(volumeTarget);
-        const volumeTargetValue = songTrack
-          .getAutomation()
-          .getAutomationValueByTarget(volumeTarget) as AutomationValue;
-        for (const cc of track.controlChanges[7]) {
-          volumeTargetValue.addPoint(insertOffset + scaleIntBy(cc.ticks, ppqScaleFactor), cc.value);
+      const volumeCCs = track.controlChanges[7];
+      if (volumeCCs) {
+        if (volumeCCs.length === 1) {
+          songTrack.setVolume(volumeCCs[0].value);
+        } else {
+          const volumeTarget = new AutomationTarget(AutomationTargetType.VOLUME);
+          songTrack.getAutomation().addAutomation(volumeTarget);
+          const volumeTargetValue = songTrack
+            .getAutomation()
+            .getAutomationValueByTarget(volumeTarget) as AutomationValue;
+          for (const cc of volumeCCs) {
+            volumeTargetValue.addPoint(
+              insertOffset + scaleIntBy(cc.ticks, ppqScaleFactor),
+              cc.value,
+            );
+          }
         }
       }
       // Add pan automation.
-      if (track.controlChanges[10]) {
-        const panTarget = new AutomationTarget(AutomationTargetType.PAN);
-        songTrack.getAutomation().addAutomation(panTarget);
-        const panTargetValue = songTrack
-          .getAutomation()
-          .getAutomationValueByTarget(panTarget) as AutomationValue;
-        for (const cc of track.controlChanges[10]) {
-          panTargetValue.addPoint(insertOffset + scaleIntBy(cc.ticks, ppqScaleFactor), cc.value);
+      const panCCs = track.controlChanges[10];
+      if (panCCs) {
+        if (panCCs.length === 1) {
+          const actualPan = Math.round(panCCs[0].value * 127 - 64);
+          songTrack.setPan(actualPan);
+        } else {
+          const panTarget = new AutomationTarget(AutomationTargetType.PAN);
+          songTrack.getAutomation().addAutomation(panTarget);
+          const panTargetValue = songTrack
+            .getAutomation()
+            .getAutomationValueByTarget(panTarget) as AutomationValue;
+          for (const cc of panCCs) {
+            panTargetValue.addPoint(insertOffset + scaleIntBy(cc.ticks, ppqScaleFactor), cc.value);
+          }
         }
       }
       if (minStartTick !== Number.MAX_SAFE_INTEGER) {
