@@ -11,6 +11,9 @@ import type { AutomationValue } from './automation';
 import { AudioPlugin } from './audio_plugin';
 
 export class Song {
+  /** The default PPQ used in TuneFlow. */
+  static DEFAULT_PPQ = 480;
+
   private masterTrack?: Track;
   private tracks: Track[];
   private PPQ: number;
@@ -412,7 +415,7 @@ export class Song {
     const insertOffset = insertAtTick;
     // For songs that are not 480 PPQ, we need to convert the ticks
     // so that the beats and time remain unchanged.
-    const ppqScaleFactor = 480 / midi.header.ppq;
+    const ppqScaleFactor = Song.DEFAULT_PPQ / midi.header.ppq;
     // Optionally overwrite tempos and time signatures.
     if (overwriteTemposAndTimeSignatures) {
       // Time signatures need to be imported before tempos.
