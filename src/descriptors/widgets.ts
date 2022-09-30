@@ -127,6 +127,17 @@ export interface InputNumberWidgetConfig {
 export interface FileSelectorWidgetConfig {
   /** The extensions (without ".") that are allowed to choose. */
   allowedExtensions: string[];
+
+  /**
+   * Whether to select a directory instead of a file.
+   * Default to false.
+   */
+  selectDirectory: boolean;
+
+  /**
+   * Custom placeholder text.
+   */
+  placeholder?: LabelText;
 }
 
 export interface MultiSourceAudioSelectorResult {
