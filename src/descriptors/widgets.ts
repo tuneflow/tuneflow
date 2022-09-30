@@ -132,7 +132,7 @@ export interface FileSelectorWidgetConfig {
    * Whether to select a directory instead of a file.
    * Default to false.
    */
-  selectDirectory: boolean;
+  selectDirectory?: boolean;
 
   /**
    * Custom placeholder text.
