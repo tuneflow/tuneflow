@@ -1,4 +1,4 @@
-import { ge as greaterEqual, lt as lowerThan } from 'binary-search-bounds';
+import { ge as greaterEqual, lt as lowerThan, le as lowerEqual } from 'binary-search-bounds';
 import cloneDeep from 'lodash.clonedeep';
 import * as _ from 'underscore';
 import type { TuneflowPlugin } from '../base_plugin';
@@ -215,6 +215,35 @@ export class Song {
     return this.tempos;
   }
 
+  getTempoAtTick(tick: number) {
+    return Song.getTempoAtTickImpl<TempoEvent>(
+      tick,
+      this.tempos,
+      tick =>
+        ({
+          getTicks: () => tick,
+        } as any),
+      tempo => tempo.getTicks(),
+    );
+  }
+
+  static getTempoAtTickImpl<T>(
+    tick: number,
+    tempos: T[],
+    tickToTempoFn: (tick: number) => T,
+    tempoToTickFn: (tempo: T) => number,
+  ): T | null {
+    const index = lowerEqual(
+      tempos,
+      tickToTempoFn(tick),
+      (a, b) => tempoToTickFn(a) - tempoToTickFn(b),
+    );
+    if (index < 0 || index >= tempos.length) {
+      return null;
+    }
+    return tempos[index];
+  }
+
   /**
    * Adds a tempo change event into the song and returns it.
    * @returns
@@ -297,6 +326,24 @@ export class Song {
     this.retimingTempoEvents();
   }
 
+  /**
+   * Create a new tempo at the tick or update the existing
+   * tempo if any.
+   * @param tick
+   * @param newBPM
+   */
+  updateTempoAtTick(tick: number, newBPM: number) {
+    const existingEvent = this.getTempoAtTick(tick);
+    if (existingEvent) {
+      this.updateTempo(existingEvent, newBPM);
+    } else {
+      this.createTempoChange({
+        ticks: tick,
+        bpm: newBPM,
+      });
+    }
+  }
+
   getTimeSignatures(): TimeSignatureEvent[] {
     return this.timeSignatures;
   }
@@ -326,6 +373,25 @@ export class Song {
   }
 
   /**
+   * Create a new time signature at the tick or update the existing
+   * signature if any.
+   * @param tick
+   */
+  updateTimeSignatureAtTick(tick: number, numerator: number, denominator: number) {
+    const existingEvent = this.getTimeSignatureAtTick(tick);
+    if (existingEvent) {
+      existingEvent.setNumerator(numerator);
+      existingEvent.setDenominator(denominator);
+    } else {
+      this.createTimeSignature({
+        ticks: tick,
+        numerator,
+        denominator,
+      });
+    }
+  }
+
+  /**
    *
    * @returns End tick of the last note.
    */
@@ -350,9 +416,53 @@ export class Song {
    *
    * This should be distinguished from `getResolution()`, which is
    * the number of ticks per quater note.
+   * @deprecated Use `getTicksPerBeatAtTick` instead.
    */
   getTicksPerBeat() {
-    return this.getResolution() * (4 / this.getTimeSignatures()[0].getDenominator());
+    return this.getTicksPerBeatAtTick(0);
+  }
+
+  /**
+   * This is the number of ticks per beat based on the time signature.
+   *
+   * This should be distinguished from `getResolution()`, which is
+   * the number of ticks per quater note.
+   */
+  getTicksPerBeatAtTick(tick: number) {
+    const timeSignature = this.getTimeSignatureAtTick(tick);
+    if (!timeSignature) {
+      return 0;
+    }
+    return this.getResolution() * (4 / timeSignature.getDenominator());
+  }
+
+  getTimeSignatureAtTick(tick: number) {
+    return Song.getTimeSignatureAtTickImpl<TimeSignatureEvent>(
+      tick,
+      this.timeSignatures,
+      tick =>
+        ({
+          getTicks: () => tick,
+        } as any),
+      timeSignature => timeSignature.getTicks(),
+    );
+  }
+
+  static getTimeSignatureAtTickImpl<T>(
+    tick: number,
+    timeSignatures: T[],
+    tickToTimeSignatureFn: (tick: number) => T,
+    timeSignatureToTickFn: (timeSignature: T) => number,
+  ): T | null {
+    const index = lowerEqual(
+      timeSignatures,
+      tickToTimeSignatureFn(tick),
+      (a, b) => timeSignatureToTickFn(a) - timeSignatureToTickFn(b),
+    );
+    if (index < 0 || index >= timeSignatures.length) {
+      return null;
+    }
+    return timeSignatures[index];
   }
 
   tickToSeconds(tick: number) {
