@@ -2,6 +2,7 @@ export { TuneflowPlugin } from './base_plugin';
 export type { ReadAPIs } from './base_plugin';
 export { TuneflowPipeline } from './pipeline';
 export { Song } from './models/song';
+export type { BarBeat } from './models/song';
 export { Track, TrackType } from './models/track';
 export { Clip, ClipType } from './models/clip';
 export type { AudioClipData } from './models/clip';

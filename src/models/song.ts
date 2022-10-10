@@ -192,20 +192,127 @@ export class Song {
     return this.PPQ;
   }
 
-  getBeatsPerBar() {
-    return this.getTimeSignatures()[0].getNumerator();
-  }
-
-  getTicksPerBar() {
-    return this.getBeatsPerBar() * this.getResolution();
-  }
-
   /**
    * Sets resolution in Pulse-per-quarter.
    * @param resolution
    */
   setResolution(resolution: number) {
     this.PPQ = resolution;
+  }
+
+  static getLeadingBar(tick: number, barBeats: BarBeat[]) {
+    if (tick < 0) {
+      return barBeats[0];
+    }
+    let index = lowerEqual(barBeats, { tick } as any, (a, b) => a.tick - b.tick);
+    while (index > 0 && barBeats[index].beat !== 1) {
+      index -= 1;
+    }
+    return barBeats[index];
+  }
+
+  static getLeadingBeat(tick: number, barBeats: BarBeat[]) {
+    if (tick < 0) {
+      return barBeats[0];
+    }
+    const index = lowerEqual(barBeats, { tick } as any, (a, b) => a.tick - b.tick);
+    return barBeats[index];
+  }
+
+  static getTrailingBeat(tick: number, barBeats: BarBeat[]) {
+    if (tick < 0) {
+      return barBeats[0];
+    }
+    const index = greaterEqual(barBeats, { tick } as any, (a, b) => a.tick - b.tick);
+    if (index > barBeats.length - 1) {
+      return barBeats[barBeats.length - 1];
+    }
+    return barBeats[index];
+  }
+
+  static getClosestBeat(tick: number, barBeats: BarBeat[]) {
+    if (tick < 0) {
+      return barBeats[0];
+    }
+    const index = lowerEqual(barBeats, { tick } as any, (a, b) => a.tick - b.tick);
+
+    if (index >= barBeats.length - 1) {
+      return barBeats[index];
+    }
+    if (Math.abs(barBeats[index].tick - tick) > Math.abs(barBeats[index + 1].tick - tick)) {
+      // tick is closer to the next beat.
+      return barBeats[index + 1];
+    }
+    return barBeats[index];
+  }
+
+  getBarBeats(endTick: number) {
+    return Song.getBarBeatsImpl<TimeSignatureEvent>(
+      endTick,
+      this.PPQ,
+      this.timeSignatures,
+      signature => ({
+        tick: signature.getTicks(),
+        numerator: signature.getNumerator(),
+        denominator: signature.getDenominator(),
+      }),
+    );
+  }
+
+  /** Gets a list of all bar beats and the corresponding ticks. */
+  static getBarBeatsImpl<T>(
+    endTick: number,
+    ppq: number,
+    timeSignatures: T[],
+    parseTimeSignatureFn: (signature: T) => any,
+  ): BarBeat[] {
+    if (timeSignatures.length === 0) {
+      return [];
+    }
+    const barBeats: BarBeat[] = [];
+    let currentTick = 0;
+    let currentTimeSignatureIndex = 0;
+    let bar = 1;
+    let beat = 1;
+
+    while (currentTick <= endTick) {
+      if (currentTimeSignatureIndex < timeSignatures.length - 1) {
+        const nextTimeSignatureInfo = parseTimeSignatureFn(
+          timeSignatures[currentTimeSignatureIndex + 1],
+        );
+        const nextSwitchingTick = nextTimeSignatureInfo.tick;
+        if (currentTick >= nextSwitchingTick) {
+          currentTick = nextSwitchingTick;
+          currentTimeSignatureIndex += 1;
+          if (beat > 1) {
+            // The bar before the time signature change did not finish,
+            // move on to the next bar.
+            beat = 1;
+            bar += 1;
+          }
+        }
+      }
+      const currentTimeSignatureInfo = parseTimeSignatureFn(
+        timeSignatures[currentTimeSignatureIndex],
+      );
+      barBeats.push({
+        bar,
+        beat,
+        tick: currentTick,
+        numerator: beat === 1 ? currentTimeSignatureInfo.numerator : undefined,
+        denominator: beat === 1 ? currentTimeSignatureInfo.denominator : undefined,
+        ticksPerBeat: beat === 1 ? (ppq * 4) / currentTimeSignatureInfo.denominator : undefined,
+      });
+
+      if (beat >= currentTimeSignatureInfo.numerator) {
+        beat = 1;
+        bar += 1;
+      } else {
+        beat += 1;
+      }
+      currentTick += (ppq * 4) / currentTimeSignatureInfo.denominator;
+    }
+    return barBeats;
   }
 
   /**
@@ -232,14 +339,17 @@ export class Song {
     tempos: T[],
     tickToTempoFn: (tick: number) => T,
     tempoToTickFn: (tempo: T) => number,
-  ): T | null {
-    const index = lowerEqual(
+  ): T {
+    let index = lowerEqual(
       tempos,
       tickToTempoFn(tick),
       (a, b) => tempoToTickFn(a) - tempoToTickFn(b),
     );
-    if (index < 0 || index >= tempos.length) {
-      return null;
+    if (index < 0) {
+      index = 0;
+    }
+    if (index >= tempos.length) {
+      index = tempos.length - 1;
     }
     return tempos[index];
   }
@@ -416,23 +526,9 @@ export class Song {
    *
    * This should be distinguished from `getResolution()`, which is
    * the number of ticks per quater note.
-   * @deprecated Use `getTicksPerBeatAtTick` instead.
-   */
-  getTicksPerBeat() {
-    return this.getTicksPerBeatAtTick(0);
-  }
-
-  /**
-   * This is the number of ticks per beat based on the time signature.
-   *
-   * This should be distinguished from `getResolution()`, which is
-   * the number of ticks per quater note.
    */
   getTicksPerBeatAtTick(tick: number) {
     const timeSignature = this.getTimeSignatureAtTick(tick);
-    if (!timeSignature) {
-      return 0;
-    }
     return this.getResolution() * (4 / timeSignature.getDenominator());
   }
 
@@ -453,14 +549,17 @@ export class Song {
     timeSignatures: T[],
     tickToTimeSignatureFn: (tick: number) => T,
     timeSignatureToTickFn: (timeSignature: T) => number,
-  ): T | null {
-    const index = lowerEqual(
+  ): T {
+    let index = lowerEqual(
       timeSignatures,
       tickToTimeSignatureFn(tick),
       (a, b) => timeSignatureToTickFn(a) - timeSignatureToTickFn(b),
     );
-    if (index < 0 || index >= timeSignatures.length) {
-      return null;
+    if (index < 0) {
+      index = 0;
+    }
+    if (index >= timeSignatures.length) {
+      index = timeSignatures.length - 1;
     }
     return timeSignatures[index];
   }
@@ -697,6 +796,15 @@ export class Song {
 interface PluginContext {
   plugin: TuneflowPlugin;
   numTracksCreatedByPlugin: number;
+}
+
+export interface BarBeat {
+  bar: number;
+  beat: number;
+  tick: number;
+  numerator?: number;
+  denominator?: number;
+  ticksPerBeat?: number;
 }
 
 function scaleIntBy(val: number, factor: number) {
