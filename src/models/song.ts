@@ -565,53 +565,96 @@ export class Song {
   }
 
   tickToSeconds(tick: number) {
-    return Song.tickToSecondsImpl(tick, this.getTempoChanges(), this.getResolution());
+    return Song.tickToSecondsImpl<TempoEvent>(
+      tick,
+      this.getTempoChanges(),
+      this.getResolution(),
+      tick =>
+        ({
+          getTicks: () => tick,
+        } as any),
+      tempo => tempo.getTicks(),
+      tempo => ({
+        tick: tempo.getTicks(),
+        bpm: tempo.getBpm(),
+        time: tempo.getTime(),
+      }),
+    );
   }
 
-  static tickToSecondsImpl(tick: number, tempos: TempoEvent[], resolution: number) {
+  static tickToSecondsImpl<T>(
+    tick: number,
+    tempos: T[],
+    resolution: number,
+    tickToTempoFn: (tick: number) => T,
+    tempoToTickFn: (tempo: T) => number,
+    parseTempoFn: (tempo: T) => any,
+  ): number {
     if (tick === 0) {
       return 0;
     }
     let baseTempoIndex = lowerThan(
       tempos,
-      // @ts-ignore
-      { getTicks: () => tick },
-      (a, b) => a.getTicks() - b.getTicks(),
+      tickToTempoFn(tick),
+      (a, b) => tempoToTickFn(a) - tempoToTickFn(b),
     );
     if (baseTempoIndex == -1) {
       // If no tempo is found before the tick, use the first tempo.
       baseTempoIndex = 0;
     }
     const baseTempoChange = tempos[baseTempoIndex];
-    const ticksDelta = tick - baseTempoChange.getTicks();
+    const baseTempoInfo = parseTempoFn(baseTempoChange);
+    const ticksDelta = tick - baseTempoInfo.tick;
     const ticksPerSecondSinceLastTempoChange = Song.tempoBPMToTicksPerSecond(
-      baseTempoChange.getBpm() as number,
+      baseTempoInfo.bpm as number,
       resolution,
     );
-    return baseTempoChange.getTime() + ticksDelta / ticksPerSecondSinceLastTempoChange;
+    return baseTempoInfo.time + ticksDelta / ticksPerSecondSinceLastTempoChange;
   }
 
   secondsToTick(seconds: number) {
+    return Song.secondsToTickImpl<TempoEvent>(
+      seconds,
+      this.PPQ,
+      this.tempos,
+      seconds => ({ getTime: () => seconds } as any),
+      tempo => tempo.getTime(),
+      tempo => ({
+        tick: tempo.getTicks(),
+        bpm: tempo.getBpm(),
+        time: tempo.getTime(),
+      }),
+    );
+  }
+
+  static secondsToTickImpl<T>(
+    seconds: number,
+    resolution: number,
+    tempos: T[],
+    secondsToTempoFn: (seconds: number) => T,
+    tempoToSecondsFn: (tempo: T) => number,
+    parseTempoFn: (tempo: T) => any,
+  ) {
     if (seconds === 0) {
       return 0;
     }
     let baseTempoIndex = lowerThan(
-      this.getTempoChanges(),
-      // @ts-ignore
-      { getTime: () => seconds },
-      (a, b) => a.getTime() - b.getTime(),
+      tempos,
+      secondsToTempoFn(seconds),
+      (a, b) => tempoToSecondsFn(a) - tempoToSecondsFn(b),
     );
     if (baseTempoIndex == -1) {
       // If no tempo is found before the time, use the first tempo.
       baseTempoIndex = 0;
     }
-    const baseTempoChange = this.getTempoChanges()[baseTempoIndex];
-    const timeDelta = seconds - baseTempoChange.getTime();
+    const baseTempoChange = tempos[baseTempoIndex];
+    const baseTempoInfo = parseTempoFn(baseTempoChange);
+    const timeDelta = seconds - baseTempoInfo.time;
     const ticksPerSecondSinceLastTempoChange = Song.tempoBPMToTicksPerSecond(
-      baseTempoChange.getBpm(),
-      this.getResolution(),
+      baseTempoInfo.bpm,
+      resolution,
     );
-    return Math.round(baseTempoChange.getTicks() + timeDelta * ticksPerSecondSinceLastTempoChange);
+    return Math.round(baseTempoInfo.tick + timeDelta * ticksPerSecondSinceLastTempoChange);
   }
 
   static importMIDI(
