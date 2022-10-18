@@ -5824,6 +5824,8 @@ class st {
     this.PPQ = e;
   }
   static getLeadingBar(e, n) {
+    if (!n || n.length === 0)
+      return null;
     if (e < 0)
       return n[0];
     let r = k.le(n, { tick: e }, (i, s) => i.tick - s.tick);
@@ -5832,18 +5834,24 @@ class st {
     return n[r];
   }
   static getLeadingBeat(e, n) {
+    if (!n || n.length === 0)
+      return null;
     if (e < 0)
       return n[0];
     const r = k.le(n, { tick: e }, (i, s) => i.tick - s.tick);
     return n[r];
   }
   static getTrailingBeat(e, n) {
+    if (!n || n.length === 0)
+      return null;
     if (e < 0)
       return n[0];
     const r = k.ge(n, { tick: e }, (i, s) => i.tick - s.tick);
     return r > n.length - 1 ? n[n.length - 1] : n[r];
   }
   static getClosestBeat(e, n) {
+    if (!n || n.length === 0)
+      return null;
     if (e < 0)
       return n[0];
     const r = k.le(n, { tick: e }, (i, s) => i.tick - s.tick);

@@ -201,6 +201,9 @@ export class Song {
   }
 
   static getLeadingBar(tick: number, barBeats: BarBeat[]) {
+    if (!barBeats || barBeats.length === 0) {
+      return null;
+    }
     if (tick < 0) {
       return barBeats[0];
     }
@@ -212,6 +215,9 @@ export class Song {
   }
 
   static getLeadingBeat(tick: number, barBeats: BarBeat[]) {
+    if (!barBeats || barBeats.length === 0) {
+      return null;
+    }
     if (tick < 0) {
       return barBeats[0];
     }
@@ -220,6 +226,9 @@ export class Song {
   }
 
   static getTrailingBeat(tick: number, barBeats: BarBeat[]) {
+    if (!barBeats || barBeats.length === 0) {
+      return null;
+    }
     if (tick < 0) {
       return barBeats[0];
     }
@@ -231,6 +240,9 @@ export class Song {
   }
 
   static getClosestBeat(tick: number, barBeats: BarBeat[]) {
+    if (!barBeats || barBeats.length === 0) {
+      return null;
+    }
     if (tick < 0) {
       return barBeats[0];
     }
