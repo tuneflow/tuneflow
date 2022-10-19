@@ -3685,6 +3685,17 @@ class Q {
       l -= 1;
     return l < 0 ? [] : l < a ? [] : e.slice(a, l + 1);
   }
+  static getOverlappingNotesWithinRangeImpl(e, n, r, i, s) {
+    const o = [];
+    for (const a of e) {
+      const l = i(a);
+      if (l > r)
+        break;
+      const u = s(a);
+      (l >= n && l <= r || u >= n && u <= r) && o.push(a);
+    }
+    return o;
+  }
   static isNoteInClip(e, n, r, i) {
     return (e >= r || r === 0 && e <= 0) && e < i && n > e;
   }

@@ -506,6 +506,8 @@ export class Clip {
   }
 
   /**
+   * Gets notes that are playable in a range.
+   *
    * Performs two O(logn) searches and some extra while loops to narrow down range.
    *
    * @param rawNotes
@@ -575,6 +577,42 @@ export class Clip {
       return [];
     }
     return rawNotes.slice(startIndex, endIndex + 1);
+  }
+
+  /**
+   * Gets the notes that are overlapping a given range.
+   * This differs from `getNotesInRangeImpl` in that this simply checks
+   * for range overlapping.
+   * @param rawNotes
+   * @param startTick
+   * @param endTick
+   * @param noteToStartTickFn
+   * @param noteToEndTickFn
+   * @returns
+   */
+  static getOverlappingNotesWithinRangeImpl<T>(
+    rawNotes: T[],
+    startTick: number,
+    endTick: number,
+    noteToStartTickFn: (note: T) => number,
+    noteToEndTickFn: (note: T) => number,
+  ): T[] {
+    const candidates = [];
+    for (const note of rawNotes) {
+      const noteStartTick = noteToStartTickFn(note);
+      if (noteStartTick > endTick) {
+        // This note and all following notes won't overlap.
+        break;
+      }
+      const noteEndTick = noteToEndTickFn(note);
+      if (
+        (noteStartTick >= startTick && noteStartTick <= endTick) ||
+        (noteEndTick >= startTick && noteEndTick <= endTick)
+      ) {
+        candidates.push(note);
+      }
+    }
+    return candidates;
   }
 
   /**
