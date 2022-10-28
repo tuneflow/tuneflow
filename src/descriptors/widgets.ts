@@ -122,6 +122,7 @@ export interface SwitchWidgetConfig {
 export interface InputNumberWidgetConfig {
   minValue: number;
   maxValue: number;
+  step: number;
 }
 
 export interface FileSelectorWidgetConfig {

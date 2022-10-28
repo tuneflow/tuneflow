@@ -174,6 +174,14 @@ export class Note {
     return Note.isNoteRangeValid(this.startTick, this.endTick);
   }
 
+  /**
+   * Transpose the note by the given number of pitches.
+   * The new pitch will be bounded to the valid pitch range (0 - 127).
+   */
+  transpose(offsetPitches: number) {
+    this.setPitch(Math.min(127, Math.max(0, this.pitch + offsetPitches)));
+  }
+
   static isValidPitch(pitch: number) {
     return pitch >= 0 && pitch <= 127 && Number.isInteger(pitch);
   }
