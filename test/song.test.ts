@@ -95,6 +95,26 @@ describe('Song-related Tests', () => {
         { bar: 4, beat: 1, tick: 4560, ticksPerBeat: 240, numerator: 7, denominator: 8 },
       ]);
     });
+
+    it('Gets bar beat when there are duplicate time signatures correctly', () => {
+      song.createTimeSignature({ ticks: 480, numerator: 4, denominator: 4 });
+      expect(song.getBarBeats(4570)).toEqual([
+        { bar: 1, beat: 1, tick: 0, ticksPerBeat: 480, numerator: 4, denominator: 4 },
+        { bar: 1, beat: 2, tick: 480 },
+        { bar: 1, beat: 3, tick: 960 },
+        { bar: 1, beat: 4, tick: 1440 },
+        { bar: 2, beat: 1, tick: 1920, ticksPerBeat: 480, numerator: 4, denominator: 4 },
+        { bar: 2, beat: 2, tick: 2400 },
+        { bar: 3, beat: 1, tick: 2880, ticksPerBeat: 240, numerator: 7, denominator: 8 },
+        { bar: 3, beat: 2, tick: 3120 },
+        { bar: 3, beat: 3, tick: 3360 },
+        { bar: 3, beat: 4, tick: 3600 },
+        { bar: 3, beat: 5, tick: 3840 },
+        { bar: 3, beat: 6, tick: 4080 },
+        { bar: 3, beat: 7, tick: 4320 },
+        { bar: 4, beat: 1, tick: 4560, ticksPerBeat: 240, numerator: 7, denominator: 8 },
+      ]);
+    });
   });
 
   describe('Gets closest/leading/trailing beats/bars correctly', () => {

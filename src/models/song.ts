@@ -281,6 +281,25 @@ export class Song {
     if (timeSignatures.length === 0) {
       return [];
     }
+    // Dedupe time signatures.
+    const dedupedTimeSignatures = [];
+    for (let i = 0; i < timeSignatures.length; i += 1) {
+      if (dedupedTimeSignatures.length === 0) {
+        dedupedTimeSignatures.push(timeSignatures[i]);
+      } else {
+        const currentTimeSignatureInfo = parseTimeSignatureFn(timeSignatures[i]);
+        const prevTimeSignatureInfo = parseTimeSignatureFn(
+          dedupedTimeSignatures[dedupedTimeSignatures.length - 1],
+        );
+        if (
+          currentTimeSignatureInfo.numerator !== prevTimeSignatureInfo.numerator ||
+          currentTimeSignatureInfo.denominator !== prevTimeSignatureInfo.denominator
+        ) {
+          dedupedTimeSignatures.push(timeSignatures[i]);
+        }
+      }
+    }
+    // Calculate bar beats.
     const barBeats: BarBeat[] = [];
     let currentTick = 0;
     let currentTimeSignatureIndex = 0;
@@ -288,9 +307,9 @@ export class Song {
     let beat = 1;
 
     while (currentTick <= endTick) {
-      if (currentTimeSignatureIndex < timeSignatures.length - 1) {
+      if (currentTimeSignatureIndex < dedupedTimeSignatures.length - 1) {
         const nextTimeSignatureInfo = parseTimeSignatureFn(
-          timeSignatures[currentTimeSignatureIndex + 1],
+          dedupedTimeSignatures[currentTimeSignatureIndex + 1],
         );
         const nextSwitchingTick = nextTimeSignatureInfo.tick;
         if (currentTick >= nextSwitchingTick) {
@@ -305,7 +324,7 @@ export class Song {
         }
       }
       const currentTimeSignatureInfo = parseTimeSignatureFn(
-        timeSignatures[currentTimeSignatureIndex],
+        dedupedTimeSignatures[currentTimeSignatureIndex],
       );
       barBeats.push({
         bar,
