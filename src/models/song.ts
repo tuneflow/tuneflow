@@ -420,6 +420,17 @@ export class Song {
     return tempoChange;
   }
 
+  removeTempoChange(index: number) {
+    if (this.getTempoChanges().length <= 1) {
+      throw new Error('Song has to have at least one tempo change.');
+    }
+    if (index === 0) {
+      throw new Error('Cannot remove the first tempo.');
+    }
+    this.getTempoChanges().splice(index, /* deleteCount= */ 1);
+    this.retimingTempoEvents();
+  }
+
   /**
    * Overwrite the existing tempo changes with the new tempo changes. Tempo times will be re-calculated.
    *
@@ -452,18 +463,34 @@ export class Song {
         bpm: tempoEvent.getBpm(),
       });
     }
-  }
-
-  /**
-   * Overwrite all existing time signatures with the given new time signatures.
-   * @param timeSignatures
-   */
-  overwriteTimeSignatures(timeSignatures: TimeSignatureEvent[]) {
-    this.timeSignatures = cloneDeep(timeSignatures);
+    this.retimingTempoEvents();
   }
 
   updateTempo(tempoEvent: TempoEvent, newBPM: number) {
     tempoEvent.setBpmInternal(newBPM);
+    this.retimingTempoEvents();
+  }
+
+  moveTempo(tempoIndex: number, moveToTick: number) {
+    const tempo = this.getTempoChanges()[tempoIndex];
+    if (!tempo) {
+      return;
+    }
+    if (tempoIndex > 0) {
+      const prevTempo = this.getTempoChanges()[tempoIndex - 1];
+      if (prevTempo.getTicks() === moveToTick) {
+        // Moved to another tempo, delete it.
+        this.removeTempoChange(tempoIndex - 1);
+      } else if (tempoIndex < this.getTempoChanges().length - 1) {
+        const nextTempo = this.getTempoChanges()[tempoIndex + 1];
+        if (nextTempo && nextTempo.getTicks() === moveToTick) {
+          // Moved to another tempo, delete it.
+          this.removeTempoChange(tempoIndex + 1);
+        }
+      }
+    }
+    // @ts-ignore
+    tempo.ticks = moveToTick;
     this.retimingTempoEvents();
   }
 
@@ -487,6 +514,14 @@ export class Song {
 
   getTimeSignatures(): TimeSignatureEvent[] {
     return this.timeSignatures;
+  }
+
+  /**
+   * Overwrite all existing time signatures with the given new time signatures.
+   * @param timeSignatures
+   */
+  overwriteTimeSignatures(timeSignatures: TimeSignatureEvent[]) {
+    this.timeSignatures = cloneDeep(timeSignatures);
   }
 
   createTimeSignature({
@@ -513,6 +548,16 @@ export class Song {
     return timeSignature;
   }
 
+  removeTimeSignature(index: number) {
+    if (this.getTimeSignatures().length <= 1) {
+      throw new Error('Song has to have at least one time signature change.');
+    }
+    if (index === 0) {
+      throw new Error('Cannot remove the first time signature.');
+    }
+    this.getTimeSignatures().splice(index, /* deleteCount= */ 1);
+  }
+
   /**
    * Create a new time signature at the tick or update the existing
    * signature if any.
@@ -530,6 +575,29 @@ export class Song {
         denominator,
       });
     }
+  }
+
+  moveTimeSignature(timeSignatureIndex: number, moveToTick: number) {
+    const timeSignature = this.getTimeSignatures()[timeSignatureIndex];
+    if (!timeSignature) {
+      return;
+    }
+    if (timeSignatureIndex > 0) {
+      const prevTimeSignature = this.getTimeSignatures()[timeSignatureIndex - 1];
+      if (prevTimeSignature.getTicks() === moveToTick) {
+        // Moved to another time signature, delete it.
+        this.removeTimeSignature(timeSignatureIndex - 1);
+      } else if (timeSignatureIndex < this.getTimeSignatures().length - 1) {
+        const nextTimeSignature = this.getTimeSignatures()[timeSignatureIndex + 1];
+        if (nextTimeSignature && nextTimeSignature.getTicks() === moveToTick) {
+          // Moved to another time signature, delete it.
+          this.removeTimeSignature(timeSignatureIndex + 1);
+        }
+      }
+    }
+    // @ts-ignore
+    timeSignature.ticks = moveToTick;
+    this.timeSignatures.sort((a, b) => a.getTicks() - b.getTicks());
   }
 
   /**

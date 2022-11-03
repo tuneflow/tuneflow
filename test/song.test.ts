@@ -31,7 +31,7 @@ describe('Song-related Tests', () => {
     song.createTimeSignature({ ticks: 2880, numerator: 7, denominator: 8 });
   });
 
-  describe('Gets tempos correctly', () => {
+  describe('Works with tempos correctly', () => {
     it('Gets tempo at tick correctly', async () => {
       expect(song.getTempoAtTick(-10).getTicks()).toBe(0);
       expect(song.getTempoAtTick(-10).getBpm()).toBe(120);
@@ -48,9 +48,128 @@ describe('Song-related Tests', () => {
       expect(song.getTempoAtTick(9999).getTicks()).toBe(1440);
       expect(song.getTempoAtTick(9999).getBpm()).toBe(60);
     });
+
+    it('Move tempo non-overlapping correctly', async () => {
+      song.createTempoChange({
+        ticks: 2880,
+        bpm: 240,
+      });
+      expect(song.getTempoChanges().length).toBe(3);
+      expect(() => song.moveTempo(1, 0)).toThrowError();
+      song.moveTempo(1, 480);
+      expect(song.getTempoChanges().length).toBe(3);
+      expect(song.getTempoChanges()[0].getBpm()).toBe(120);
+      expect(song.getTempoChanges()[0].getTime()).toBe(0);
+      expect(song.getTempoChanges()[1].getBpm()).toBe(60);
+      expect(song.getTempoChanges()[1].getTime()).toBeCloseTo(0.5);
+      expect(song.getTempoChanges()[2].getBpm()).toBe(240);
+      expect(song.getTempoChanges()[2].getTime()).toBeCloseTo(5.5);
+    });
+
+    it('Move tempo past another correctly', async () => {
+      song.createTempoChange({
+        ticks: 2880,
+        bpm: 240,
+      });
+      expect(song.getTempoChanges().length).toBe(3);
+      song.moveTempo(1, 3360);
+      expect(song.getTempoChanges().length).toBe(3);
+      expect(song.getTempoChanges()[0].getBpm()).toBe(120);
+      expect(song.getTempoChanges()[0].getTime()).toBe(0);
+      expect(song.getTempoChanges()[1].getBpm()).toBe(240);
+      expect(song.getTempoChanges()[1].getTime()).toBeCloseTo(3);
+      expect(song.getTempoChanges()[2].getBpm()).toBe(60);
+      expect(song.getTempoChanges()[2].getTime()).toBeCloseTo(3.25);
+    });
+
+    it('Move tempo overwrite correctly', async () => {
+      song.createTempoChange({
+        ticks: 2880,
+        bpm: 240,
+      });
+      expect(song.getTempoChanges().length).toBe(3);
+      expect(() => song.moveTempo(1, 0)).toThrowError();
+      song.moveTempo(2, 1440);
+      expect(song.getTempoChanges().length).toBe(2);
+      expect(song.getTempoChanges()[0].getBpm()).toBe(120);
+      expect(song.getTempoChanges()[1].getBpm()).toBe(240);
+    });
+
+    it('Remove tempo correctly', async () => {
+      expect(() => song.removeTempoChange(0)).toThrowError();
+      song.removeTempoChange(1);
+      expect(song.getTempoChanges().length).toBe(1);
+      expect(song.getTempoChanges()[0].getBpm()).toBe(120);
+      expect(() => song.removeTempoChange(0)).toThrowError();
+    });
   });
 
-  describe('Gets time signatures correctly', () => {
+  describe('Works with time signatures correctly', () => {
+    it('Move time signature non-overlapping correctly', async () => {
+      expect(song.getTimeSignatures().length).toBe(2);
+      expect(() => song.moveTimeSignature(1, 0)).toThrowError();
+      song.moveTimeSignature(1, 480);
+      expect(song.getTimeSignatures().length).toBe(2);
+      expect(song.getTimeSignatures()[0].getNumerator()).toBe(4);
+      expect(song.getTimeSignatures()[0].getDenominator()).toBe(4);
+      expect(song.getTimeSignatures()[1].getNumerator()).toBe(7);
+      expect(song.getTimeSignatures()[1].getDenominator()).toBe(8);
+    });
+
+    it('Move time signature past another correctly', async () => {
+      song.createTimeSignature({
+        ticks: 480,
+        numerator: 3,
+        denominator: 4,
+      });
+      expect(song.getTimeSignatures().length).toBe(3);
+      expect(song.getTimeSignatures()[0].getNumerator()).toBe(4);
+      expect(song.getTimeSignatures()[0].getDenominator()).toBe(4);
+      expect(song.getTimeSignatures()[1].getNumerator()).toBe(3);
+      expect(song.getTimeSignatures()[1].getDenominator()).toBe(4);
+      expect(song.getTimeSignatures()[2].getNumerator()).toBe(7);
+      expect(song.getTimeSignatures()[2].getDenominator()).toBe(8);
+      song.moveTimeSignature(1, 3360);
+      expect(song.getTimeSignatures().length).toBe(3);
+      expect(song.getTimeSignatures()[0].getNumerator()).toBe(4);
+      expect(song.getTimeSignatures()[0].getDenominator()).toBe(4);
+      expect(song.getTimeSignatures()[1].getNumerator()).toBe(7);
+      expect(song.getTimeSignatures()[1].getDenominator()).toBe(8);
+      expect(song.getTimeSignatures()[2].getNumerator()).toBe(3);
+      expect(song.getTimeSignatures()[2].getDenominator()).toBe(4);
+    });
+
+    it('Move time signature overwrite correctly', async () => {
+      song.createTimeSignature({
+        ticks: 480,
+        numerator: 3,
+        denominator: 4,
+      });
+      expect(song.getTimeSignatures().length).toBe(3);
+      expect(song.getTimeSignatures()[0].getNumerator()).toBe(4);
+      expect(song.getTimeSignatures()[0].getDenominator()).toBe(4);
+      expect(song.getTimeSignatures()[1].getNumerator()).toBe(3);
+      expect(song.getTimeSignatures()[1].getDenominator()).toBe(4);
+      expect(song.getTimeSignatures()[2].getNumerator()).toBe(7);
+      expect(song.getTimeSignatures()[2].getDenominator()).toBe(8);
+      song.moveTimeSignature(2, 480);
+      expect(song.getTimeSignatures().length).toBe(2);
+      expect(song.getTimeSignatures()[0].getNumerator()).toBe(4);
+      expect(song.getTimeSignatures()[0].getDenominator()).toBe(4);
+      expect(song.getTimeSignatures()[1].getNumerator()).toBe(7);
+      expect(song.getTimeSignatures()[1].getDenominator()).toBe(8);
+    });
+
+    it('Remove time signature correctly', async () => {
+      expect(song.getTimeSignatures().length).toBe(2);
+      expect(() => song.removeTimeSignature(0)).toThrowError();
+      song.removeTimeSignature(1);
+      expect(song.getTimeSignatures().length).toBe(1);
+      expect(song.getTimeSignatures()[0].getNumerator()).toBe(4);
+      expect(song.getTimeSignatures()[0].getDenominator()).toBe(4);
+      expect(() => song.removeTimeSignature(0)).toThrowError();
+    });
+
     it('Gets time signature at tick correctly', async () => {
       expect(song.getTimeSignatureAtTick(-10).getTicks()).toBe(0);
       expect(song.getTimeSignatureAtTick(-10).getNumerator()).toBe(4);
