@@ -39,6 +39,7 @@ export interface WidgetDescriptor {
     | InputNumberWidgetConfig
     | FileSelectorWidgetConfig
     | SelectListWidgetConfig
+    | MultiSourceAudioSelectorWidgetConfig
     | undefined
     | null;
 }
@@ -141,8 +142,15 @@ export interface FileSelectorWidgetConfig {
   placeholder?: LabelText;
 }
 
+type AudioSourceType = 'file' | 'audioTrack' | 'record';
+
+export interface MultiSourceAudioSelectorWidgetConfig {
+  // Default to allow all audio sources.
+  allowedSources?: AudioSourceType[];
+}
+
 export interface MultiSourceAudioSelectorResult {
-  sourceType: 'file' | 'audioTrack' | 'record';
+  sourceType: AudioSourceType;
   /**
    * Result type will be:
    * * `File` if `sourceType` is 'file'
