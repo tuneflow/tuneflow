@@ -20,6 +20,8 @@ export enum WidgetType {
   MultiSourceAudioSelector = 13,
   AudioRecorder = 14,
   SelectList = 15,
+  /** Read-only table of descriptions. */
+  Descriptions = 16,
 }
 
 /**
@@ -40,6 +42,7 @@ export interface WidgetDescriptor {
     | FileSelectorWidgetConfig
     | SelectListWidgetConfig
     | MultiSourceAudioSelectorWidgetConfig
+    | DescriptionsWidgetConfig
     | undefined
     | null;
 }
@@ -158,6 +161,18 @@ export interface MultiSourceAudioSelectorResult {
    * * `AudioBuffer` if `sourceType` is 'record'
    */
   audioInfo: File | string | AudioBuffer;
+}
+
+export interface DescriptionData {
+  label: LabelText;
+  value: string;
+  span?: number;
+}
+
+export interface DescriptionsWidgetConfig {
+  size: 'mini' | 'small' | 'medium' | 'large';
+  column: number;
+  data: DescriptionData[];
 }
 
 export async function getFileContentFromFileSelector(file: File) {
