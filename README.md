@@ -1,6 +1,6 @@
 # TuneFlow 插件系统
 
-[English](./README.md) | [中文](./README.md)
+[English](./README.en.md) | [中文](./README.md)
 
 这里是 TuneFlow 插件系统，负责运行插件和维护工程状态。你可以把它理解为 TuneFlow 编辑器的驱动引擎。
 

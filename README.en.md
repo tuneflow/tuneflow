@@ -1,6 +1,6 @@
 # TuneFlow
 
-[English](./README.md) | [中文](./README.md)
+[English](./README.en.md) | [中文](./README.md)
 
 This is the plugin system of TuneFlow. It is in charge of running plugins and maintaining the states of a project. You can interpret it as the driving engine of TuneFlow's editor.
 
