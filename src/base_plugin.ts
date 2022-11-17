@@ -1,4 +1,4 @@
-import type { ParamDescriptor, LabelText, SongAccess } from './descriptors';
+import type { ParamDescriptor, LabelText, SongAccess, PluginInfo } from './descriptors';
 import type { Song } from './models/song';
 import * as _ from 'underscore';
 import { nanoid } from 'nanoid';
@@ -72,6 +72,10 @@ export class TuneflowPlugin {
    * The description of this plugin.
    */
   static pluginDescription(): LabelText | null {
+    return null;
+  }
+
+  static pluginInfo(): PluginInfo | null {
     return null;
   }
 

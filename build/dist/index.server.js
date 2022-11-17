@@ -1143,6 +1143,9 @@ class Rs {
   static pluginDescription() {
     return null;
   }
+  static pluginInfo() {
+    return null;
+  }
   static allowReset() {
     return !0;
   }
