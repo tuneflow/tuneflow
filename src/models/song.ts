@@ -9,6 +9,8 @@ import { Midi } from '@tonejs/midi';
 import { AutomationTarget, AutomationTargetType } from './automation';
 import type { AutomationValue } from './automation';
 import { AudioPlugin } from './audio_plugin';
+import { StructureMarker } from './marker';
+import type { StructureType } from './marker';
 
 export class Song {
   /** The default PPQ used in TuneFlow. */
@@ -19,6 +21,7 @@ export class Song {
   private PPQ: number;
   private tempos: TempoEvent[];
   private timeSignatures: TimeSignatureEvent[];
+  private structures: StructureMarker[];
   private pluginContext?: PluginContext;
   private nextTrackRank = 1;
 
@@ -27,6 +30,7 @@ export class Song {
     this.PPQ = 0;
     this.tempos = [];
     this.timeSignatures = [];
+    this.structures = [];
   }
 
   getMasterTrack() {
@@ -476,19 +480,22 @@ export class Song {
     if (!tempo) {
       return;
     }
-    if (tempoIndex > 0) {
-      const prevTempo = this.getTempoChanges()[tempoIndex - 1];
-      if (prevTempo.getTicks() === moveToTick) {
+    if (tempoIndex === 0) {
+      // Cannot move the first tempo.
+      return;
+    }
+    const prevTempo = this.getTempoChanges()[tempoIndex - 1];
+    if (prevTempo.getTicks() === moveToTick) {
+      // Moved to another tempo, delete it.
+      this.removeTempoChange(tempoIndex - 1);
+    } else if (tempoIndex < this.getTempoChanges().length - 1) {
+      const nextTempo = this.getTempoChanges()[tempoIndex + 1];
+      if (nextTempo && nextTempo.getTicks() === moveToTick) {
         // Moved to another tempo, delete it.
-        this.removeTempoChange(tempoIndex - 1);
-      } else if (tempoIndex < this.getTempoChanges().length - 1) {
-        const nextTempo = this.getTempoChanges()[tempoIndex + 1];
-        if (nextTempo && nextTempo.getTicks() === moveToTick) {
-          // Moved to another tempo, delete it.
-          this.removeTempoChange(tempoIndex + 1);
-        }
+        this.removeTempoChange(tempoIndex + 1);
       }
     }
+
     // @ts-ignore
     tempo.ticks = moveToTick;
     this.retimingTempoEvents();
@@ -582,22 +589,125 @@ export class Song {
     if (!timeSignature) {
       return;
     }
-    if (timeSignatureIndex > 0) {
-      const prevTimeSignature = this.getTimeSignatures()[timeSignatureIndex - 1];
-      if (prevTimeSignature.getTicks() === moveToTick) {
+    if (timeSignatureIndex == 0) {
+      // Cannot move the first time signature.
+      return;
+    }
+    const prevTimeSignature = this.getTimeSignatures()[timeSignatureIndex - 1];
+    if (prevTimeSignature.getTicks() === moveToTick) {
+      // Moved to another time signature, delete it.
+      this.removeTimeSignature(timeSignatureIndex - 1);
+    } else if (timeSignatureIndex < this.getTimeSignatures().length - 1) {
+      const nextTimeSignature = this.getTimeSignatures()[timeSignatureIndex + 1];
+      if (nextTimeSignature && nextTimeSignature.getTicks() === moveToTick) {
         // Moved to another time signature, delete it.
-        this.removeTimeSignature(timeSignatureIndex - 1);
-      } else if (timeSignatureIndex < this.getTimeSignatures().length - 1) {
-        const nextTimeSignature = this.getTimeSignatures()[timeSignatureIndex + 1];
-        if (nextTimeSignature && nextTimeSignature.getTicks() === moveToTick) {
-          // Moved to another time signature, delete it.
-          this.removeTimeSignature(timeSignatureIndex + 1);
-        }
+        this.removeTimeSignature(timeSignatureIndex + 1);
       }
     }
+
     // @ts-ignore
     timeSignature.ticks = moveToTick;
     this.timeSignatures.sort((a, b) => a.getTicks() - b.getTicks());
+  }
+
+  getStructures() {
+    return this.structures;
+  }
+
+  getStructureAtIndex(index: number) {
+    return this.structures[index];
+  }
+
+  getStructureAtTick(tick: number) {
+    return Song.getStructureAtTickImpl<StructureMarker>(
+      tick,
+      this.structures,
+      tick => ({ getTick: () => tick } as any),
+      structure => structure.getTick(),
+    );
+  }
+
+  static getStructureAtTickImpl<T>(
+    tick: number,
+    structures: T[],
+    tickToStructureFn: (tick: number) => T,
+    structureToTickFn: (structure: T) => number,
+  ): T {
+    let index = lowerEqual(
+      structures,
+      tickToStructureFn(tick),
+      (a, b) => structureToTickFn(a) - structureToTickFn(b),
+    );
+    if (index < 0) {
+      index = 0;
+    }
+    if (index >= structures.length) {
+      index = structures.length - 1;
+    }
+    return structures[index];
+  }
+
+  createStructure({ tick, type }: { tick: number; type: StructureType }) {
+    const structure = new StructureMarker({
+      tick,
+      type,
+    });
+    this.structures.push(structure);
+    if (this.structures.length === 1) {
+      // If there are only 1 structure, move it to the start.
+      structure.setTick(0);
+    }
+    this.structures.sort((a, b) => a.getTick() - b.getTick());
+  }
+
+  moveStructure(structureIndex: number, moveToTick: number) {
+    const structure = this.getStructures()[structureIndex];
+    if (!structure) {
+      return;
+    }
+    if (structureIndex <= 0) {
+      return;
+    }
+    const prevStructure = this.getStructures()[structureIndex - 1];
+    if (prevStructure.getTick() === moveToTick) {
+      // Moved to another structure, delete it.
+      this.removeStructure(structureIndex - 1);
+    } else if (structureIndex < this.getStructures().length - 1) {
+      const nextStructure = this.getStructures()[structureIndex + 1];
+      if (nextStructure && nextStructure.getTick() === moveToTick) {
+        // Moved to another time signature, delete it.
+        this.removeStructure(structureIndex + 1);
+      }
+    }
+
+    // @ts-ignore
+    structure.tick = moveToTick;
+    this.structures.sort((a, b) => a.getTick() - b.getTick());
+  }
+
+  updateStructureAtTick(tick: number, type: StructureType) {
+    const existinStructure = this.getStructureAtTick(tick);
+    if (existinStructure) {
+      existinStructure.setType(type);
+    } else {
+      this.createStructure({
+        tick,
+        type,
+      });
+    }
+  }
+
+  removeStructure(index: number) {
+    if (index < 0 || index >= this.structures.length) {
+      return;
+    }
+    this.getStructures().splice(index, /* deleteCount= */ 1);
+    if (this.structures.length > 0 && this.structures[0].getTick() > 0) {
+      // If the first structure of the remaining ones does not start
+      // from 0, move it to 0.
+      this.structures[0].setTick(0);
+    }
+    this.structures.sort((a, b) => a.getTick() - b.getTick());
   }
 
   /**

@@ -1,5 +1,6 @@
 import { Song, TuneflowPlugin } from '../src';
 import type { SongAccess } from '../src';
+import { StructureType } from '../src/models/marker';
 
 describe('Song-related Tests', () => {
   class TestUtilsPlugin extends TuneflowPlugin {
@@ -192,6 +193,206 @@ describe('Song-related Tests', () => {
       expect(song.getTimeSignatureAtTick(9999).getTicks()).toBe(2880);
       expect(song.getTimeSignatureAtTick(9999).getNumerator()).toBe(7);
       expect(song.getTimeSignatureAtTick(9999).getDenominator()).toBe(8);
+    });
+  });
+
+  describe('Works with structures correctly', () => {
+    it('Gets structure at index correctly', async () => {
+      expect(song.getStructureAtIndex(0)).toBeUndefined();
+
+      song.createStructure({
+        tick: 0,
+        type: StructureType.INTRO,
+      });
+
+      song.createStructure({
+        tick: 480,
+        type: StructureType.VERSE,
+      });
+
+      expect(song.getStructureAtIndex(0).getTick()).toBe(0);
+      expect(song.getStructureAtIndex(0).getType()).toBe(StructureType.INTRO);
+
+      expect(song.getStructureAtIndex(1).getTick()).toBe(480);
+      expect(song.getStructureAtIndex(1).getType()).toBe(StructureType.VERSE);
+    });
+
+    it('Gets structure at tick correctly', async () => {
+      expect(song.getStructureAtTick(0)).toBeUndefined();
+      expect(song.getStructureAtTick(-1)).toBeUndefined();
+
+      song.createStructure({
+        tick: 0,
+        type: StructureType.INTRO,
+      });
+
+      song.createStructure({
+        tick: 480,
+        type: StructureType.VERSE,
+      });
+
+      expect(song.getStructureAtTick(-1).getTick()).toBe(0);
+      expect(song.getStructureAtTick(-1).getType()).toBe(StructureType.INTRO);
+
+      expect(song.getStructureAtTick(0).getTick()).toBe(0);
+      expect(song.getStructureAtTick(0).getType()).toBe(StructureType.INTRO);
+
+      expect(song.getStructureAtTick(240).getTick()).toBe(0);
+      expect(song.getStructureAtTick(240).getType()).toBe(StructureType.INTRO);
+
+      expect(song.getStructureAtTick(480).getTick()).toBe(480);
+      expect(song.getStructureAtTick(480).getType()).toBe(StructureType.VERSE);
+
+      expect(song.getStructureAtTick(960).getTick()).toBe(480);
+      expect(song.getStructureAtTick(960).getType()).toBe(StructureType.VERSE);
+    });
+
+    it('Create first structure from non-0 tick', async () => {
+      song.createStructure({
+        tick: 480,
+        type: StructureType.INTRO,
+      });
+      expect(song.getStructureAtIndex(0).getTick()).toBe(0);
+      expect(song.getStructureAtIndex(0).getType()).toBe(StructureType.INTRO);
+    });
+
+    it('Sort created structures correctly', async () => {
+      song.createStructure({
+        tick: 480,
+        type: StructureType.INTRO,
+      });
+      song.createStructure({
+        tick: 960,
+        type: StructureType.VERSE,
+      });
+      song.createStructure({
+        tick: 480,
+        type: StructureType.OUTRO,
+      });
+      expect(song.getStructureAtIndex(0).getTick()).toBe(0);
+      expect(song.getStructureAtIndex(0).getType()).toBe(StructureType.INTRO);
+      expect(song.getStructureAtIndex(1).getTick()).toBe(480);
+      expect(song.getStructureAtIndex(1).getType()).toBe(StructureType.OUTRO);
+      expect(song.getStructureAtIndex(2).getTick()).toBe(960);
+      expect(song.getStructureAtIndex(2).getType()).toBe(StructureType.VERSE);
+    });
+
+    it('Move structure non-overlapping correctly', async () => {
+      song.createStructure({
+        tick: 0,
+        type: StructureType.INTRO,
+      });
+      song.createStructure({
+        tick: 480,
+        type: StructureType.VERSE,
+      });
+      song.createStructure({
+        tick: 960,
+        type: StructureType.CHORUS,
+      });
+      expect(song.getStructures().length).toBe(3);
+      song.moveStructure(1, 240);
+      expect(song.getStructures().length).toBe(3);
+      expect(song.getStructures()[0].getType()).toBe(StructureType.INTRO);
+      expect(song.getStructures()[0].getTick()).toBe(0);
+      expect(song.getStructures()[1].getType()).toBe(StructureType.VERSE);
+      expect(song.getStructures()[1].getTick()).toBe(240);
+      expect(song.getStructures()[2].getType()).toBe(StructureType.CHORUS);
+      expect(song.getStructures()[2].getTick()).toBe(960);
+    });
+
+    it('Move structure past another correctly', async () => {
+      song.createStructure({
+        tick: 0,
+        type: StructureType.INTRO,
+      });
+      song.createStructure({
+        tick: 480,
+        type: StructureType.VERSE,
+      });
+      song.createStructure({
+        tick: 960,
+        type: StructureType.CHORUS,
+      });
+      expect(song.getStructures().length).toBe(3);
+      song.moveStructure(1, 1920);
+      expect(song.getStructures().length).toBe(3);
+      expect(song.getStructures()[0].getType()).toBe(StructureType.INTRO);
+      expect(song.getStructures()[0].getTick()).toBe(0);
+      expect(song.getStructures()[1].getType()).toBe(StructureType.CHORUS);
+      expect(song.getStructures()[1].getTick()).toBe(960);
+      expect(song.getStructures()[2].getType()).toBe(StructureType.VERSE);
+      expect(song.getStructures()[2].getTick()).toBe(1920);
+    });
+
+    it('Move structure overwrite correctly', async () => {
+      song.createStructure({
+        tick: 0,
+        type: StructureType.INTRO,
+      });
+      song.createStructure({
+        tick: 480,
+        type: StructureType.VERSE,
+      });
+      song.createStructure({
+        tick: 960,
+        type: StructureType.CHORUS,
+      });
+      expect(song.getStructures().length).toBe(3);
+      song.moveStructure(1, 960);
+      expect(song.getStructures().length).toBe(2);
+      expect(song.getStructures()[0].getType()).toBe(StructureType.INTRO);
+      expect(song.getStructures()[0].getTick()).toBe(0);
+      expect(song.getStructures()[1].getType()).toBe(StructureType.VERSE);
+      expect(song.getStructures()[1].getTick()).toBe(960);
+    });
+
+    it('Move structure overwrite first correctly', async () => {
+      song.createStructure({
+        tick: 0,
+        type: StructureType.INTRO,
+      });
+      song.createStructure({
+        tick: 480,
+        type: StructureType.VERSE,
+      });
+      song.createStructure({
+        tick: 960,
+        type: StructureType.CHORUS,
+      });
+      expect(song.getStructures().length).toBe(3);
+      song.moveStructure(1, 0);
+      expect(song.getStructures().length).toBe(2);
+      expect(song.getStructures()[0].getType()).toBe(StructureType.VERSE);
+      expect(song.getStructures()[0].getTick()).toBe(0);
+      expect(song.getStructures()[1].getType()).toBe(StructureType.CHORUS);
+      expect(song.getStructures()[1].getTick()).toBe(960);
+    });
+
+    it('Remove structure correctly', async () => {
+      song.createStructure({
+        tick: 0,
+        type: StructureType.INTRO,
+      });
+      song.createStructure({
+        tick: 480,
+        type: StructureType.VERSE,
+      });
+      song.createStructure({
+        tick: 960,
+        type: StructureType.CHORUS,
+      });
+      expect(song.getStructures().length).toBe(3);
+
+      song.removeStructure(1);
+      expect(song.getTempoChanges().length).toBe(2);
+      expect(song.getStructures()[0].getType()).toBe(StructureType.INTRO);
+      expect(song.getStructures()[0].getTick()).toBe(0);
+      expect(song.getStructures()[1].getType()).toBe(StructureType.CHORUS);
+      expect(song.getStructures()[1].getTick()).toBe(960);
+      song.removeStructure(3);
+      song.removeStructure(-1);
+      expect(song.getTempoChanges().length).toBe(2);
     });
   });
 
