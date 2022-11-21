@@ -6,6 +6,8 @@ const MOCK_READ_APIS: ReadAPIs = {
   translateLabel: (label: any) => label,
   serializeSong: async () => 'serializedSong',
   deserializeSong: async () => new Song(),
+  getAvailableAudioPlugins: async () => [],
+  getFilesInDirectory: async () => [],
 };
 
 describe('Skeleton Tuneflow', () => {

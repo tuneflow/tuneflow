@@ -143,6 +143,9 @@ export interface FileSelectorWidgetConfig {
    * Custom placeholder text.
    */
   placeholder?: LabelText;
+
+  /** If true, selects local system files. */
+  selectLocalFile?: boolean;
 }
 
 type AudioSourceType = 'file' | 'audioTrack' | 'record';
