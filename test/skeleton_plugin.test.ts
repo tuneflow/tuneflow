@@ -3,6 +3,9 @@ import type { SongAccess, ReadAPIs } from '../src';
 
 const MOCK_READ_APIS: ReadAPIs = {
   readAudioBuffer: async () => null,
+  readPluginSpec: async () => null,
+  readFile: async () => null,
+  resolvePath: async (path1, path2) => `${path1}/${path2}`,
   translateLabel: (label: any) => label,
   serializeSong: async () => 'serializedSong',
   deserializeSong: async () => new Song(),

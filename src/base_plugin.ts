@@ -8,6 +8,10 @@ type RunParameters = { [paramName: string]: any };
 
 export interface ReadAPIs {
   readAudioBuffer: (audioFile: string | File) => Promise<AudioBuffer | null | undefined>;
+  readPluginSpec: (specPath: string) => Promise<any>;
+  /** Read a file with an allowed extension type. */
+  readFile: (filePath: string) => Promise<Uint8Array | null>;
+  resolvePath: (path1: string, path2: string) => Promise<string>;
   translateLabel: (label: LabelText) => string;
   serializeSong: (song: Song) => Promise<string>;
   deserializeSong: (encodedSong: string) => Promise<Song>;

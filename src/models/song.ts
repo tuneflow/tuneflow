@@ -836,6 +836,44 @@ export class Song {
     );
   }
 
+  advanceTickByBars(
+    originalTick: number,
+    offsetBar: number,
+    offsetBeat: number,
+    barBeats: BarBeat[],
+  ) {
+    if (originalTick < 0) {
+      // Cannot offset negative tick
+      return null;
+    }
+    if (offsetBar < 0 || offsetBeat < 0) {
+      // Bar and beat offsets have to be positive;
+      return null;
+    }
+    let barBeatIndex = lowerEqual(
+      barBeats,
+      { tick: originalTick } as any,
+      (a, b) => a.tick - b.tick,
+    );
+    const startingBarBeat = barBeats[barBeatIndex < 0 ? 0 : barBeatIndex];
+    if (!startingBarBeat) {
+      return null;
+    }
+    for (; barBeatIndex < barBeats.length; barBeatIndex += 1) {
+      const currentBarBeat = barBeats[barBeatIndex];
+      if (currentBarBeat.bar - startingBarBeat.bar >= offsetBar) {
+        if (
+          currentBarBeat.bar - startingBarBeat.bar > offsetBar ||
+          currentBarBeat.beat >= offsetBeat + 1
+        ) {
+          break;
+        }
+      }
+    }
+    const endingBarBeat = barBeats[barBeatIndex];
+    return endingBarBeat ? endingBarBeat.tick : null;
+  }
+
   static secondsToTickImpl<T>(
     seconds: number,
     resolution: number,
@@ -866,6 +904,7 @@ export class Song {
     return Math.round(baseTempoInfo.tick + timeDelta * ticksPerSecondSinceLastTempoChange);
   }
 
+  /** Import a midi file into the song, returns the newly created tracks. */
   static importMIDI(
     song: Song,
     fileBuffer: ArrayBuffer,
@@ -915,11 +954,13 @@ export class Song {
     }
 
     // Add tracks and notes.
+    const createdTracks = [];
     for (const track of midi.tracks) {
       const songTrack = song.createTrack({
         type: TrackType.MIDI_TRACK,
         assignDefaultSamplerPlugin: true,
       });
+      createdTracks.push(songTrack);
       songTrack.setInstrument({
         program: track.instrument.number,
         isDrum: track.instrument.percussion,
@@ -979,6 +1020,7 @@ export class Song {
         trackClip.adjustClipLeft(minStartTick);
       }
     }
+    return createdTracks;
   }
 
   protected setPluginContextInternal(plugin: TuneflowPlugin) {
