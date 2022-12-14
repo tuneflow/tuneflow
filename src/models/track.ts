@@ -14,6 +14,8 @@ export enum TrackType {
   MASTER_TRACK = 3,
 }
 
+const MAX_NUM_EFFECTS_PLUGINS = 5;
+
 /**
  * A track in the song that maps to an instrument.
  *
@@ -272,8 +274,67 @@ export class Track {
     return this.audioPlugins;
   }
 
-  addAudioPlugin(plugin: AudioPlugin) {
-    this.audioPlugins.push(plugin);
+  /**
+   *
+   * @param index Index of the audio plugin (excluding the sampler plugin), counting from 0.
+   * @returns
+   */
+  getAudioPluginAt(index: number): AudioPlugin | undefined {
+    return this.audioPlugins[index];
+  }
+
+  /**
+   *
+   * @param index Index of the audio plugin (excluding the sampler plugin), counting from 0.
+   * @param plugin
+   */
+  setAudioPluginAt(index: number, plugin: AudioPlugin, clearAutomation = true) {
+    if (this.type !== TrackType.MIDI_TRACK) {
+      return;
+    }
+    if (index > MAX_NUM_EFFECTS_PLUGINS - 1) {
+      throw new Error(
+        `The maximum number of effects plugin per track is ${MAX_NUM_EFFECTS_PLUGINS}`,
+      );
+    }
+    const oldPlugin = this.audioPlugins ? this.audioPlugins[index] : undefined;
+    const pluginTypeChanged =
+      (!oldPlugin && !!plugin) ||
+      (!plugin && !!oldPlugin) ||
+      (!!plugin && !!oldPlugin && !plugin.matchesTfId(oldPlugin.getTuneflowId()));
+    this.audioPlugins[index] = plugin;
+    if (pluginTypeChanged && oldPlugin && clearAutomation) {
+      this.automation.removeAutomationOfPlugin(oldPlugin.getInstanceId());
+    }
+  }
+
+  /**
+   *
+   * @param index Index of the audio plugin (excluding the sampler plugin), counting from 0.
+   */
+  removeAudioPluginAt(index: number) {
+    const oldPlugin = this.audioPlugins ? this.audioPlugins[index] : undefined;
+    delete this.audioPlugins[index];
+    if (oldPlugin) {
+      this.automation.removeAutomationOfPlugin(oldPlugin.getInstanceId());
+    }
+  }
+
+  getPluginByInstanceId(pluginInstanceId: string) {
+    if (this.samplerPlugin && this.samplerPlugin.getInstanceId() === pluginInstanceId) {
+      return this.samplerPlugin;
+    }
+    if (this.audioPlugins) {
+      for (const audioPlugin of this.audioPlugins) {
+        if (!audioPlugin) {
+          continue;
+        }
+        if (audioPlugin.getInstanceId() === pluginInstanceId) {
+          return audioPlugin;
+        }
+      }
+    }
+    return null;
   }
 
   getTrackStartTick() {

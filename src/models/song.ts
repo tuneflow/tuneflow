@@ -153,12 +153,14 @@ export class Song {
       if (existingSamplerPlugin) {
         newTrack.setSamplerPlugin(existingSamplerPlugin.clone(newTrack));
       }
-    } else if (track.getType() === TrackType.AUDIO_TRACK) {
-      // No-op.
     }
 
-    for (const audioPlugin of track.getAudioPlugins()) {
-      newTrack.addAudioPlugin(audioPlugin.clone(newTrack));
+    for (let i = 0; i < track.getAudioPlugins().length; i += 1) {
+      const audioPlugin = track.getAudioPluginAt(i);
+      if (!audioPlugin) {
+        continue;
+      }
+      newTrack.setAudioPluginAt(i, audioPlugin.clone(newTrack));
     }
     for (const clip of track.getClips()) {
       const newClip = newTrack.cloneClip(clip);

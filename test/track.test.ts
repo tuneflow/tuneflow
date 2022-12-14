@@ -194,4 +194,58 @@ describe('Track-related Tests', () => {
       expect(clonedAutomationValue.getPoints()[0].value).toBeCloseTo(0.5);
     });
   });
+
+  describe('Audio plugins', () => {
+    it('CRUD audio plugins correctly', async () => {
+      const track = song.createTrack({
+        type: TrackType.MIDI_TRACK,
+      });
+      expect(track.getAudioPlugins()).toEqual([]);
+
+      track.setAudioPluginAt(0, track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID));
+
+      expect(track.getAudioPlugins().length).toBe(1);
+      expect(track.getAudioPluginAt(0)?.getTuneflowId()).toBe(AudioPlugin.DEFAULT_SYNTH_TFID);
+
+      track.removeAudioPluginAt(0);
+
+      expect(track.getAudioPlugins()).toEqual([]);
+
+      track.setAudioPluginAt(2, track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID));
+
+      expect(track.getAudioPluginAt(0)).toBeUndefined();
+      expect(track.getAudioPluginAt(2)?.getTuneflowId()).toBe(AudioPlugin.DEFAULT_SYNTH_TFID);
+    });
+
+    it('Cannot set audio plugin at slot larger than supported', async () => {
+      const track = song.createTrack({
+        type: TrackType.MIDI_TRACK,
+      });
+      expect(track.getAudioPlugins()).toEqual([]);
+
+      expect(() =>
+        track.setAudioPluginAt(1000, track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID)),
+      ).toThrow();
+    });
+
+    it('Get audio plugin by instance id correctly', async () => {
+      const track = song.createTrack({
+        type: TrackType.MIDI_TRACK,
+      });
+      expect(track.getAudioPlugins()).toEqual([]);
+
+      const samplerPlugin = track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID);
+      track.setSamplerPlugin(samplerPlugin);
+
+      expect(track.getSamplerPlugin()).toBe(
+        track.getPluginByInstanceId(samplerPlugin.getInstanceId()),
+      );
+
+      const audioPlugin = track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID);
+      track.setAudioPluginAt(1, audioPlugin);
+      expect(track.getAudioPluginAt(1)).toBe(
+        track.getPluginByInstanceId(audioPlugin.getInstanceId()),
+      );
+    });
+  });
 });
