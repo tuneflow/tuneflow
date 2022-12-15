@@ -14,14 +14,14 @@ export enum TrackType {
   MASTER_TRACK = 3,
 }
 
-const MAX_NUM_EFFECTS_PLUGINS = 5;
-
 /**
  * A track in the song that maps to an instrument.
  *
  * It contains clips, instrument information, play status(volume, muted, etc.), and more.
  */
 export class Track {
+  static MAX_NUM_EFFECTS_PLUGINS = 5;
+
   private insturment?: InstrumentInfo;
   /** Clips sorted by their start tick. */
   private clips: Clip[];
@@ -289,9 +289,9 @@ export class Track {
    * @param plugin
    */
   setAudioPluginAt(index: number, plugin: AudioPlugin, clearAutomation = true) {
-    if (index > MAX_NUM_EFFECTS_PLUGINS - 1) {
+    if (index > Track.MAX_NUM_EFFECTS_PLUGINS - 1) {
       throw new Error(
-        `The maximum number of effects plugin per track is ${MAX_NUM_EFFECTS_PLUGINS}`,
+        `The maximum number of effects plugin per track is ${Track.MAX_NUM_EFFECTS_PLUGINS}`,
       );
     }
     const oldPlugin = this.audioPlugins ? this.audioPlugins[index] : undefined;
