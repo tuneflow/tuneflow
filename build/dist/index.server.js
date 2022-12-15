@@ -4243,8 +4243,6 @@ class Gt {
     return this.audioPlugins[e];
   }
   setAudioPluginAt(e, n, r = !0) {
-    if (this.type !== 1)
-      return;
     if (e > Bi - 1)
       throw new Error(
         `The maximum number of effects plugin per track is ${Bi}`

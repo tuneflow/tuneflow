@@ -289,9 +289,6 @@ export class Track {
    * @param plugin
    */
   setAudioPluginAt(index: number, plugin: AudioPlugin, clearAutomation = true) {
-    if (this.type !== TrackType.MIDI_TRACK) {
-      return;
-    }
     if (index > MAX_NUM_EFFECTS_PLUGINS - 1) {
       throw new Error(
         `The maximum number of effects plugin per track is ${MAX_NUM_EFFECTS_PLUGINS}`,
