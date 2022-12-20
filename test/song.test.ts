@@ -754,4 +754,19 @@ describe('Song-related Tests', () => {
       });
     });
   });
+
+  describe('Gets/Sets buses correctly', () => {
+    it('Gets/Sets buses correctly', async () => {
+      expect(song.getBusByRank(1)).toBeUndefined();
+      song.setBus(/* rank= */ 1, 'Reverb');
+      expect(song.getBusByRank(1).getRank()).toBe(1);
+      expect(song.getBusByRank(1).getName()).toBe('Reverb');
+
+      song.setBus(32, 'Compress');
+      expect(song.getBusByRank(32).getRank()).toBe(32);
+      expect(song.getBusByRank(32).getName()).toBe('Compress');
+
+      expect(() => song.setBus(33, 'test bus')).toThrow();
+    });
+  });
 });

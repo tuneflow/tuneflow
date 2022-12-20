@@ -8,7 +8,8 @@ import {
   TuneflowPlugin,
 } from '../src';
 import type { SongAccess, AutomationValue } from '../src';
-import type { InstrumentInfo } from '../src/models/track';
+import { TrackSend, TrackSendPosition } from '../src/models/track';
+import type { AuxTrackData, InstrumentInfo } from '../src/models/track';
 
 describe('Track-related Tests', () => {
   class TestUtilsPlugin extends TuneflowPlugin {
@@ -268,5 +269,180 @@ describe('Track-related Tests', () => {
         track.getPluginByInstanceId(audioPlugin.getInstanceId()),
       );
     });
-  });
+  }); // End of audio plugins.
+
+  describe('Input bus', () => {
+    it('Sets/Gets/Removes input bus rank correctly', () => {
+      const track = song.createTrack({
+        type: TrackType.AUX_TRACK,
+      });
+
+      expect((track.getAuxTrackData() as AuxTrackData).getInputBusRank()).toBe(1);
+
+      (track.getAuxTrackData() as AuxTrackData).setInputBusRank(2);
+
+      expect((track.getAuxTrackData() as AuxTrackData).getInputBusRank()).toBe(2);
+
+      (track.getAuxTrackData() as AuxTrackData).removeInputBus();
+
+      expect((track.getAuxTrackData() as AuxTrackData).getInputBusRank()).toBeUndefined();
+    });
+
+    it('Non-aux track does not contain aux track data', () => {
+      const track = song.createTrack({
+        type: TrackType.MIDI_TRACK,
+      });
+
+      expect(track.getAuxTrackData()).toBeUndefined();
+    });
+  }); // End of input bus.
+
+  describe('Sends', () => {
+    it('Add send correctly', async () => {
+      const track = song.createTrack({
+        type: TrackType.AUX_TRACK,
+      });
+
+      expect(track.getSendCount()).toBe(0);
+
+      track.setSendAt(
+        0,
+        new TrackSend({
+          outputBusRank: 32,
+          gainLevel: 1.0,
+          position: TrackSendPosition.PreFader,
+        }),
+      );
+
+      expect(track.getSendCount()).toBe(1);
+
+      const addedSend = track.getSendAt(0);
+      expect(addedSend.getOutputBusRank()).toBe(32);
+      expect(addedSend.getGainLevel()).toBeCloseTo(1.0);
+      expect(addedSend.getPosition()).toBe(TrackSendPosition.PreFader);
+      expect(addedSend.getMuted()).toBe(false);
+
+      track.setSendAt(
+        1,
+        new TrackSend({
+          outputBusRank: 6,
+          gainLevel: 0,
+          position: TrackSendPosition.PostFader,
+          muted: true,
+        }),
+      );
+
+      expect(track.getSendCount()).toBe(2);
+
+      const addedSend2 = track.getSendAt(1);
+      expect(addedSend2.getOutputBusRank()).toBe(6);
+      expect(addedSend2.getGainLevel()).toBeCloseTo(0);
+      expect(addedSend2.getPosition()).toBe(TrackSendPosition.PostFader);
+      expect(addedSend2.getMuted()).toBe(true);
+    });
+
+    it('Reject when adding send for master track', async () => {
+      const masterTrack = song.getMasterTrack();
+
+      expect(masterTrack).toBeTruthy();
+      expect(() =>
+        masterTrack.setSendAt(
+          0,
+          new TrackSend({
+            outputBusRank: 2,
+            gainLevel: 0.5,
+            position: TrackSendPosition.PreFader,
+          }),
+        ),
+      ).toThrow();
+    });
+
+    it('Reject when setting invalid gain level', async () => {
+      const track = song.createTrack({
+        type: TrackType.AUX_TRACK,
+      });
+
+      expect(track.getSendCount()).toBe(0);
+
+      expect(() =>
+        track.setSendAt(
+          0,
+          new TrackSend({
+            outputBusRank: 32,
+            gainLevel: 1.1,
+            position: TrackSendPosition.PreFader,
+          }),
+        ),
+      ).toThrow();
+
+      const newSend = new TrackSend({
+        outputBusRank: 32,
+        gainLevel: 1.0,
+        position: TrackSendPosition.PreFader,
+      });
+
+      track.setSendAt(0, newSend);
+      expect(() => newSend.setGainLevel(-1)).toThrow();
+    });
+
+    it('Adjust send correctly', async () => {
+      const track = song.createTrack({
+        type: TrackType.AUX_TRACK,
+      });
+
+      expect(track.getSendCount()).toBe(0);
+
+      track.setSendAt(
+        0,
+        new TrackSend({
+          outputBusRank: 31,
+          gainLevel: 0.5,
+          position: TrackSendPosition.PreFader,
+        }),
+      );
+
+      expect(track.getSendCount()).toBe(1);
+
+      const addedSend = track.getSendAt(0);
+      expect(addedSend.getOutputBusRank()).toBe(31);
+      expect(addedSend.getGainLevel()).toBeCloseTo(0.5);
+      expect(addedSend.getPosition()).toBe(TrackSendPosition.PreFader);
+      expect(addedSend.getMuted()).toBe(false);
+
+      addedSend.setOutputBusRank(5);
+      addedSend.setGainLevel(0);
+      addedSend.setPosition(TrackSendPosition.PostFader);
+      addedSend.setMuted(true);
+
+      expect(addedSend.getOutputBusRank()).toBe(5);
+      expect(addedSend.getGainLevel()).toBe(0);
+      expect(addedSend.getPosition()).toBe(TrackSendPosition.PostFader);
+      expect(addedSend.getMuted()).toBe(true);
+    });
+
+    it('Remove send correctly', async () => {
+      const track = song.createTrack({
+        type: TrackType.AUX_TRACK,
+      });
+
+      expect(track.getSendCount()).toBe(0);
+
+      track.setSendAt(
+        0,
+        new TrackSend({
+          outputBusRank: 31,
+          gainLevel: 1.0,
+          position: TrackSendPosition.PreFader,
+        }),
+      );
+
+      expect(track.getSendCount()).toBe(1);
+      expect(track.getSendAt(0)).toBeTruthy();
+
+      track.removeSendAt(0);
+
+      expect(track.getSendCount()).toBe(0);
+      expect(track.getSendAt(0)).toBeUndefined();
+    });
+  }); // End of sends.
 });

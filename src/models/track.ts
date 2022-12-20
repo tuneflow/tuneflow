@@ -12,6 +12,7 @@ export enum TrackType {
   MIDI_TRACK = 1,
   AUDIO_TRACK = 2,
   MASTER_TRACK = 3,
+  AUX_TRACK = 4,
 }
 
 /**
@@ -21,6 +22,7 @@ export enum TrackType {
  */
 export class Track {
   static MAX_NUM_EFFECTS_PLUGINS = 5;
+  static MAX_NUM_SENDS = 5;
 
   private insturment?: InstrumentInfo;
   /** Clips sorted by their start tick. */
@@ -37,6 +39,8 @@ export class Track {
   private song: Song;
   private automation: AutomationData;
   private type: TrackType;
+  private auxTrackData?: AuxTrackData;
+  private sends: TrackSend[] = [];
 
   /**
    * IMPORTANT: Do not use the constructor directly, call
@@ -89,6 +93,10 @@ export class Track {
         program: 0,
         isDrum: false,
       });
+    }
+    if (type === TrackType.AUX_TRACK) {
+      this.auxTrackData = new AuxTrackData();
+      this.auxTrackData.setInputBusRank(1);
     }
     this.clips = [...clips];
     this.suggestedInstruments = [...suggestedInstruments];
@@ -574,6 +582,37 @@ export class Track {
     );
   }
 
+  getAuxTrackData() {
+    return this.auxTrackData;
+  }
+
+  /**
+   * Get the number of specified sends.
+   *
+   * NOTE: Do not use this as the length of the sends array since many entries might be undefined.
+   */
+  getSendCount() {
+    return _.keys(this.sends).length;
+  }
+
+  getSendAt(index: number) {
+    return this.sends[index];
+  }
+
+  removeSendAt(index: number) {
+    delete this.sends[index];
+  }
+
+  setSendAt(index: number, send: TrackSend) {
+    if (index >= Track.MAX_NUM_SENDS) {
+      throw new Error(`Maximum of supported sends is ${Track.MAX_NUM_SENDS}`);
+    }
+    if (this.type === TrackType.MASTER_TRACK) {
+      throw new Error('Cannot add send for master track');
+    }
+    this.sends[index] = send;
+  }
+
   /** Gets all visible notes in this track sorted by start time. */
   getVisibleNotes() {
     const visibleNotes = [];
@@ -619,6 +658,90 @@ export class Track {
   }
 }
 
+export enum TrackSendPosition {
+  Undefined = 0,
+  PreFader = 1,
+  PostFader = 2,
+  // TODO: Support PostPan
+}
+
+export class TrackSend {
+  private outputBusRank: number;
+  private gainLevel: number;
+  private position: TrackSendPosition;
+  private muted: boolean;
+
+  constructor({
+    outputBusRank,
+    gainLevel,
+    position = TrackSendPosition.PostFader,
+    muted = false,
+  }: {
+    /** Rank of the bus to send to. Valid value ranges from 1 to `Song.NUM_BUSES`. */
+    outputBusRank: number;
+    /** A float value from 0 to 1, indicating the send level fader position. */
+    gainLevel: number;
+    position: TrackSendPosition;
+    muted?: boolean;
+  }) {
+    this.outputBusRank = outputBusRank;
+    this.gainLevel = TrackSend.checkGainLevel(gainLevel);
+    this.position = position;
+    this.muted = _.isBoolean(muted) ? muted : false;
+  }
+
+  static checkGainLevel(level: number) {
+    if (level < 0 || level > 1) {
+      throw new Error(`Send gain level ${level} out of valid range 0 - 1.`);
+    }
+    return level;
+  }
+
+  /**
+   * @returns Rank of the bus to send to. Valid value ranges from 1 to `Song.NUM_BUSES`.
+   */
+  getOutputBusRank() {
+    return this.outputBusRank;
+  }
+
+  /**
+   * @param rank Rank of the bus to send to. Valid value ranges from 1 to `Song.NUM_BUSES`.
+   */
+  setOutputBusRank(rank: number) {
+    this.outputBusRank = rank;
+  }
+
+  /**
+   * @returns A float value from 0 to 1, indicating the send gain fader position.
+   */
+  getGainLevel() {
+    return this.gainLevel;
+  }
+
+  /**
+   * @param level A float value from 0 to 1, indicating the send gain fader position.
+   */
+  setGainLevel(level: number) {
+    this.gainLevel = TrackSend.checkGainLevel(level);
+  }
+
+  getPosition() {
+    return this.position;
+  }
+
+  setPosition(position: TrackSendPosition) {
+    this.position = position;
+  }
+
+  getMuted() {
+    return this.muted;
+  }
+
+  setMuted(muted: boolean) {
+    this.muted = muted;
+  }
+}
+
 /**
  * Information about how an instrument should be played.
  */
@@ -660,6 +783,25 @@ export class InstrumentInfo {
       program: this.program,
       isDrum: this.isDrum,
     });
+  }
+}
+
+export class AuxTrackData {
+  private inputBusRank?: number;
+
+  /**
+   * @param rank Rank of the bus to be used as the input, ranges from 1 to Song.NUM_BUSES.
+   */
+  setInputBusRank(rank: number) {
+    this.inputBusRank = rank;
+  }
+
+  getInputBusRank() {
+    return this.inputBusRank;
+  }
+
+  removeInputBus() {
+    delete this.inputBusRank;
   }
 }
 

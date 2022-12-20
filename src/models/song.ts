@@ -5,6 +5,7 @@ import type { TuneflowPlugin } from '../base_plugin';
 import { TempoEvent } from './tempo';
 import { TimeSignatureEvent } from './time_signature';
 import { Track, TrackType } from './track';
+import type { AuxTrackData } from './track';
 import { Midi } from '@tonejs/midi';
 import { AutomationTarget, AutomationTargetType } from './automation';
 import type { AutomationValue } from './automation';
@@ -16,6 +17,8 @@ export class Song {
   /** The default PPQ used in TuneFlow. */
   static DEFAULT_PPQ = 480;
 
+  static NUM_BUSES = 32;
+
   private masterTrack?: Track;
   private tracks: Track[];
   private PPQ: number;
@@ -24,6 +27,7 @@ export class Song {
   private structures: StructureMarker[];
   private pluginContext?: PluginContext;
   private nextTrackRank = 1;
+  private buses: Bus[] = [];
 
   constructor() {
     this.tracks = [];
@@ -31,6 +35,22 @@ export class Song {
     this.tempos = [];
     this.timeSignatures = [];
     this.structures = [];
+  }
+
+  getBusByRank(rank: number) {
+    return this.buses[rank - 1];
+  }
+
+  setBus(rank: number, name: string) {
+    if (rank > Song.NUM_BUSES) {
+      throw new Error(`Only ${Song.NUM_BUSES} buses are supported.`);
+    }
+    const index = rank - 1;
+    if (!this.buses[index]) {
+      this.buses[index] = new Bus({ rank, name });
+    } else {
+      this.buses[index].setName(name);
+    }
   }
 
   getMasterTrack() {
@@ -105,6 +125,9 @@ export class Song {
     });
     if (assignDefaultSamplerPlugin && type === TrackType.MIDI_TRACK) {
       track.setSamplerPlugin(track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID));
+    }
+    if (type === TrackType.AUX_TRACK) {
+      (track.getAuxTrackData() as AuxTrackData).setInputBusRank(1);
     }
     if (index !== undefined && index !== null) {
       this.tracks.splice(index, 0, track);
@@ -1105,4 +1128,38 @@ export interface BarBeat {
 
 function scaleIntBy(val: number, factor: number) {
   return Math.round(val * factor);
+}
+
+export class Bus {
+  private rank: number;
+  private name?: string;
+
+  constructor({
+    rank,
+    name,
+  }: {
+    /**
+     * Rank of the bus, ranges from 1 to `Song.NUM_BUSES`.
+     */
+    rank: number;
+    name?: string;
+  }) {
+    this.rank = rank;
+    this.name = name;
+  }
+
+  /**
+   * @returns Rank of the bus, ranges from 1 to `Song.NUM_BUSES`.
+   */
+  getRank() {
+    return this.rank;
+  }
+
+  getName() {
+    return this.name;
+  }
+
+  setName(newName: string) {
+    this.name = newName;
+  }
 }
