@@ -4,7 +4,7 @@ import * as _ from 'underscore';
 import type { TuneflowPlugin } from '../base_plugin';
 import { TempoEvent } from './tempo';
 import { TimeSignatureEvent } from './time_signature';
-import { Track, TrackType } from './track';
+import { Track, TrackSend, TrackType } from './track';
 import type { AuxTrackData } from './track';
 import { Midi } from '@tonejs/midi';
 import { AutomationTarget, AutomationTargetType } from './automation';
@@ -188,6 +188,33 @@ export class Song {
     for (const clip of track.getClips()) {
       const newClip = newTrack.cloneClip(clip);
       newTrack.insertClip(newClip);
+    }
+    // Clone aux data
+    const auxTrackData = track.getAuxTrackData();
+    if (
+      auxTrackData &&
+      _.isNumber(auxTrackData.getInputBusRank()) &&
+      (auxTrackData.getInputBusRank() as number) > 0
+    ) {
+      (newTrack.getAuxTrackData() as AuxTrackData).setInputBusRank(
+        auxTrackData.getInputBusRank() as number,
+      );
+    }
+    // Clone sends.
+    for (let i = 0; i < Track.MAX_NUM_SENDS; i += 1) {
+      const send = track.getSendAt(i);
+      if (!send) {
+        continue;
+      }
+      newTrack.setSendAt(
+        i,
+        new TrackSend({
+          outputBusRank: send.getOutputBusRank(),
+          gainLevel: send.getGainLevel(),
+          position: send.getPosition(),
+          muted: send.getMuted(),
+        }),
+      );
     }
     // Clone automation.
     if (track.hasAnyAutomation()) {

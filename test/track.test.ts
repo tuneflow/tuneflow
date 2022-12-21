@@ -85,7 +85,7 @@ describe('Track-related Tests', () => {
       expect(track.getSuggestedInstruments()).toEqual([]);
     });
 
-    it('Clone track correctly', async () => {
+    it('Clone audio track correctly', async () => {
       const track = song.createTrack({
         type: TrackType.AUDIO_TRACK,
       });
@@ -95,8 +95,17 @@ describe('Track-related Tests', () => {
         isDrum: false,
       });
 
-      const audioPlugin = new AudioPlugin('plugin1', 'manufacturer1', 'VST', '1.1');
-      track.setSamplerPlugin(audioPlugin);
+      const audioFxPlugin = new AudioPlugin('audioplugin1', 'man1', 'VST3', '1.0.0');
+      track.setAudioPluginAt(1, audioFxPlugin);
+      track.setSendAt(
+        2,
+        new TrackSend({
+          outputBusRank: 2,
+          gainLevel: 0.53,
+          position: TrackSendPosition.PostFader,
+          muted: true,
+        }),
+      );
 
       track.createSuggestedInstrument({
         program: 64,
@@ -112,6 +121,13 @@ describe('Track-related Tests', () => {
       expect(clonedTrack.getSuggestedInstruments().length).toBe(0);
       const clonedTrackSamplerPlugin = clonedTrack.getSamplerPlugin();
       expect(clonedTrackSamplerPlugin).toBeUndefined();
+      const clonedAudioFxPlugin = clonedTrack.getAudioPluginAt(1);
+      expect(clonedAudioFxPlugin?.matchesTfId(audioFxPlugin.getTuneflowId())).toBe(true);
+      const clonedSend = clonedTrack.getSendAt(2);
+      expect(clonedSend.getOutputBusRank()).toBe(2);
+      expect(clonedSend.getGainLevel()).toBeCloseTo(0.53);
+      expect(clonedSend.getPosition()).toBe(TrackSendPosition.PostFader);
+      expect(clonedSend.getMuted()).toBe(true);
       expect(clonedTrack.getVolume()).toBeCloseTo(0.1);
       expect(clonedTrack.getPan()).toBe(60);
       expect(clonedTrack.getSolo()).toBe(true);
@@ -120,7 +136,7 @@ describe('Track-related Tests', () => {
   });
 
   describe('MIDI tracks', () => {
-    it('Clone track correctly', async () => {
+    it('Clone midi track correctly', async () => {
       const track = song.createTrack({
         type: TrackType.MIDI_TRACK,
       });
@@ -132,6 +148,17 @@ describe('Track-related Tests', () => {
 
       const audioPlugin = new AudioPlugin('plugin1', 'manufacturer1', 'VST', '1.1');
       track.setSamplerPlugin(audioPlugin);
+      const audioFxPlugin = new AudioPlugin('audioplugin1', 'man1', 'VST3', '1.0.0');
+      track.setAudioPluginAt(1, audioFxPlugin);
+      track.setSendAt(
+        2,
+        new TrackSend({
+          outputBusRank: 2,
+          gainLevel: 0.53,
+          position: TrackSendPosition.PostFader,
+          muted: true,
+        }),
+      );
 
       track.createSuggestedInstrument({
         program: 64,
@@ -172,6 +199,13 @@ describe('Track-related Tests', () => {
       expect(
         (clonedTrackSamplerPlugin as AudioPlugin).matchesTfId(audioPlugin.getTuneflowId()),
       ).toBe(true);
+      const clonedAudioFxPlugin = clonedTrack.getAudioPluginAt(1);
+      expect(clonedAudioFxPlugin?.matchesTfId(audioFxPlugin.getTuneflowId())).toBe(true);
+      const clonedSend = clonedTrack.getSendAt(2);
+      expect(clonedSend.getOutputBusRank()).toBe(2);
+      expect(clonedSend.getGainLevel()).toBeCloseTo(0.53);
+      expect(clonedSend.getPosition()).toBe(TrackSendPosition.PostFader);
+      expect(clonedSend.getMuted()).toBe(true);
       expect(clonedTrack.getVolume()).toBeCloseTo(0.1);
       expect(clonedTrack.getPan()).toBe(60);
       expect(clonedTrack.getSolo()).toBe(true);
@@ -182,6 +216,70 @@ describe('Track-related Tests', () => {
       expect(clonedTrack.getClips()[0].getNotes()[0].getVelocity()).toBe(80);
       expect(clonedTrack.getClips()[0].getNotes()[0].getStartTick()).toBe(1);
       expect(clonedTrack.getClips()[0].getNotes()[0].getEndTick()).toBe(10);
+      expect(clonedTrack.getAutomation().getAutomationTargets().length).toBe(1);
+      expect(clonedTrack.getAutomation().getAutomationTargets()[0].toTfAutomationTargetId()).toBe(
+        volumeAutomationTarget.toTfAutomationTargetId(),
+      );
+      const clonedAutomationValue = clonedTrack
+        .getAutomation()
+        .getAutomationValueById(volumeAutomationTarget.toTfAutomationTargetId()) as AutomationValue;
+      expect(clonedAutomationValue.getDisabled()).toBe(true);
+      expect(clonedAutomationValue.getPoints().length).toBe(1);
+      expect(clonedAutomationValue.getPoints()[0].tick).toBe(3);
+      expect(clonedAutomationValue.getPoints()[0].value).toBeCloseTo(0.5);
+    });
+  }); // end of midi tracks.
+
+  describe('Aux tracks', () => {
+    it('Clone aux track correctly', async () => {
+      const track = song.createTrack({
+        type: TrackType.AUX_TRACK,
+      });
+
+      (track.getAuxTrackData() as AuxTrackData).setInputBusRank(3);
+      const audioFxPlugin = new AudioPlugin('audioplugin1', 'man1', 'VST3', '1.0.0');
+      track.setAudioPluginAt(1, audioFxPlugin);
+      track.setSendAt(
+        2,
+        new TrackSend({
+          outputBusRank: 2,
+          gainLevel: 0.53,
+          position: TrackSendPosition.PostFader,
+          muted: true,
+        }),
+      );
+
+      track.setVolume(0.1);
+      track.setPan(60);
+      track.setSolo(true);
+      track.setMuted(true);
+
+      const volumeAutomationTarget = new AutomationTarget(AutomationTargetType.VOLUME);
+      track.getAutomation().addAutomation(volumeAutomationTarget);
+      const automationValue = track
+        .getAutomation()
+        .getOrCreateAutomationValueById(volumeAutomationTarget.toTfAutomationTargetId());
+      automationValue.setDisabled(true);
+      automationValue.addPoint(3, 0.5, false);
+      const clonedTrack = song.cloneTrack(track);
+      const clonedTrackInstrument = clonedTrack.getInstrument();
+      expect(clonedTrackInstrument).toBeUndefined();
+      const clonedTrackSamplerPlugin = clonedTrack.getSamplerPlugin();
+      expect(clonedTrackSamplerPlugin).toBeUndefined();
+      const clonedAuxTrackData = clonedTrack.getAuxTrackData();
+      expect(clonedAuxTrackData?.getInputBusRank()).toBe(3);
+      const clonedAudioFxPlugin = clonedTrack.getAudioPluginAt(1);
+      expect(clonedAudioFxPlugin?.matchesTfId(audioFxPlugin.getTuneflowId())).toBe(true);
+      const clonedSend = clonedTrack.getSendAt(2);
+      expect(clonedSend.getOutputBusRank()).toBe(2);
+      expect(clonedSend.getGainLevel()).toBeCloseTo(0.53);
+      expect(clonedSend.getPosition()).toBe(TrackSendPosition.PostFader);
+      expect(clonedSend.getMuted()).toBe(true);
+      expect(clonedTrack.getVolume()).toBeCloseTo(0.1);
+      expect(clonedTrack.getPan()).toBe(60);
+      expect(clonedTrack.getSolo()).toBe(true);
+      expect(clonedTrack.getMuted()).toBe(true);
+
       expect(clonedTrack.getAutomation().getAutomationTargets().length).toBe(1);
       expect(clonedTrack.getAutomation().getAutomationTargets()[0].toTfAutomationTargetId()).toBe(
         volumeAutomationTarget.toTfAutomationTargetId(),
