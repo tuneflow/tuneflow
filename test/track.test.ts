@@ -600,6 +600,27 @@ describe('Track-related Tests', () => {
       expect(track.getOutput()).toBeUndefined();
     });
 
+    it('Removes track deletes the track outputs that depend on it', async () => {
+      const track = song.createTrack({
+        type: TrackType.AUDIO_TRACK,
+      });
+      const track2 = song.createTrack({
+        type: TrackType.AUX_TRACK,
+      });
+
+      track.setOutput({
+        type: TrackOutputType.Track,
+        trackId: track2.getId(),
+      });
+
+      expect(track.getOutput()?.getType()).toBe(TrackOutputType.Track);
+      expect(track.getOutput()?.getTrackId()).toBe(track2.getId());
+
+      track2.deleteFromParent();
+
+      expect(track.getOutput()).toBeUndefined();
+    });
+
     it('Rejects when setting output on master track', async () => {
       const track = song.getMasterTrack();
 

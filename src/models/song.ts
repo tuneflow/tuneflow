@@ -4,7 +4,7 @@ import * as _ from 'underscore';
 import type { TuneflowPlugin } from '../base_plugin';
 import { TempoEvent } from './tempo';
 import { TimeSignatureEvent } from './time_signature';
-import { Track, TrackSend, TrackType } from './track';
+import { Track, TrackOutputType, TrackSend, TrackType } from './track';
 import type { AuxTrackData } from './track';
 import { Midi } from '@tonejs/midi';
 import { AutomationTarget, AutomationTargetType } from './automation';
@@ -238,6 +238,17 @@ export class Song {
       _.findIndex(this.tracks, track => track.getId() === trackId),
       1,
     );
+    // Delete dependencies.
+    for (const depTrack of this.tracks) {
+      const trackOutput = depTrack.getOutput();
+      if (
+        trackOutput &&
+        trackOutput.getType() === TrackOutputType.Track &&
+        trackOutput.getTrackId() === trackId
+      ) {
+        depTrack.removeOutput();
+      }
+    }
     return track;
   }
 
