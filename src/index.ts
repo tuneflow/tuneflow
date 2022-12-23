@@ -11,6 +11,8 @@ export {
   AuxTrackData,
   TrackSend,
   TrackSendPosition,
+  TrackOutput,
+  TrackOutputType,
 } from './models/track';
 export { Clip, ClipType } from './models/clip';
 export type { AudioClipData } from './models/clip';

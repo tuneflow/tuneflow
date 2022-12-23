@@ -35,12 +35,14 @@ export class Track {
   private rank: number;
   private pan: number;
   private samplerPlugin?: AudioPlugin;
-  private audioPlugins: AudioPlugin[] = [];
+  private audioPlugins: { [index: string]: AudioPlugin } = {};
   private song: Song;
   private automation: AutomationData;
   private type: TrackType;
   private auxTrackData?: AuxTrackData;
-  private sends: TrackSend[] = [];
+  private sends: { [index: string]: TrackSend } = {};
+  /** If not specified, the track outputs to the default device. */
+  private output?: TrackOutput;
 
   /**
    * IMPORTANT: Do not use the constructor directly, call
@@ -278,8 +280,13 @@ export class Track {
     }
   }
 
-  getAudioPlugins() {
-    return this.audioPlugins;
+  /**
+   * This is the number of specified fx plugins.
+   *
+   * Do not use it to loop through the audio plugins map.
+   */
+  getAudioPluginCount() {
+    return _.keys(this.audioPlugins).length;
   }
 
   /**
@@ -330,7 +337,8 @@ export class Track {
       return this.samplerPlugin;
     }
     if (this.audioPlugins) {
-      for (const audioPlugin of this.audioPlugins) {
+      for (const index of _.keys(this.audioPlugins)) {
+        const audioPlugin = this.audioPlugins[index];
         if (!audioPlugin) {
           continue;
         }
@@ -613,6 +621,31 @@ export class Track {
     this.sends[index] = send;
   }
 
+  getOutput() {
+    return this.output;
+  }
+
+  setOutput({ type, trackId = undefined }: { type: TrackOutputType; trackId?: string }) {
+    if (this.type === TrackType.MASTER_TRACK) {
+      throw new Error(`Master track can only output to the default device.`);
+    }
+    if (type !== TrackOutputType.Track) {
+      throw new Error('Non-track output type is not supported yet.');
+    }
+    if (trackId === this.getId()) {
+      throw new Error('Cannot set output to the track itself.');
+    }
+
+    this.output = new TrackOutput({
+      type,
+      trackId,
+    });
+  }
+
+  removeOutput() {
+    delete this.output;
+  }
+
   /** Gets all visible notes in this track sorted by start time. */
   getVisibleNotes() {
     const visibleNotes = [];
@@ -802,6 +835,33 @@ export class AuxTrackData {
 
   removeInputBus() {
     delete this.inputBusRank;
+  }
+}
+
+export enum TrackOutputType {
+  Undefined = 0,
+  Device = 1,
+  Track = 2,
+}
+
+export class TrackOutput {
+  private type: TrackOutputType;
+  private trackId?: string;
+
+  /**
+   * DO NOT call this constructor directly, use `track.setOutput` instead.
+   */
+  constructor({ type, trackId = undefined }: { type: TrackOutputType; trackId?: string }) {
+    this.type = type;
+    this.trackId = trackId;
+  }
+
+  getType() {
+    return this.type;
+  }
+
+  getTrackId() {
+    return this.trackId;
   }
 }
 

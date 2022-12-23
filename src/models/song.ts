@@ -178,7 +178,7 @@ export class Song {
       }
     }
 
-    for (let i = 0; i < track.getAudioPlugins().length; i += 1) {
+    for (let i = 0; i < Track.MAX_NUM_EFFECTS_PLUGINS; i += 1) {
       const audioPlugin = track.getAudioPluginAt(i);
       if (!audioPlugin) {
         continue;

@@ -8,7 +8,7 @@ import {
   TuneflowPlugin,
 } from '../src';
 import type { SongAccess, AutomationValue } from '../src';
-import { TrackSend, TrackSendPosition } from '../src/models/track';
+import { TrackOutputType, TrackSend, TrackSendPosition } from '../src/models/track';
 import type { AuxTrackData, InstrumentInfo } from '../src/models/track';
 
 describe('Track-related Tests', () => {
@@ -299,16 +299,16 @@ describe('Track-related Tests', () => {
       const track = song.createTrack({
         type: TrackType.MIDI_TRACK,
       });
-      expect(track.getAudioPlugins()).toEqual([]);
+      expect(track.getAudioPluginCount()).toEqual(0);
 
       track.setAudioPluginAt(0, track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID));
 
-      expect(track.getAudioPlugins().length).toBe(1);
+      expect(track.getAudioPluginCount()).toBe(1);
       expect(track.getAudioPluginAt(0)?.getTuneflowId()).toBe(AudioPlugin.DEFAULT_SYNTH_TFID);
 
       track.removeAudioPluginAt(0);
 
-      expect(track.getAudioPlugins()).toEqual([]);
+      expect(track.getAudioPluginCount()).toEqual(0);
 
       track.setAudioPluginAt(2, track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID));
 
@@ -320,16 +320,16 @@ describe('Track-related Tests', () => {
       const track = song.createTrack({
         type: TrackType.AUDIO_TRACK,
       });
-      expect(track.getAudioPlugins()).toEqual([]);
+      expect(track.getAudioPluginCount()).toEqual(0);
 
       track.setAudioPluginAt(0, track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID));
 
-      expect(track.getAudioPlugins().length).toBe(1);
+      expect(track.getAudioPluginCount()).toBe(1);
       expect(track.getAudioPluginAt(0)?.getTuneflowId()).toBe(AudioPlugin.DEFAULT_SYNTH_TFID);
 
       track.removeAudioPluginAt(0);
 
-      expect(track.getAudioPlugins()).toEqual([]);
+      expect(track.getAudioPluginCount()).toEqual(0);
 
       track.setAudioPluginAt(2, track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID));
 
@@ -341,7 +341,7 @@ describe('Track-related Tests', () => {
       const track = song.createTrack({
         type: TrackType.MIDI_TRACK,
       });
-      expect(track.getAudioPlugins()).toEqual([]);
+      expect(track.getAudioPluginCount()).toEqual(0);
 
       expect(() =>
         track.setAudioPluginAt(1000, track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID)),
@@ -352,7 +352,7 @@ describe('Track-related Tests', () => {
       const track = song.createTrack({
         type: TrackType.MIDI_TRACK,
       });
-      expect(track.getAudioPlugins()).toEqual([]);
+      expect(track.getAudioPluginCount()).toEqual(0);
 
       const samplerPlugin = track.createAudioPlugin(AudioPlugin.DEFAULT_SYNTH_TFID);
       track.setSamplerPlugin(samplerPlugin);
@@ -543,4 +543,85 @@ describe('Track-related Tests', () => {
       expect(track.getSendAt(0)).toBeUndefined();
     });
   }); // End of sends.
+
+  describe('Track output', () => {
+    it('Gets/Sets track output correctly', async () => {
+      const track = song.createTrack({
+        type: TrackType.AUDIO_TRACK,
+      });
+
+      expect(track.getOutput()).toBeUndefined();
+
+      track.setOutput({
+        type: TrackOutputType.Track,
+        trackId: 'track1',
+      });
+
+      expect(track.getOutput()?.getType()).toBe(TrackOutputType.Track);
+      expect(track.getOutput()?.getTrackId()).toBe('track1');
+    });
+
+    it('Rejects if updating to non-track output', async () => {
+      const track = song.createTrack({
+        type: TrackType.AUDIO_TRACK,
+      });
+
+      track.setOutput({
+        type: TrackOutputType.Track,
+        trackId: 'track1',
+      });
+
+      expect(track.getOutput()?.getType()).toBe(TrackOutputType.Track);
+      expect(track.getOutput()?.getTrackId()).toBe('track1');
+
+      expect(() =>
+        track.setOutput({
+          type: TrackOutputType.Device,
+          trackId: 'track1',
+        }),
+      ).toThrow();
+    });
+
+    it('Removes track output correctly', async () => {
+      const track = song.createTrack({
+        type: TrackType.AUDIO_TRACK,
+      });
+
+      track.setOutput({
+        type: TrackOutputType.Track,
+        trackId: 'track1',
+      });
+
+      expect(track.getOutput()?.getType()).toBe(TrackOutputType.Track);
+      expect(track.getOutput()?.getTrackId()).toBe('track1');
+
+      track.removeOutput();
+
+      expect(track.getOutput()).toBeUndefined();
+    });
+
+    it('Rejects when setting output on master track', async () => {
+      const track = song.getMasterTrack();
+
+      expect(() =>
+        track.setOutput({
+          type: TrackOutputType.Device,
+          trackId: 'sometrack',
+        }),
+      ).toThrow();
+    });
+
+    it('Rejects when setting output to itself', async () => {
+      const track = song.createTrack({
+        type: TrackType.MIDI_TRACK,
+      });
+
+      expect(() =>
+        track.setOutput({
+          type: TrackOutputType.Track,
+          trackId: track.getId(),
+        }),
+      ).toThrow();
+    });
+  }); // End of track output.
 });
