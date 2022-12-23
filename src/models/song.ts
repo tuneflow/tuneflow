@@ -5,7 +5,7 @@ import type { TuneflowPlugin } from '../base_plugin';
 import { TempoEvent } from './tempo';
 import { TimeSignatureEvent } from './time_signature';
 import { Track, TrackOutputType, TrackSend, TrackType } from './track';
-import type { AuxTrackData } from './track';
+import type { AuxTrackData, TrackOutput } from './track';
 import { Midi } from '@tonejs/midi';
 import { AutomationTarget, AutomationTargetType } from './automation';
 import type { AutomationValue } from './automation';
@@ -219,6 +219,14 @@ export class Song {
     // Clone automation.
     if (track.hasAnyAutomation()) {
       newTrack.setAutomation(track.getAutomation());
+    }
+    // Clone track output.
+    if (track.getOutput()) {
+      const originalOutput = track.getOutput() as TrackOutput;
+      newTrack.setOutput({
+        type: originalOutput.getType(),
+        trackId: originalOutput.getTrackId(),
+      });
     }
     return newTrack;
   }

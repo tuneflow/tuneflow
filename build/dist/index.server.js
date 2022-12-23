@@ -6182,7 +6182,14 @@ class X {
         })
       );
     }
-    return e.hasAnyAutomation() && r.setAutomation(e.getAutomation()), r;
+    if (e.hasAnyAutomation() && r.setAutomation(e.getAutomation()), e.getOutput()) {
+      const s = e.getOutput();
+      r.setOutput({
+        type: s.getType(),
+        trackId: s.getTrackId()
+      });
+    }
+    return r;
   }
   removeTrack(e) {
     this.checkAccess("removeTrack");

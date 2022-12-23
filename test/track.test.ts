@@ -115,6 +115,10 @@ describe('Track-related Tests', () => {
       track.setPan(60);
       track.setSolo(true);
       track.setMuted(true);
+      track.setOutput({
+        type: TrackOutputType.Track,
+        trackId: 'track2',
+      });
       const clonedTrack = song.cloneTrack(track);
       const clonedTrackInstrument = clonedTrack.getInstrument();
       expect(clonedTrackInstrument).toBeUndefined();
@@ -132,6 +136,8 @@ describe('Track-related Tests', () => {
       expect(clonedTrack.getPan()).toBe(60);
       expect(clonedTrack.getSolo()).toBe(true);
       expect(clonedTrack.getMuted()).toBe(true);
+      expect(clonedTrack.getOutput()?.getType()).toBe(TrackOutputType.Track);
+      expect(clonedTrack.getOutput()?.getTrackId()).toBe('track2');
     });
   });
 
