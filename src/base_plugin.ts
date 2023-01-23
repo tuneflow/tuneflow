@@ -1,4 +1,10 @@
-import type { ParamDescriptor, LabelText, SongAccess, PluginInfo } from './descriptors';
+import type {
+  ParamDescriptor,
+  LabelText,
+  SongAccess,
+  PluginInfo,
+  AudioPluginDescriptor,
+} from './descriptors';
 import type { Song } from './models/song';
 import * as _ from 'underscore';
 import { nanoid } from 'nanoid';
@@ -15,7 +21,7 @@ export interface ReadAPIs {
   translateLabel: (label: LabelText) => string;
   serializeSong: (song: Song) => Promise<string>;
   deserializeSong: (encodedSong: string, keepPluginStates?: boolean) => Promise<Song>;
-  getAvailableAudioPlugins: () => Promise<any[]>;
+  getAvailableAudioPlugins: () => Promise<AudioPluginDescriptor[]>;
   getFilesInDirectory: (directoryPath: string) => Promise<string[]>;
 }
 
