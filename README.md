@@ -1,28 +1,96 @@
-# TuneFlow 插件系统
+# TuneFlow Typescript SDK
 
-[English](./README.en.md) | [中文](./README.md)
+[English](./README.md) | [中文](./README.zh.md)
 
-这里是 TuneFlow 插件系统，负责运行插件和维护工程状态。你可以把它理解为 TuneFlow 编辑器的驱动引擎。
 
-## 什么是 TuneFlow？
+## What is `TuneFlow`?
 
-[TuneFlow](https://www.tuneflow.com) 是围绕 AI 能力打造的新一代，全功能，跨平台 DAW (数字音乐工作站)。一句话概括 TuneFlow 的核心目标：
+[TuneFlow](https://www.tuneflow.com) is a next-gen DAW that aims to boost music making productivity through the power of AI. Unlike traditional DAWs, TuneFlow has a plugin system designed to facilitate music production in almost all areas, including but not limited to **song writing**, **arrangement**, **automation**, **mixing**, **transcription**...... You can easily write your own algorithms or integrate your AI models directly into the song-making process. `tuneflow` is the Typescript SDK of TuneFlow plugins.
 
-> **用 AI 的力量帮助创作者更好更快地制作音乐**。
+## Installation
 
-TuneFlow 的主体包括三个部分：
+``` bash
+npm install tuneflow
+```
 
-- 一个全平台互通 (网页，Windows，macOS) 的 DAW (数字音乐工作站)
-- 一个强大的 AI 生成引擎
-- **一个灵活可扩展的插件系统 （本仓库）**
+## Prefer Another Language?
 
-## 开发 TuneFlow 插件
+Check out the SDKs in other languages:
 
-TuneFlow 为开发者提供了一个强大且易于实现的插件平台。不同于专注在单轨处理的传统 VST 和 AU 插件，TuneFlow 插件可以读取整个工程的数据，并调用整个 DAW 的底层能力。在这里，你可以从全局出发，开发更具系统性的插件，比如：
+* **Python**: https://www.github.com/tuneflow/tuneflow-py
+* Other: Contributions welcome!
 
-- 接入 AI 模型来为旋律续写或添加多轨道的和声；
-- 生成贴合整首歌曲结构的鼓点；
-- 你甚至可以操控每个轨道的 VST 并且用算法来生成每个参数的自动化。
-- ......
+## Getting Started
 
-访问[TuneFlow 开发者文档](https://help.tuneflow.com/zh/developer/)了解 TuneFlow 插件系统的运行原理，以及如何通过 TuneFlow DevKit 来快速将你的音乐构思变成可运行的 TuneFlow 插件。
+The core idea of TuneFlow's plugin system is that you only care about the data model, NOT the implementation. A plugin's only goal is to modify the song to its need, and the DAW will get the modified result and apply the changes automatically. Below is an illustration:
+
+![Plugin Flow](docs/images/pipeline_flow_en.jpg)
+
+A barebone plugin may look like this:
+
+``` typescript
+import type { LabelText, ParamDescriptor, SliderWidgetConfig, Song } from 'tuneflow';
+import { TuneflowPlugin, WidgetType } from 'tuneflow';
+
+export class HelloWorld extends TuneflowPlugin {
+  static providerId(): string {
+    return 'andantei';
+  }
+
+  static pluginId(): string {
+    return 'hello-world';
+  }
+
+  static providerDisplayName(): LabelText {
+    return 'Andantei';
+  }
+
+  static pluginDisplayName(): LabelText {
+    return 'Hello World';
+  }
+
+  params(): { [paramName: string]: ParamDescriptor } {
+    return {
+      ......
+    };
+  }
+
+  async init(song: Song, readApis: ReadAPIs): Promise<void> {
+    ......
+  }
+
+  async run(song: Song, params: { [paramName: string]: any }): Promise<void> {
+    ......
+  }
+}
+
+```
+
+When writing a plugin, our main focus is in`params`, `init` and `run`.
+
+### `params`
+
+This is where you specify the input parameters you want from the user or from the DAW. It will be processed by the DAW and generate your plugin's UI widgets.
+
+### `init`
+
+Called by the DAW when the user loads the plugin but before actually running it. The DAW will provide the current song snapshot (`song: Song`) and some read-only APIs (`readApis: ReadAPIs`), and you will take these params to initialize your plugin.
+
+For example, if you have a list of presets that applies to different time signatures, you can use `init` to read the current song's time signature and filter out those options that don't work for the song.
+
+### `run`
+
+Called by the DAW when the user actually runs the plugin by hitting the **Apply`** button.
+
+Here is where you implement your main logic. The method takes in the current song snapshot (`song: Song`), the params that are actually provided by the user or the DAW (`params`), and the read-only APIs (`readApis: ReadAPIs`).
+
+## Examples
+
+For a comprehensive of basic plugins that are used in TuneFlow's editor, check out https://www.github.com/tuneflow/tuneflow-plugin-basic
+
+
+## Resources
+
+[TuneFlow Website](https://tuneflow.com)
+
+[Python SDK](https://www.github.com/tuneflow/tuneflow-py)
