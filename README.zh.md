@@ -2,6 +2,7 @@
 
 [English](./README.md) | [中文](./README.zh.md)
 
+![TuneFlow Screenshots](docs/images/tuneflow_wall_thin.jpg)
 
 ## `TuneFlow` 是什么?
 
