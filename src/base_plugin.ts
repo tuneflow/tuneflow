@@ -1,14 +1,9 @@
-import type {
-  ParamDescriptor,
-  LabelText,
-  SongAccess,
-  PluginInfo,
-  AudioPluginDescriptor,
-} from './descriptors';
+import type { ParamDescriptor, LabelText, AudioPluginDescriptor } from './descriptors';
 import type { Song } from './models/song';
 import * as _ from 'underscore';
 import { nanoid } from 'nanoid';
 import { WidgetType } from '.';
+import type { TuneflowPluginOptions } from './descriptors/plugin';
 
 type RunParameters = { [paramName: string]: any };
 
@@ -40,6 +35,8 @@ export class TuneflowPlugin {
   /** Cache for the Song instance that was successfully produced in the last pipeline run. */
   // @ts-ignore
   private songCacheInternal?: Song;
+  readonly allowManualApplyAdjust = false;
+  readonly allowReset = false;
   /** The execution progress. */
   private progress: number | null = null;
   private isExecuting = false;
@@ -67,38 +64,6 @@ export class TuneflowPlugin {
   }
 
   /**
-   * The display name of the provider.
-   */
-  static providerDisplayName(): LabelText {
-    throw new Error('providerDisplayName() should be overwritten.');
-  }
-
-  /**
-   * The display name of the plugin.
-   */
-  static pluginDisplayName(): LabelText {
-    throw new Error('pluginDisplayName() should be overwritten.');
-  }
-
-  /**
-   * The description of this plugin.
-   */
-  static pluginDescription(): LabelText | null {
-    return null;
-  }
-
-  static pluginInfo(): PluginInfo | null {
-    return null;
-  }
-
-  /**
-   * Whether to allow users to reset all parameters of this plugin.
-   */
-  static allowReset(): boolean {
-    return true;
-  }
-
-  /**
    * Initializes the plugin instance.
    *
    * Override this method to initialize your plugin before it starts running.
@@ -118,24 +83,6 @@ export class TuneflowPlugin {
    */
   params(): { [paramName: string]: ParamDescriptor } {
     return {};
-  }
-
-  /**
-   * Provide the access this plugin needs to modify a song.
-   */
-  songAccess(): SongAccess {
-    return {};
-  }
-
-  /**
-   * Whether the user can manually apply this plugin and go back to adjust it.
-   * Enable this when you want the user to frequently toggle this plugin on and off
-   * to see the difference.
-   * For example: A plugin that divides a track into two, you want the user to
-   * easily switch between the plugin is on or off to see what's going on.
-   */
-  public allowManualApplyAdjust() {
-    return false;
   }
 
   /**
@@ -167,8 +114,12 @@ export class TuneflowPlugin {
    * Creates a plugin instance and initializes it.
    * @param song The current version of the song.
    */
-  public static async create(song: Song, readApis: ReadAPIs) {
+  public static async create(song: Song, readApis: ReadAPIs, options: TuneflowPluginOptions) {
     const plugin = new this();
+    // @ts-ignore
+    plugin.allowManualApplyAdjust = options.allowManualApplyAdjust;
+    // @ts-ignore
+    plugin.allowReset = options.allowReset;
     plugin.resetInternal();
     await plugin.init(song, readApis);
     return plugin;
@@ -265,7 +216,11 @@ export class TuneflowPlugin {
    * @returns The unique identifier for the plugin CLASS, which is the combination of providerId and moduleId. NOTE: this is not the id of the plugin instance.
    */
   public static id(): string {
-    return `${this.providerId()}^_^${this.pluginId()}`;
+    return TuneflowPlugin.getPluginFullId(this.providerId(), this.pluginId());
+  }
+
+  public static getPluginFullId(providerId: string, pluginId: string) {
+    return `${providerId}^_^${pluginId}`;
   }
 
   /**
@@ -339,7 +294,7 @@ export class TuneflowPlugin {
    */
   public resetInternal() {
     this.resetParamsInternal();
-    if (this.allowManualApplyAdjust()) {
+    if (this.allowManualApplyAdjust) {
       this.enabledInternal = false;
     }
   }
@@ -353,7 +308,7 @@ export class TuneflowPlugin {
    * the plugin should be disabled.
    */
   private maybeSyncEnabledWithParamsReadiness() {
-    if (this.allowManualApplyAdjust() && !this.hasAllParamsSet()) {
+    if (this.allowManualApplyAdjust && !this.hasAllParamsSet()) {
       this.setEnabledInternal(false);
     }
   }

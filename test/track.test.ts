@@ -7,19 +7,12 @@ import {
   TrackType,
   TuneflowPlugin,
 } from '../src';
-import type { SongAccess, AutomationValue } from '../src';
+import type { AutomationValue } from '../src';
 import { TrackOutputType, TrackSend, TrackSendPosition } from '../src/models/track';
 import type { AuxTrackData, InstrumentInfo } from '../src/models/track';
 
 describe('Track-related Tests', () => {
-  class TestUtilsPlugin extends TuneflowPlugin {
-    songAccess(): SongAccess {
-      return {
-        createTrack: true,
-        removeTrack: true,
-      };
-    }
-  }
+  class TestUtilsPlugin extends TuneflowPlugin {}
 
   const testUtilsPlugin = new TestUtilsPlugin();
   let song = new Song();

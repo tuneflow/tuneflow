@@ -1,5 +1,5 @@
 import { TrackType, TuneflowPipeline, Song, TuneflowPlugin } from '../src';
-import type { SongAccess, ReadAPIs } from '../src';
+import type { ReadAPIs } from '../src';
 
 const MOCK_READ_APIS: ReadAPIs = {
   readAudioBuffer: async () => null,
@@ -14,14 +14,7 @@ const MOCK_READ_APIS: ReadAPIs = {
 };
 
 describe('Skeleton Tuneflow', () => {
-  class TestUtilsPlugin extends TuneflowPlugin {
-    songAccess(): SongAccess {
-      return {
-        createTrack: true,
-        removeTrack: true,
-      };
-    }
-  }
+  class TestUtilsPlugin extends TuneflowPlugin {}
 
   class NoAccessCreateTrackPlugin extends TuneflowPlugin {
     static providerId(): string {
@@ -46,14 +39,7 @@ describe('Skeleton Tuneflow', () => {
     }
   }
 
-  class CreateTrackPlugin extends NoAccessCreateTrackPlugin {
-    songAccess(): SongAccess {
-      return {
-        createTrack: true,
-        removeTrack: true,
-      };
-    }
-  }
+  class CreateTrackPlugin extends NoAccessCreateTrackPlugin {}
 
   const testUtilsPlugin = new TestUtilsPlugin();
   let song = new Song();
@@ -90,31 +76,5 @@ describe('Skeleton Tuneflow', () => {
     expect(song.getTracks().length).toBe(1);
     await pipeline.run();
     expect(song.getTracks().length).toBe(2);
-  });
-
-  describe('Song Access', () => {
-    beforeEach(() => {
-      song = new Song();
-    });
-
-    it('throws error if calling restricted methods on song without setting plugin context.', async () => {
-      expect(() => {
-        song.createTrack({ type: TrackType.MIDI_TRACK });
-      }).toThrow();
-    });
-
-    it('marks has error if plugin calls restricted methods without getting access.', async () => {
-      const pipeline = new TuneflowPipeline();
-      pipeline.addAsOrReplaceActivePlugin(new NoAccessCreateTrackPlugin());
-      expect(song.getTracks().length).toBe(0);
-      pipeline.setOriginalSong(song);
-      // @ts-ignore
-      pipeline.cloneSongFnInternal = (song: Song) => song;
-      // @ts-ignore
-      pipeline.readApisInternal = MOCK_READ_APIS;
-      await pipeline.run();
-      expect(pipeline.getThrewErrorInLastRun()).toBeTruthy();
-      expect(song.getTracks().length).toBe(0);
-    });
   });
 });

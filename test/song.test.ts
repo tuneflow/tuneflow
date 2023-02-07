@@ -1,16 +1,8 @@
 import { Song, TuneflowPlugin } from '../src';
-import type { SongAccess } from '../src';
 import { StructureType } from '../src/models/marker';
 
 describe('Song-related Tests', () => {
-  class TestUtilsPlugin extends TuneflowPlugin {
-    songAccess(): SongAccess {
-      return {
-        createTrack: true,
-        removeTrack: true,
-      };
-    }
-  }
+  class TestUtilsPlugin extends TuneflowPlugin {}
 
   const testUtilsPlugin = new TestUtilsPlugin();
   let song = new Song();

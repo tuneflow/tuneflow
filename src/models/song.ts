@@ -111,7 +111,6 @@ export class Song {
     /** Whether to assign a default sampler plugin if type is `MIDI_TRACK`. */
     assignDefaultSamplerPlugin?: boolean;
   }): Track {
-    this.checkAccess('createTrack');
     if (rank == undefined || rank === null) {
       rank = this.getNextTrackRank();
     } else {
@@ -237,7 +236,6 @@ export class Song {
    * Requires `removeTrack` access.
    */
   removeTrack(trackId: string) {
-    this.checkAccess('removeTrack');
     const track = this.getTrackById(trackId);
     if (!track) {
       return null;
@@ -1125,21 +1123,6 @@ export class Song {
     const nextRank = this.nextTrackRank;
     this.nextTrackRank += 1;
     return nextRank;
-  }
-
-  private checkAccess(accessName: string) {
-    if (!this.pluginContext) {
-      throw new Error(
-        `Song needs to be accessed in a plugin context in order to use privileged methods.`,
-      );
-    }
-    if (!(this.pluginContext.plugin.songAccess() as any)[accessName]) {
-      throw new Error(
-        `Plugin ${(
-          this.pluginContext.plugin.constructor as any
-        ).id()} requires access ${accessName} in order to run.`,
-      );
-    }
   }
 
   private static tempoBPMToTicksPerSecond(tempoBPM: number, PPQ: number) {

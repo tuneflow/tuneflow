@@ -6,19 +6,12 @@ import {
   TrackType,
   TuneflowPlugin,
 } from '../src';
-import type { Note, AutomationValue, SongAccess } from '../src';
+import type { Note, AutomationValue } from '../src';
 
 import { assertClipRange, assertNotesAreEqual, createTestNotes } from '../src/test_utils';
 
 describe('MIDI Clip-related Tests', () => {
-  class TestUtilsPlugin extends TuneflowPlugin {
-    songAccess(): SongAccess {
-      return {
-        createTrack: true,
-        removeTrack: true,
-      };
-    }
-  }
+  class TestUtilsPlugin extends TuneflowPlugin {}
 
   const testUtilsPlugin = new TestUtilsPlugin();
   let song = new Song();

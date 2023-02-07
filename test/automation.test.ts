@@ -6,17 +6,9 @@ import {
   TrackType,
   TuneflowPlugin,
 } from '../src';
-import type { SongAccess } from '../src';
 
 describe('Automation-related Tests', () => {
-  class TestUtilsPlugin extends TuneflowPlugin {
-    songAccess(): SongAccess {
-      return {
-        createTrack: true,
-        removeTrack: true,
-      };
-    }
-  }
+  class TestUtilsPlugin extends TuneflowPlugin {}
 
   const testUtilsPlugin = new TestUtilsPlugin();
   let song = new Song();

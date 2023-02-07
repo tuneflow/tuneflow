@@ -1,5 +1,5 @@
 import { ClipType, Song, TrackType, TuneflowPlugin } from '../src';
-import type { AudioClipData, SongAccess, Track } from '../src';
+import type { AudioClipData, Track } from '../src';
 
 const TEST_AUDIO_CLIP_DATA: AudioClipData = {
   audioFilePath: 'file1',
@@ -8,14 +8,7 @@ const TEST_AUDIO_CLIP_DATA: AudioClipData = {
 };
 
 describe('Audio Clip-related Tests', () => {
-  class TestUtilsPlugin extends TuneflowPlugin {
-    songAccess(): SongAccess {
-      return {
-        createTrack: true,
-        removeTrack: true,
-      };
-    }
-  }
+  class TestUtilsPlugin extends TuneflowPlugin {}
 
   const testUtilsPlugin = new TestUtilsPlugin();
   let song = new Song();

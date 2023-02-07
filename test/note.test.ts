@@ -1,16 +1,8 @@
 import { Song, TrackType, TuneflowPlugin } from '../src';
-import type { SongAccess } from '../src';
 import { assertNotesAreEqual, createTestNotes } from '../src/test_utils';
 
 describe('Note-related Tests', () => {
-  class TestUtilsPlugin extends TuneflowPlugin {
-    songAccess(): SongAccess {
-      return {
-        createTrack: true,
-        removeTrack: true,
-      };
-    }
-  }
+  class TestUtilsPlugin extends TuneflowPlugin {}
 
   const testUtilsPlugin = new TestUtilsPlugin();
   let song = new Song();
