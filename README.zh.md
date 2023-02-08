@@ -27,7 +27,37 @@ TuneFlow插件系统的核心宗旨是让开发者只需要关注数据模型，
 
 ![Plugin Flow](docs/images/pipeline_flow.jpg)
 
-一个最简单的TuneFlow插件可能看起来是这样的:
+一个插件包(Bundle)由3个部分组成：包文件(Bundle file)，插件文件，以及导出文件
+
+### Bundle文件 (`bundle.json`)
+
+包文件，我们通常命名为`bundle.json`，包含了插件包里所有插件的信息。DAW从中获取这个插件包的基本信息。这些信息可以用于让用户在加载你的插件代码前浏览你的插件信息。
+
+一个示例的包文件长这样：
+
+``` json
+{
+  "plugins": [
+    ......,
+    {
+      "providerId": "my-provider-id",
+      "providerDisplayName": "我的开发者名称",
+      "pluginId": "my-plugin-id",
+      "pluginDisplayName": "我的插件名称",
+      "version": "1.0.0",
+      "minRequiredDesktopVersion": "1.8.3",
+      "options": {
+        "allowReset": false
+      }
+    },
+    ......
+  ]
+}
+```
+
+### 插件代码
+
+这些文件是你的实际插件代码。一个最简单的TuneFlow插件，比如我们给他取名为`hello_world_plugin.ts`，可能看起来是这样的:
 
 ``` typescript
 import type { LabelText, ParamDescriptor, SliderWidgetConfig, Song } from 'tuneflow';
@@ -40,14 +70,6 @@ export class HelloWorld extends TuneflowPlugin {
 
   static pluginId(): string {
     return 'hello-world';
-  }
-
-  static providerDisplayName(): LabelText {
-    return 'Andantei行板';
-  }
-
-  static pluginDisplayName(): LabelText {
-    return 'Hello World 插件';
   }
 
   params(): { [paramName: string]: ParamDescriptor } {
@@ -66,6 +88,22 @@ export class HelloWorld extends TuneflowPlugin {
 }
 
 ```
+
+首先你需要overwrite `providerId()` 和 `pluginId()` 两个方法，将你在`bundle.json`里设置的值填入其中。TuneFlow会在加载插件时通过比对这两个id将bundle文件中的每一项与对应的代码文件做匹配。
+
+### 导出文件 (`export.ts`)
+
+最后，为了让TuneFlow能够加载并执行你的插件，你需要将你的插件们统一导出到一个文件里，并用后续的构建工具将其构建为一个javascript文件。在这里我们需要创建一个`index.ts`文件，它大概长这样：
+
+``` typescript
+// index.ts
+
+export { HelloWorld } from './hello_world_plugin';
+export { SomeOtherPlugin } from './some_other_plugin';
+......
+```
+
+## 编写插件
 
 编写TuneFlow插件时，我们主要关注的对象是`params`, `init` 和 `run`三个方法.
 
@@ -90,6 +128,10 @@ export class HelloWorld extends TuneflowPlugin {
 * `song: Song` 当前歌曲的快照
 * `params: { [paramName: string]: any }` 根据`params()`提供的参数列表收集到的用户或DAW提供的实际参数值，每一个key对应`params()`中指定的参数名，value则是用户或DAW提供的实际参数值。
 * `readApis: ReadAPIs` 只读的API接口，可用于读取当前的音频插件列表，获取音频数据等。
+
+## 运行插件
+
+TuneFlow的插件开发通过`tuneflow-devkit`进行。更多插件开发文档，请访问: https://www.github.com/tuneflow/tuneflow-devkit
 
 ## 示例
 

@@ -14,40 +14,66 @@
 npm install tuneflow
 ```
 
-## Prefer Another Language?
+## Prefer another language?
 
 Check out the SDKs in other languages:
 
 * **Python**: https://www.github.com/tuneflow/tuneflow-py
 * Other: Contributions welcome!
 
-## Getting Started
+## Getting started
 
 The core idea of TuneFlow's plugin system is that you only care about the data model, NOT the implementation. A plugin's only goal is to modify the song to its need, and the DAW will get the modified result and apply the changes automatically. Below is an illustration:
 
 ![Plugin Flow](docs/images/pipeline_flow_en.jpg)
 
-A barebone plugin may look like this:
+A plugin bundle consists of 3 components: The bundle file, the plugin files, and the bundle export.
+
+
+
+### Bundle file (`bundle.json`)
+
+The bundle file, which we usually name it `bundle.json`, contains the information of the plugins in this bundle.  The information here will be shown to the users before they need to load the code of your plugin.
+
+An example manifest file looks like this.
+
+``` json
+{
+  "plugins": [
+    ......,
+    {
+      "providerId": "my-provider-id",
+      "providerDisplayName": "My Provider Name",
+      "pluginId": "my-plugin-id",
+      "pluginDisplayName": "My Plugin Name",
+      "version": "1.0.0",
+      "minRequiredDesktopVersion": "1.8.3",
+      "options": {
+        "allowReset": false
+      }
+    },
+    ......
+  ]
+}
+```
+
+### Plugin code
+
+This is will be your actual code file. A barebone plugin, for example `hello_world_plugin.ts`, may look like this:
 
 ``` typescript
+// hello_world_plugin.ts
+
 import type { LabelText, ParamDescriptor, SliderWidgetConfig, Song } from 'tuneflow';
 import { TuneflowPlugin, WidgetType } from 'tuneflow';
 
 export class HelloWorld extends TuneflowPlugin {
   static providerId(): string {
-    return 'andantei';
+    return 'my-provider-id';
   }
 
   static pluginId(): string {
-    return 'hello-world';
-  }
-
-  static providerDisplayName(): LabelText {
-    return 'Andantei';
-  }
-
-  static pluginDisplayName(): LabelText {
-    return 'Hello World';
+    return 'my-plugin-id';
   }
 
   params(): { [paramName: string]: ParamDescriptor } {
@@ -67,7 +93,23 @@ export class HelloWorld extends TuneflowPlugin {
 
 ```
 
-When writing a plugin, our main focus is in`params`, `init` and `run`.
+First you'll need to overwrite the `providerId()` and `pluginId()` methods to match what you specified in the manifest file. When loading the plugins, TuneFlow looks for the two ids to match the bundle file with each plugin source code.
+
+### Bundle export
+
+Finally, in order for TuneFlow to execute your code, you need to export it and use build tools to build a bundle. Here we need to create an index file to export all of your plugins in this bundle. Here for example, we can create an `index.ts` file which looks like this:
+
+``` typescript
+// index.ts
+
+export { HelloWorld } from './hello_world_plugin';
+export { SomeOtherPlugin } from './some_other_plugin';
+......
+```
+
+## Writing a plugin
+
+When writing a plugin, our main focus is in `params`, `init` and `run`.
 
 ### `params`
 
@@ -84,6 +126,10 @@ For example, if you have a list of presets that applies to different time signat
 Called by the DAW when the user actually runs the plugin by hitting the **Apply`** button.
 
 Here is where you implement your main logic. The method takes in the current song snapshot (`song: Song`), the params that are actually provided by the user or the DAW (`params`), and the read-only APIs (`readApis: ReadAPIs`).
+
+## Run your plugin
+
+To run or debug your plugin, your can use `tuneflow-devkit`. For more information on plugin development, check out https://www.github.com/tuneflow/tuneflow-devkit
 
 ## Examples
 
