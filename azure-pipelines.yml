@@ -22,3 +22,10 @@ steps:
 - script: |
     npm run test
   displayName: 'Test'
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: 'Cobertura'
+    summaryFileLocation: 'coverage/cobertura-coverage.xml'
+    pathToSources: 'src'
+    failIfCoverageEmpty: true
