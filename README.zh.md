@@ -4,6 +4,12 @@
 
 ![TuneFlow Screenshots](docs/images/tuneflow_wall_thin.jpg)
 
+[![Build Status](https://dev.azure.com/zeostudio/tuneflow-public/_apis/build/status/tuneflow.tuneflow?branchName=master)](https://dev.azure.com/zeostudio/tuneflow-public/_build/latest?definitionId=33&branchName=master)
+[![Code Coverage](https://img.shields.io/azure-devops/coverage/zeostudio/tuneflow-public/33/master?logo=azure-pipelines)](https://dev.azure.com/zeostudio/tuneflow-public/_build/latest?definitionId=33&branchName=master)
+[![npm](https://img.shields.io/npm/v/tuneflow)](https://www.npmjs.com/package/tuneflow)
+[![Discord](https://img.shields.io/discord/1076012137161424906?color=%237289da&logo=discord)](https://discord.com/channels/1076012137161424906/1076012755250851860)
+![License](https://img.shields.io/github/license/tuneflow/tuneflow-py)
+
 ## `TuneFlow` 是什么?
 
 [TuneFlow](https://www.tuneflow.com) 是AI驱动的新一代DAW (数字音乐工作站)。与传统DAW不同的是，与它深度集成的插件系统可以支持端到端的完整音乐制作流程，比如**作曲**, **编曲**, **自动化**, **混音**, **转录** 等等...... 你可以轻松地将你的音乐算法或AI模型集成到TuneFlow中，所有的更改会即时反映到DAW中，与你的日常制作流程融为一体。

@@ -4,6 +4,12 @@
 
 ![TuneFlow Screenshots](docs/images/tuneflow_wall_thin.jpg)
 
+[![Build Status](https://dev.azure.com/zeostudio/tuneflow-public/_apis/build/status/tuneflow.tuneflow?branchName=master)](https://dev.azure.com/zeostudio/tuneflow-public/_build/latest?definitionId=33&branchName=master)
+[![Code Coverage](https://img.shields.io/azure-devops/coverage/zeostudio/tuneflow-public/33/master?logo=azure-pipelines)](https://dev.azure.com/zeostudio/tuneflow-public/_build/latest?definitionId=33&branchName=master)
+[![npm](https://img.shields.io/npm/v/tuneflow)](https://www.npmjs.com/package/tuneflow)
+[![Discord](https://img.shields.io/discord/1076012137161424906?color=%237289da&logo=discord)](https://discord.com/channels/1076012137161424906/1076012755250851860)
+![License](https://img.shields.io/github/license/tuneflow/tuneflow-py)
+
 ## What is `TuneFlow`?
 
 [TuneFlow](https://www.tuneflow.com) is a next-gen DAW that aims to boost music making productivity through the power of AI. Unlike traditional DAWs, TuneFlow has a plugin system designed to facilitate music production in almost all areas, including but not limited to **song writing**, **arrangement**, **automation**, **mixing**, **transcription**...... You can easily write your own algorithms or integrate your AI models directly into the song-making process. `tuneflow` is the Typescript SDK of TuneFlow plugins.
