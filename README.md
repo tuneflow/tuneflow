@@ -97,7 +97,7 @@ First you'll need to overwrite the `providerId()` and `pluginId()` methods to ma
 
 ### Bundle export
 
-Finally, in order for TuneFlow to execute your code, you need to export it and use build tools to build a bundle. Here we need to create an index file to export all of your plugins in this bundle. Here for example, we can create an `index.ts` file which looks like this:
+Finally, in order for TuneFlow to execute your code, you need to export all of your plugins in this bundle into one file, and use build tools to build it into a javascript file for distribution. Here we need to create an index file to export all of your plugins in this bundle. Here for example, we can create an `index.ts` file which looks like this:
 
 ``` typescript
 // index.ts

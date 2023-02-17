@@ -517,7 +517,7 @@ export class Song {
       throw new Error('Cannot clear all the tempo events.');
     }
     const sortedTempoEvents = cloneDeep(tempoEvents);
-    sortedTempoEvents.sort((a, b) => a.getTicks() - b.getTicks());
+    sortedTempoEvents.sort((a: any, b: any) => a.getTicks() - b.getTicks());
     const firstTempoEvent = sortedTempoEvents[0];
     if (firstTempoEvent.getTicks() > 0) {
       throw new Error('The first tempo event needs to start from tick 0');
