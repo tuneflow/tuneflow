@@ -6,7 +6,7 @@
 
 [![Build Status](https://dev.azure.com/zeostudio/tuneflow-public/_apis/build/status/tuneflow.tuneflow?branchName=master)](https://dev.azure.com/zeostudio/tuneflow-public/_build/latest?definitionId=33&branchName=master)
 [![Code Coverage](https://img.shields.io/azure-devops/coverage/zeostudio/tuneflow-public/33/master?logo=azure-pipelines)](https://dev.azure.com/zeostudio/tuneflow-public/_build/latest?definitionId=33&branchName=master)
-[![npm](https://img.shields.io/npm/v/tuneflow)](https://www.npmjs.com/package/tuneflow)
+[![npm](https://img.shields.io/npm/v/tuneflow?logo=npm)](https://www.npmjs.com/package/tuneflow)
 [![Discord](https://img.shields.io/discord/1076012137161424906?color=%237289da&logo=discord)](https://discord.com/channels/1076012137161424906/1076012755250851860)
 ![License](https://img.shields.io/github/license/tuneflow/tuneflow-py)
 
