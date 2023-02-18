@@ -6386,6 +6386,8 @@ class Z {
     return this.timeSignatures;
   }
   overwriteTimeSignatures(e) {
+    if (e.length === 0)
+      throw new Error("At least one time signature needs to be present.");
     this.timeSignatures = ki(e);
   }
   createTimeSignature({

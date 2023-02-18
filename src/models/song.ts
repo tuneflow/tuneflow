@@ -597,6 +597,9 @@ export class Song {
    * @param timeSignatures
    */
   overwriteTimeSignatures(timeSignatures: TimeSignatureEvent[]) {
+    if (timeSignatures.length === 0) {
+      throw new Error('At least one time signature needs to be present.');
+    }
     this.timeSignatures = cloneDeep(timeSignatures);
   }
 
