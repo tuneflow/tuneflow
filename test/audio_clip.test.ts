@@ -7,6 +7,15 @@ const TEST_AUDIO_CLIP_DATA: AudioClipData = {
   duration: 1,
 };
 
+const TEST_AUDIO_CLIP_DATA_WITH_AUDIO_DATA: AudioClipData = {
+  audioData: {
+    format: 'wav',
+    data: new Uint8Array(),
+  },
+  startTick: 480,
+  duration: 100,
+};
+
 describe('Audio Clip-related Tests', () => {
   class TestUtilsPlugin extends TuneflowPlugin {}
 
@@ -85,6 +94,17 @@ describe('Audio Clip-related Tests', () => {
       expect(clip1.getAudioDuration()).toBe(1);
       expect(clip1.getAudioEndTick()).toBe(1440);
       expect(clip1.getAudioClipData()).toEqual(TEST_AUDIO_CLIP_DATA);
+    });
+
+    it('Get audio related fields correctly with audio data', async () => {
+      const clip1 = audioTrack.createAudioClip({
+        clipStartTick: 480,
+        audioClipData: TEST_AUDIO_CLIP_DATA_WITH_AUDIO_DATA,
+      });
+      expect(clip1.getClipEndTick()).toBe(48960);
+      expect(clip1.getAudioDuration()).toBe(100);
+      expect(clip1.getAudioEndTick()).toBe(48960);
+      expect(clip1.getAudioClipData()).toEqual(TEST_AUDIO_CLIP_DATA_WITH_AUDIO_DATA);
     });
 
     it('Set and get custom clip start and end tick out of audio range correctly', async () => {

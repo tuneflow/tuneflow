@@ -22,6 +22,7 @@ export enum WidgetType {
   SelectList = 15,
   /** Read-only table of descriptions. */
   Descriptions = 16,
+  TextArea = 17,
 }
 
 /**
@@ -43,6 +44,7 @@ export interface WidgetDescriptor {
     | SelectListWidgetConfig
     | MultiSourceAudioSelectorWidgetConfig
     | DescriptionsWidgetConfig
+    | TextAreaWidgetConfig
     | undefined
     | null;
 }
@@ -176,6 +178,13 @@ export interface DescriptionsWidgetConfig {
   size: 'mini' | 'small' | 'medium' | 'large';
   column: number;
   data: DescriptionData[];
+}
+
+export interface TextAreaWidgetConfig {
+  placeholder?: string;
+  maxLength?: number;
+  allowClear?: boolean;
+  autoSize?: boolean;
 }
 
 export async function getFileContentFromFileSelector(file: File) {

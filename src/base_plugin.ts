@@ -203,6 +203,8 @@ export class TuneflowPlugin {
         );
       case WidgetType.None:
         return paramResult !== undefined && paramResult !== null;
+      case WidgetType.TextArea:
+        return paramResult !== '';
       default:
         throw new Error(
           `Param nullness check needs to be implemented for widget type ${paramWidgetType}. Either use default nullness check or define custom logic.`,

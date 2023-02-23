@@ -10,14 +10,30 @@ export enum ClipType {
   AUDIO_CLIP = 2,
 }
 
+/** A temporary holder of audio data that will be converted to local files and cleared once received. */
+export interface AudioData {
+  data: Uint8Array;
+  format: string;
+}
+
 /**
  * Audio-related clip data.
  */
 export interface AudioClipData {
   /**
    * The absolute file path of the audio.
+   *
+   * Can be omitted if `audioData` is set.
    */
-  audioFilePath: string;
+  audioFilePath?: string;
+
+  /**
+   * A temporary holder of the audio file data. When set, the daw will save a copy to local file system and replace
+   * `audioFilePath` with the saved file path, and this field will be cleared afterwards.
+   *
+   * Can be omitted if `audioFilePath` is set.
+   */
+  audioData?: AudioData;
 
   /**
    * The start tick of the audio.
@@ -98,6 +114,12 @@ export class Clip {
         audioFilePath: audioClipData.audioFilePath,
         startTick: audioClipData.startTick,
         duration: audioClipData.duration,
+        audioData:
+          audioClipData.audioData && audioClipData.audioData.data
+            ? {
+                ...audioClipData.audioData,
+              }
+            : undefined,
       };
 
       clipStartTick = _.isNumber(clipStartTick)
@@ -130,6 +152,7 @@ export class Clip {
     return this.audioClipData;
   }
 
+  /** Sets a new audio file. */
   setAudioFile(filePath: string, startTick: number, duration: number) {
     if (!this.audioClipData) {
       this.audioClipData = {

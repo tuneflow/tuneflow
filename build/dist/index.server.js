@@ -163,7 +163,7 @@ function pi(t) {
   );
 }
 var mi = "[object DataView]";
-function Vn(t, e, n, r) {
+function Fn(t, e, n, r) {
   if (t === e)
     return t !== 0 || 1 / t === 1 / e;
   if (t == null || e == null)
@@ -222,20 +222,20 @@ function ns(t, e, n, r) {
     if (l = t.length, l !== e.length)
       return !1;
     for (; l--; )
-      if (!Vn(t[l], e[l], n, r))
+      if (!Fn(t[l], e[l], n, r))
         return !1;
   } else {
     var d = y(t), f;
     if (l = d.length, y(e).length !== l)
       return !1;
     for (; l--; )
-      if (f = d[l], !(Et(e, f) && Vn(t[f], e[f], n, r)))
+      if (f = d[l], !(Et(e, f) && Fn(t[f], e[f], n, r)))
         return !1;
   }
   return n.pop(), r.pop(), !0;
 }
 function ac(t, e) {
-  return Vn(t, e);
+  return Fn(t, e);
 }
 function ke(t) {
   if (!Ht(t))
@@ -276,7 +276,7 @@ function as(t) {
     e[t[n[r]]] = n[r];
   return e;
 }
-function Fn(t) {
+function Vn(t) {
   var e = [];
   for (var n in t)
     M(t[n]) && e.push(n);
@@ -558,7 +558,7 @@ function Gt(t, e, n, r) {
   }
   return r;
 }
-const Vc = J(function(t, e) {
+const Fc = J(function(t, e) {
   e = Gt(e, !1, !1);
   var n = e.length;
   if (n < 1)
@@ -569,7 +569,7 @@ const Vc = J(function(t, e) {
   }
   return t;
 });
-function Fc(t, e) {
+function Vc(t, e) {
   var n = function(r) {
     var i = n.cache, s = "" + (e ? e.apply(this, arguments) : r);
     return Et(i, s) || (i[s] = t.apply(this, arguments)), i[s];
@@ -697,7 +697,7 @@ function dt(t, e, n) {
   }
   return t;
 }
-function Ft(t, e, n) {
+function Vt(t, e, n) {
   e = j(e, n);
   for (var r = !Q(t) && y(t), i = (r || t).length, s = Array(i), a = 0; a < i; a++) {
     var o = r ? r[a] : a;
@@ -752,7 +752,7 @@ function gt(t, e, n, r) {
 }
 const Wc = J(function(t, e, n) {
   var r, i;
-  return M(e) ? i = e : (e = Se(e), r = e.slice(0, -1), e = e[e.length - 1]), Ft(t, function(s) {
+  return M(e) ? i = e : (e = Se(e), r = e.slice(0, -1), e = e[e.length - 1]), Vt(t, function(s) {
     var a = i;
     if (!a) {
       if (r && r.length && (s = ar(s, r)), s == null)
@@ -763,7 +763,7 @@ const Wc = J(function(t, e, n) {
   });
 });
 function fr(t, e) {
-  return Ft(t, cr(e));
+  return Vt(t, cr(e));
 }
 function Jc(t, e) {
   return ne(t, pe(e));
@@ -794,7 +794,7 @@ function Xc(t, e, n) {
 }
 var jc = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
 function Ps(t) {
-  return t ? $t(t) ? we.call(t) : Yn(t) ? t.match(jc) : Q(t) ? Ft(t, or) : re(t) : [];
+  return t ? $t(t) ? we.call(t) : Yn(t) ? t.match(jc) : Q(t) ? Vt(t, or) : re(t) : [];
 }
 function Ns(t, e, n) {
   if (e == null || n)
@@ -812,7 +812,7 @@ function Qc(t) {
 }
 function Yc(t, e, n) {
   var r = 0;
-  return e = j(e, n), fr(Ft(t, function(i, s, a) {
+  return e = j(e, n), fr(Vt(t, function(i, s, a) {
     return {
       value: i,
       index: r++,
@@ -865,7 +865,7 @@ const As = J(function(t, e) {
   return n;
 }), su = J(function(t, e) {
   var n = e[0], r;
-  return M(n) ? (n = lr(n), e.length > 1 && (r = e[1])) : (e = Ft(Gt(e, !1, !1), String), n = function(i, s) {
+  return M(n) ? (n = lr(n), e.length > 1 && (r = e[1])) : (e = Vt(Gt(e, !1, !1), String), n = function(i, s) {
     return !gt(e, s);
   }), As(t, n, r);
 });
@@ -945,7 +945,7 @@ function hr(t, e) {
   return t._chain ? _(e).chain() : e;
 }
 function Rs(t) {
-  return dt(Fn(t), function(e) {
+  return dt(Vn(t), function(e) {
     var n = _[e] = t[e];
     _.prototype[e] = function() {
       var r = [this._wrapped];
@@ -1002,8 +1002,8 @@ const mu = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   values: re,
   pairs: gc,
   invert: as,
-  functions: Fn,
-  methods: Fn,
+  functions: Vn,
+  methods: Vn,
   extend: os,
   extendOwn: Ke,
   assign: Ke,
@@ -1035,8 +1035,8 @@ const mu = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   iteratee: ur,
   partial: ie,
   bind: vs,
-  bindAll: Vc,
-  memoize: Fc,
+  bindAll: Fc,
+  memoize: Vc,
   delay: bs,
   defer: Uc,
   throttle: Lc,
@@ -1058,8 +1058,8 @@ const mu = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   findWhere: Kc,
   each: dt,
   forEach: dt,
-  map: Ft,
-  collect: Ft,
+  map: Vt,
+  collect: Vt,
   reduce: Tn,
   foldl: Tn,
   inject: Tn,
@@ -1167,26 +1167,28 @@ class $n {
       return !1;
     const i = this.params()[e].widget.type;
     switch (i) {
-      case H.Input:
-      case H.Pitch:
-      case H.Slider:
-      case H.TrackSelector:
-      case H.Select:
-      case H.SelectList:
-      case H.Switch:
-      case H.InputNumber:
-      case H.FileSelector:
+      case F.Input:
+      case F.Pitch:
+      case F.Slider:
+      case F.TrackSelector:
+      case F.Select:
+      case F.SelectList:
+      case F.Switch:
+      case F.InputNumber:
+      case F.FileSelector:
         return !0;
-      case H.MultiTrackSelector:
+      case F.MultiTrackSelector:
         return n.length > 0;
-      case H.TrackPitchSelector:
+      case F.TrackPitchSelector:
         return n.track !== void 0 && n.track !== null && n.pitch !== void 0 && n.pitch !== null;
-      case H.InstrumentSelector:
+      case F.InstrumentSelector:
         return n.program !== void 0 && n.program !== null && n.isDrum !== void 0 && n.isDrum !== null;
-      case H.MultiSourceAudioSelector:
+      case F.MultiSourceAudioSelector:
         return n != null && n.audioInfo !== void 0 && n.audioInfo !== null;
-      case H.None:
+      case F.None:
         return n != null;
+      case F.TextArea:
+        return n !== "";
       default:
         throw new Error(
           `Param nullness check needs to be implemented for widget type ${i}. Either use default nullness check or define custom logic.`
@@ -1243,6 +1245,8 @@ class bh {
   maxNumPluginsToKeep = 50;
   originalSong;
   cloneSongFnInternal;
+  materializeSongFnInternal;
+  currentSongIdInternal;
   readApisInternal;
   activePluginIndex = -1;
   addAsOrReplaceActivePlugin(e) {
@@ -1277,7 +1281,7 @@ class bh {
         return r;
       r.setPluginContextInternal(s);
       try {
-        s.isExecuting = !0, s.setProgress(null), await s.run(r, s.getParamsInternal(), this.readApisInternal), r.clearPluginContextInternal(), s.isExecuting = !1;
+        s.isExecuting = !0, s.setProgress(null), await s.run(r, s.getParamsInternal(), this.readApisInternal), r.clearPluginContextInternal(), await this.materializeSongFnInternal(r, this.currentSongIdInternal), s.isExecuting = !1;
       } catch {
         this.threwErrorInLastRun = !0, r.clearPluginContextInternal(), s.isExecuting = !1;
         const o = this.getIndexOfLatestPluginWithCacheBeforeIndex(i);
@@ -1418,8 +1422,8 @@ var T = {
   }
 }, Gn = { exports: {} };
 (function(t, e) {
-  var n = 200, r = "__lodash_hash_undefined__", i = 9007199254740991, s = "[object Arguments]", a = "[object Array]", o = "[object Boolean]", u = "[object Date]", l = "[object Error]", d = "[object Function]", f = "[object GeneratorFunction]", g = "[object Map]", m = "[object Number]", b = "[object Object]", v = "[object Promise]", k = "[object RegExp]", C = "[object Set]", F = "[object String]", I = "[object Symbol]", S = "[object WeakMap]", A = "[object ArrayBuffer]", ot = "[object DataView]", Mt = "[object Float32Array]", Ar = "[object Float64Array]", Or = "[object Int8Array]", yr = "[object Int16Array]", Rr = "[object Int32Array]", Br = "[object Uint8Array]", Vr = "[object Uint8ClampedArray]", Fr = "[object Uint16Array]", Ur = "[object Uint32Array]", da = /[\\^$.*+?()[\]{}|]/g, pa = /\w*$/, ma = /^\[object .+?Constructor\]$/, va = /^(?:0|[1-9]\d*)$/, x = {};
-  x[s] = x[a] = x[A] = x[ot] = x[o] = x[u] = x[Mt] = x[Ar] = x[Or] = x[yr] = x[Rr] = x[g] = x[m] = x[b] = x[k] = x[C] = x[F] = x[I] = x[Br] = x[Vr] = x[Fr] = x[Ur] = !0, x[l] = x[d] = x[S] = !1;
+  var n = 200, r = "__lodash_hash_undefined__", i = 9007199254740991, s = "[object Arguments]", a = "[object Array]", o = "[object Boolean]", u = "[object Date]", l = "[object Error]", d = "[object Function]", f = "[object GeneratorFunction]", g = "[object Map]", m = "[object Number]", b = "[object Object]", v = "[object Promise]", k = "[object RegExp]", C = "[object Set]", U = "[object String]", I = "[object Symbol]", S = "[object WeakMap]", A = "[object ArrayBuffer]", ot = "[object DataView]", Mt = "[object Float32Array]", Ar = "[object Float64Array]", Or = "[object Int8Array]", yr = "[object Int16Array]", Rr = "[object Int32Array]", Br = "[object Uint8Array]", Fr = "[object Uint8ClampedArray]", Vr = "[object Uint16Array]", Ur = "[object Uint32Array]", da = /[\\^$.*+?()[\]{}|]/g, pa = /\w*$/, ma = /^\[object .+?Constructor\]$/, va = /^(?:0|[1-9]\d*)$/, x = {};
+  x[s] = x[a] = x[A] = x[ot] = x[o] = x[u] = x[Mt] = x[Ar] = x[Or] = x[yr] = x[Rr] = x[g] = x[m] = x[b] = x[k] = x[C] = x[U] = x[I] = x[Br] = x[Fr] = x[Vr] = x[Ur] = !0, x[l] = x[d] = x[S] = !1;
   var ba = typeof lt == "object" && lt && lt.Object === Object && lt, wa = typeof self == "object" && self && self.Object === Object && self, ft = ba || wa || Function("return this")(), Lr = e && !e.nodeType && e, Hr = Lr && !0 && t && !t.nodeType && t, ka = Hr && Hr.exports === Lr;
   function Sa(c, h) {
     return c.set(h[0], h[1]), c;
@@ -1438,8 +1442,8 @@ var T = {
     return c;
   }
   function $r(c, h, p, w) {
-    var B = -1, U = c ? c.length : 0;
-    for (w && U && (p = c[++B]); ++B < U; )
+    var B = -1, L = c ? c.length : 0;
+    for (w && L && (p = c[++B]); ++B < L; )
       p = h(p, c[B], B, c);
     return p;
   }
@@ -1482,7 +1486,7 @@ var T = {
     return c ? "Symbol(src)_1." + c : "";
   }(), Kr = Pa.toString, pt = Ie.hasOwnProperty, _e = Ie.toString, Na = RegExp(
     "^" + Kr.call(pt).replace(da, "\\$&").replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, "$1.*?") + "$"
-  ), qr = ka ? ft.Buffer : void 0, Wr = ft.Symbol, Jr = ft.Uint8Array, Aa = pn(Object.getPrototypeOf, Object), Oa = Object.create, ya = Ie.propertyIsEnumerable, Ra = Ta.splice, Xr = Object.getOwnPropertySymbols, Ba = qr ? qr.isBuffer : void 0, Va = pn(Object.keys, Object), vn = Kt(ft, "DataView"), se = Kt(ft, "Map"), bn = Kt(ft, "Promise"), wn = Kt(ft, "Set"), kn = Kt(ft, "WeakMap"), ae = Kt(Object, "create"), Fa = Pt(vn), Ua = Pt(se), La = Pt(bn), Ha = Pt(wn), $a = Pt(kn), jr = Wr ? Wr.prototype : void 0, Qr = jr ? jr.valueOf : void 0;
+  ), qr = ka ? ft.Buffer : void 0, Wr = ft.Symbol, Jr = ft.Uint8Array, Aa = pn(Object.getPrototypeOf, Object), Oa = Object.create, ya = Ie.propertyIsEnumerable, Ra = Ta.splice, Xr = Object.getOwnPropertySymbols, Ba = qr ? qr.isBuffer : void 0, Fa = pn(Object.keys, Object), vn = Kt(ft, "DataView"), se = Kt(ft, "Map"), bn = Kt(ft, "Promise"), wn = Kt(ft, "Set"), kn = Kt(ft, "WeakMap"), ae = Kt(Object, "create"), Va = Pt(vn), Ua = Pt(se), La = Pt(bn), Ha = Pt(wn), $a = Pt(kn), jr = Wr ? Wr.prototype : void 0, Qr = jr ? jr.valueOf : void 0;
   function xt(c) {
     var h = -1, p = c ? c.length : 0;
     for (this.clear(); ++h < p; ) {
@@ -1597,8 +1601,8 @@ var T = {
   zt.prototype.clear = no, zt.prototype.delete = ro, zt.prototype.get = io, zt.prototype.has = so, zt.prototype.set = ao;
   function oo(c, h) {
     var p = In(c) || yo(c) ? Ea(c.length, String) : [], w = p.length, B = !!w;
-    for (var U in c)
-      (h || pt.call(c, U)) && !(B && (U == "length" || Po(U, w))) && p.push(U);
+    for (var L in c)
+      (h || pt.call(c, L)) && !(B && (L == "length" || Po(L, w))) && p.push(L);
     return p;
   }
   function Yr(c, h, p) {
@@ -1614,9 +1618,9 @@ var T = {
   function co(c, h) {
     return c && Zr(h, _n(h), c);
   }
-  function Sn(c, h, p, w, B, U, Y) {
+  function Sn(c, h, p, w, B, L, Y) {
     var K;
-    if (w && (K = U ? w(c, B, U, Y) : w(c)), K !== void 0)
+    if (w && (K = L ? w(c, B, L, Y) : w(c)), K !== void 0)
       return K;
     if (!Te(c))
       return c;
@@ -1628,14 +1632,14 @@ var T = {
       var qt = Tt(c), ai = qt == d || qt == f;
       if (Bo(c))
         return po(c, h);
-      if (qt == b || qt == s || ai && !U) {
+      if (qt == b || qt == s || ai && !L) {
         if (Gr(c))
-          return U ? c : {};
+          return L ? c : {};
         if (K = xo(ai ? {} : c), !h)
           return Io(c, co(K, c));
       } else {
         if (!x[qt])
-          return U ? c : {};
+          return L ? c : {};
         K = To(c, qt, Sn, h);
       }
     }
@@ -1667,7 +1671,7 @@ var T = {
   }
   function go(c) {
     if (!ei(c))
-      return Va(c);
+      return Fa(c);
     var h = [];
     for (var p in Object(c))
       pt.call(c, p) && p != "constructor" && h.push(p);
@@ -1714,7 +1718,7 @@ var T = {
   }
   function Zr(c, h, p, w) {
     p || (p = {});
-    for (var B = -1, U = h.length; ++B < U; ) {
+    for (var B = -1, L = h.length; ++B < L; ) {
       var Y = h[B], K = w ? w(p[Y], c[Y], Y, p, c) : void 0;
       Yr(p, Y, K === void 0 ? c[Y] : K);
     }
@@ -1739,7 +1743,7 @@ var T = {
     var h = _e.call(c), p = h == b ? c.constructor : void 0, w = p ? Pt(p) : void 0;
     if (w)
       switch (w) {
-        case Fa:
+        case Va:
           return ot;
         case Ua:
           return g;
@@ -1775,14 +1779,14 @@ var T = {
       case yr:
       case Rr:
       case Br:
-      case Vr:
       case Fr:
+      case Vr:
       case Ur:
         return So(c, w);
       case g:
         return vo(c, w, p);
       case m:
-      case F:
+      case U:
         return new B(c);
       case k:
         return bo(c);
@@ -1830,24 +1834,24 @@ var T = {
   }
   var In = Array.isArray;
   function ri(c) {
-    return c != null && Vo(c.length) && !ii(c);
+    return c != null && Fo(c.length) && !ii(c);
   }
   function Ro(c) {
-    return Fo(c) && ri(c);
+    return Vo(c) && ri(c);
   }
   var Bo = Ba || Lo;
   function ii(c) {
     var h = Te(c) ? _e.call(c) : "";
     return h == d || h == f;
   }
-  function Vo(c) {
+  function Fo(c) {
     return typeof c == "number" && c > -1 && c % 1 == 0 && c <= i;
   }
   function Te(c) {
     var h = typeof c;
     return !!c && (h == "object" || h == "function");
   }
-  function Fo(c) {
+  function Vo(c) {
     return !!c && typeof c == "object";
   }
   function _n(c) {
@@ -1972,7 +1976,7 @@ const pr = () => {
 }, Pu = () => !1, Nu = /^on[^a-z]/, Au = (t) => Nu.test(t), st = Object.assign, Ou = (t, e) => {
   const n = t.indexOf(e);
   n > -1 && t.splice(n, 1);
-}, yu = Object.prototype.hasOwnProperty, O = (t, e) => yu.call(t, e), N = Array.isArray, Qt = (t) => an(t) === "[object Map]", Ru = (t) => an(t) === "[object Set]", D = (t) => typeof t == "function", at = (t) => typeof t == "string", mr = (t) => typeof t == "symbol", W = (t) => t !== null && typeof t == "object", Bu = (t) => W(t) && D(t.then) && D(t.catch), Vu = Object.prototype.toString, an = (t) => Vu.call(t), Bs = (t) => an(t).slice(8, -1), Fu = (t) => an(t) === "[object Object]", vr = (t) => at(t) && t !== "NaN" && t[0] !== "-" && "" + parseInt(t, 10) === t, Uu = (t) => {
+}, yu = Object.prototype.hasOwnProperty, O = (t, e) => yu.call(t, e), N = Array.isArray, Qt = (t) => an(t) === "[object Map]", Ru = (t) => an(t) === "[object Set]", D = (t) => typeof t == "function", at = (t) => typeof t == "string", mr = (t) => typeof t == "symbol", W = (t) => t !== null && typeof t == "object", Bu = (t) => W(t) && D(t.then) && D(t.catch), Fu = Object.prototype.toString, an = (t) => Fu.call(t), Bs = (t) => an(t).slice(8, -1), Vu = (t) => an(t) === "[object Object]", vr = (t) => at(t) && t !== "NaN" && t[0] !== "-" && "" + parseInt(t, 10) === t, Uu = (t) => {
   const e = /* @__PURE__ */ Object.create(null);
   return (n) => e[n] || (e[n] = t(n));
 }, wh = Uu((t) => t.charAt(0).toUpperCase() + t.slice(1)), We = (t, e) => !Object.is(t, e), Lu = (t, e, n) => {
@@ -1996,7 +2000,7 @@ function Mu(t, e = Gu) {
 const Mn = (t) => {
   const e = new Set(t);
   return e.w = 0, e.n = 0, e;
-}, Vs = (t) => (t.w & It) > 0, Fs = (t) => (t.n & It) > 0, Du = ({ deps: t }) => {
+}, Fs = (t) => (t.w & It) > 0, Vs = (t) => (t.n & It) > 0, Du = ({ deps: t }) => {
   if (t.length)
     for (let e = 0; e < t.length; e++)
       t[e].w |= It;
@@ -2006,7 +2010,7 @@ const Mn = (t) => {
     let n = 0;
     for (let r = 0; r < e.length; r++) {
       const i = e[r];
-      Vs(i) && !Fs(i) ? i.delete(t) : e[n++] = i, i.w &= ~It, i.n &= ~It;
+      Fs(i) && !Vs(i) ? i.delete(t) : e[n++] = i, i.w &= ~It, i.n &= ~It;
     }
     e.length = n;
   }
@@ -2067,7 +2071,7 @@ function rt(t, e, n) {
 }
 function qu(t, e) {
   let n = !1;
-  ue <= zn ? Fs(t) || (t.n |= It, n = !Vs(t)) : n = !t.has(q), n && (t.add(q), q.deps.push(t), process.env.NODE_ENV !== "production" && q.onTrack && q.onTrack(Object.assign({ effect: q }, e)));
+  ue <= zn ? Vs(t) || (t.n |= It, n = !Fs(t)) : n = !t.has(q), n && (t.add(q), q.deps.push(t), process.env.NODE_ENV !== "production" && q.onTrack && q.onTrack(Object.assign({ effect: q }, e)));
 }
 function _t(t, e, n, r, i, s) {
   const a = Dn.get(t);
@@ -2239,7 +2243,7 @@ function Be(t, e) {
     return !t && rt(o, "iterate", Ot), a.forEach((l, d) => r.call(i, u(l), u(d), s));
   };
 }
-function Ve(t, e, n) {
+function Fe(t, e, n) {
   return function(...r) {
     const i = this.__v_raw, s = E(i), a = Qt(s), o = t === "entries" || t === Symbol.iterator && a, u = t === "keys" && a, l = i[t](...r), d = n ? wr : e ? Ir : Cr;
     return !e && rt(s, "iterate", u ? Kn : Ot), {
@@ -2323,7 +2327,7 @@ function sl() {
     forEach: Be(!0, !0)
   };
   return ["keys", "values", "entries", Symbol.iterator].forEach((s) => {
-    t[s] = Ve(s, !1, !1), n[s] = Ve(s, !0, !1), e[s] = Ve(s, !1, !0), r[s] = Ve(s, !0, !0);
+    t[s] = Fe(s, !1, !1), n[s] = Fe(s, !0, !1), e[s] = Fe(s, !1, !0), r[s] = Fe(s, !0, !0);
   }), [
     t,
     n,
@@ -2373,7 +2377,7 @@ function qs(t) {
 function Ws(t) {
   return Sr(t, !0, Gs, fl, zs);
 }
-function Fe(t) {
+function Ve(t) {
   return Sr(t, !0, il, hl, Ks);
 }
 function Sr(t, e, n, r, i) {
@@ -2439,7 +2443,7 @@ function $(t, ...e) {
   Ls();
   const n = Bt.length ? Bt[Bt.length - 1].component : null, r = n && n.appContext.config.warnHandler, i = Cl();
   if (r)
-    Vt(r, n, 11, [
+    Ft(r, n, 11, [
       t + e.join(""),
       n && n.proxy,
       i.map(({ vnode: s }) => `at <${ca(n, s.type)}>`).join(`
@@ -2520,7 +2524,7 @@ const Xs = {
   [13]: "async component loader",
   [14]: "scheduler flush. This is likely a Vue internals bug. Please open an issue at https://new-issue.vuejs.org/?repo=vuejs/core"
 };
-function Vt(t, e, n, r) {
+function Ft(t, e, n, r) {
   let i;
   try {
     i = r ? t(...r) : t();
@@ -2531,7 +2535,7 @@ function Vt(t, e, n, r) {
 }
 function Wn(t, e, n, r) {
   if (D(t)) {
-    const s = Vt(t, e, n, r);
+    const s = Ft(t, e, n, r);
     return s && Bu(s) && s.catch((a) => {
       js(a, e, n);
     }), s;
@@ -2557,7 +2561,7 @@ function js(t, e, n, r = !0) {
     }
     const u = e.appContext.config.errorHandler;
     if (u) {
-      Vt(u, null, 10, [t, a, o]);
+      Ft(u, null, 10, [t, a, o]);
       return;
     }
   }
@@ -2630,7 +2634,7 @@ function ta(t) {
       if (n && n.active !== !1) {
         if (process.env.NODE_ENV !== "production" && e(n))
           continue;
-        Vt(n, null, 14);
+        Ft(n, null, 14);
       }
     }
   } finally {
@@ -2699,8 +2703,8 @@ function Nn(t) {
     }
   };
 }
-let kt = null, Vl = null;
-const Fl = (t) => t.__isSuspense;
+let kt = null, Fl = null;
+const Vl = (t) => t.__isSuspense;
 function Ul(t, e) {
   e && e.pendingBranch ? N(t) ? e.effects.push(...t) : e.effects.push(t) : Zs(t);
 }
@@ -2717,9 +2721,9 @@ function Ll(t, e, { immediate: n, deep: r, flush: i, onTrack: s, onTrigger: a } 
     if (Rt(I))
       return Xt(I);
     if (D(I))
-      return Vt(I, u, 2);
+      return Ft(I, u, 2);
     process.env.NODE_ENV !== "production" && o(I);
-  })) : D(t) ? e ? l = () => Vt(t, u, 2) : l = () => {
+  })) : D(t) ? e ? l = () => Ft(t, u, 2) : l = () => {
     if (!(u && u.isUnmounted))
       return g && g(), Wn(t, u, 3, [m]);
   } : (l = pr, process.env.NODE_ENV !== "production" && o(t)), e && r) {
@@ -2728,7 +2732,7 @@ function Ll(t, e, { immediate: n, deep: r, flush: i, onTrack: s, onTrigger: a } 
   }
   let g, m = (I) => {
     g = C.onStop = () => {
-      Vt(I, u, 4);
+      Ft(I, u, 4);
     };
   }, b = f ? new Array(t.length).fill(Ue) : Ue;
   const v = () => {
@@ -2756,9 +2760,9 @@ function Hl(t, e, n) {
   let s;
   D(e) ? s = e : (s = e.handler, n = e);
   const a = Zt;
-  Vi(this);
+  Fi(this);
   const o = Ll(i, s.bind(r), n);
-  return a ? Vi(a) : of(), o;
+  return a ? Fi(a) : of(), o;
 }
 function $l(t, e) {
   const n = e.split(".");
@@ -2781,7 +2785,7 @@ function Xt(t, e) {
     t.forEach((n) => {
       Xt(n, e);
     });
-  else if (Fu(t))
+  else if (Vu(t))
     for (const n in t)
       Xt(t[n], e);
   return t;
@@ -2790,10 +2794,10 @@ const Gl = Symbol(), Xn = (t) => t ? cf(t) ? uf(t) || t.proxy : Xn(t.parent) : n
   $: (t) => t,
   $el: (t) => t.vnode.el,
   $data: (t) => t.data,
-  $props: (t) => process.env.NODE_ENV !== "production" ? Fe(t.props) : t.props,
-  $attrs: (t) => process.env.NODE_ENV !== "production" ? Fe(t.attrs) : t.attrs,
-  $slots: (t) => process.env.NODE_ENV !== "production" ? Fe(t.slots) : t.slots,
-  $refs: (t) => process.env.NODE_ENV !== "production" ? Fe(t.refs) : t.refs,
+  $props: (t) => process.env.NODE_ENV !== "production" ? Ve(t.props) : t.props,
+  $attrs: (t) => process.env.NODE_ENV !== "production" ? Ve(t.attrs) : t.attrs,
+  $slots: (t) => process.env.NODE_ENV !== "production" ? Ve(t.slots) : t.slots,
+  $refs: (t) => process.env.NODE_ENV !== "production" ? Ve(t.refs) : t.refs,
   $parent: (t) => Xn(t.parent),
   $root: (t) => Xn(t.root),
   $emit: (t) => t.emit,
@@ -2885,20 +2889,20 @@ const ql = {
   emits: At,
   methods: At,
   computed: At,
-  beforeCreate: L,
-  created: L,
-  beforeMount: L,
-  mounted: L,
-  beforeUpdate: L,
-  updated: L,
-  beforeDestroy: L,
-  beforeUnmount: L,
-  destroyed: L,
-  unmounted: L,
-  activated: L,
-  deactivated: L,
-  errorCaptured: L,
-  serverPrefetch: L,
+  beforeCreate: H,
+  created: H,
+  beforeMount: H,
+  mounted: H,
+  beforeUpdate: H,
+  updated: H,
+  beforeDestroy: H,
+  beforeUnmount: H,
+  destroyed: H,
+  unmounted: H,
+  activated: H,
+  deactivated: H,
+  errorCaptured: H,
+  serverPrefetch: H,
   components: At,
   directives: At,
   watch: Jl,
@@ -2922,7 +2926,7 @@ function Ri(t) {
   }
   return t;
 }
-function L(t, e) {
+function H(t, e) {
   return t ? [...new Set([].concat(t, e))] : e;
 }
 function At(t, e) {
@@ -2935,7 +2939,7 @@ function Jl(t, e) {
     return t;
   const n = st(/* @__PURE__ */ Object.create(null), t);
   for (const r in e)
-    n[r] = L(t[r], e[r]);
+    n[r] = H(t[r], e[r]);
   return n;
 }
 function Xl() {
@@ -2974,7 +2978,7 @@ function ef(t, e = null, n = null, r = 0, i = null, s = t === na ? 0 : 1, a = !1
     props: e,
     key: e && ia(e),
     ref: e && Me(e),
-    scopeId: Vl,
+    scopeId: Fl,
     slotScopeIds: null,
     children: n,
     component: null,
@@ -3008,7 +3012,7 @@ function sa(t, e = null, n = null, r = 0, i = null, s = !1) {
     let { class: o, style: u } = e;
     o && !at(o) && (e.class = dr(o)), W(u) && (Je(u) && !N(u) && (u = st({}, u)), e.style = gr(u));
   }
-  const a = at(t) ? 1 : Fl(t) ? 128 : jl(t) ? 64 : W(t) ? 4 : D(t) ? 2 : 0;
+  const a = at(t) ? 1 : Vl(t) ? 128 : jl(t) ? 64 : W(t) ? 4 : D(t) ? 2 : 0;
   return process.env.NODE_ENV !== "production" && a & 4 && Je(t) && (t = E(t), $("Vue received a Component which was made a reactive object. This can lead to unnecessary performance overhead, and should be avoided by marking the component with `markRaw` or using `shallowRef` instead of `ref`.", `
 Component that was made reactive: `, t)), ef(t, e, n, r, i, a, s, !0);
 }
@@ -3093,7 +3097,7 @@ function af(...t) {
 }
 Xl();
 let Zt = null;
-const Vi = (t) => {
+const Fi = (t) => {
   Zt = t, t.scope.on();
 }, of = () => {
   Zt && Zt.scope.off(), Zt = null;
@@ -3304,7 +3308,7 @@ function Sh(t) {
   const n = e[1], r = e[2];
   return mf[n.toLowerCase()] + (parseInt(r, 10) + 2) * 12;
 }
-function Fi(t, e, n, r) {
+function Vi(t, e, n, r) {
   return `${t} // ${e} // ${n} // ${r}`;
 }
 function vf(t, e, n) {
@@ -3410,7 +3414,7 @@ class cn {
     this.name = e, this.manufacturerName = n, this.pluginFormatName = r, this.pluginVersion = i, this.localInstanceIdInternal = cn.generateAudioPluginInstanceIdInternal();
   }
   getTuneflowId() {
-    return Fi(
+    return Vi(
       this.manufacturerName,
       this.pluginFormatName,
       this.name,
@@ -3454,7 +3458,7 @@ class cn {
   static generateAudioPluginInstanceIdInternal() {
     return sn(10);
   }
-  static DEFAULT_SYNTH_TFID = Fi("TuneFlow", "VST3", "TFSynth", "1.0.0");
+  static DEFAULT_SYNTH_TFID = Vi("TuneFlow", "VST3", "TFSynth", "1.0.0");
 }
 class St {
   pitch;
@@ -3577,7 +3581,10 @@ class et {
       this.audioClipData = {
         audioFilePath: o.audioFilePath,
         startTick: o.startTick,
-        duration: o.duration
+        duration: o.duration,
+        audioData: o.audioData && o.audioData.data ? {
+          ...o.audioData
+        } : void 0
       }, r = P.isNumber(r) ? Math.max(r, o.startTick) : o.startTick;
       const u = this.getAudioEndTick();
       (!P.isNumber(a) || u < a) && (a = u), this.clipStartTick = r, this.clipEndTick = a;
@@ -4923,9 +4930,9 @@ R.prototype.writeVarInt = function(t) {
 R.prototype.writeChunk = function(t, e) {
   this.writeString(t), this.writeUInt32(e.length), this.writeBytes(e);
 };
-var Vf = Of;
+var Ff = Of;
 un.parseMidi = Af;
-un.writeMidi = Vf;
+un.writeMidi = Ff;
 var en = {}, Lt = {};
 Object.defineProperty(Lt, "__esModule", { value: !0 });
 Lt.insert = Lt.search = void 0;
@@ -4951,14 +4958,14 @@ function fa(t, e, n) {
   return -1;
 }
 Lt.search = fa;
-function Ff(t, e, n) {
+function Vf(t, e, n) {
   if (n === void 0 && (n = "ticks"), t.length) {
     var r = fa(t, e[n], n);
     t.splice(r + 1, 0, e);
   } else
     t.push(e);
 }
-Lt.insert = Ff;
+Lt.insert = Vf;
 (function(t) {
   Object.defineProperty(t, "__esModule", { value: !0 }), t.Header = t.keySignatureKeys = void 0;
   var e = Lt, n = /* @__PURE__ */ new WeakMap();
@@ -5866,7 +5873,7 @@ dn.encode = gh;
       });
     }
     return new (m || (m = Promise))(function(k, C) {
-      function F(A) {
+      function U(A) {
         try {
           S(b.next(A));
         } catch (ot) {
@@ -5881,7 +5888,7 @@ dn.encode = gh;
         }
       }
       function S(A) {
-        A.done ? k(A.value) : v(A.value).then(F, I);
+        A.done ? k(A.value) : v(A.value).then(U, I);
       }
       S((b = b.apply(f, g || [])).next());
     });
@@ -5891,10 +5898,10 @@ dn.encode = gh;
         throw k[1];
       return k[1];
     }, trys: [], ops: [] }, b, v, k, C;
-    return C = { next: F(0), throw: F(1), return: F(2) }, typeof Symbol == "function" && (C[Symbol.iterator] = function() {
+    return C = { next: U(0), throw: U(1), return: U(2) }, typeof Symbol == "function" && (C[Symbol.iterator] = function() {
       return this;
     }), C;
-    function F(S) {
+    function U(S) {
       return function(A) {
         return I([S, A]);
       };
@@ -5958,8 +5965,8 @@ dn.encode = gh;
         var v = g instanceof ArrayBuffer ? new Uint8Array(g) : g;
         b = (0, r.parseMidi)(v), b.tracks.forEach(function(k) {
           var C = 0;
-          k.forEach(function(F) {
-            C += F.deltaTime, F.absoluteTime = C;
+          k.forEach(function(U) {
+            C += U.deltaTime, U.absoluteTime = C;
           });
         }), b.tracks = d(b.tracks);
       }
@@ -6044,8 +6051,8 @@ dn.encode = gh;
   } });
   function d(f) {
     for (var g = [], m = 0; m < f.length; m++)
-      for (var b = g.length, v = /* @__PURE__ */ new Map(), k = Array(16).fill(0), C = 0, F = f[m]; C < F.length; C++) {
-        var I = F[C], S = b, A = I.channel;
+      for (var b = g.length, v = /* @__PURE__ */ new Map(), k = Array(16).fill(0), C = 0, U = f[m]; C < U.length; C++) {
+        var I = U[C], S = b, A = I.channel;
         if (A !== void 0) {
           I.type === "programChange" && (k[A] = I.programNumber);
           var ot = k[A], Mt = "".concat(ot, " ").concat(A);
@@ -6726,7 +6733,7 @@ class mh {
     this.name = e;
   }
 }
-var H = /* @__PURE__ */ ((t) => (t[t.Slider = 1] = "Slider", t[t.Input = 2] = "Input", t[t.TrackSelector = 3] = "TrackSelector", t[t.Pitch = 4] = "Pitch", t[t.TrackPitchSelector = 5] = "TrackPitchSelector", t[t.InstrumentSelector = 6] = "InstrumentSelector", t[t.Select = 7] = "Select", t[t.Switch = 8] = "Switch", t[t.InputNumber = 9] = "InputNumber", t[t.MultiTrackSelector = 10] = "MultiTrackSelector", t[t.None = 11] = "None", t[t.FileSelector = 12] = "FileSelector", t[t.MultiSourceAudioSelector = 13] = "MultiSourceAudioSelector", t[t.AudioRecorder = 14] = "AudioRecorder", t[t.SelectList = 15] = "SelectList", t[t.Descriptions = 16] = "Descriptions", t))(H || {});
+var F = /* @__PURE__ */ ((t) => (t[t.Slider = 1] = "Slider", t[t.Input = 2] = "Input", t[t.TrackSelector = 3] = "TrackSelector", t[t.Pitch = 4] = "Pitch", t[t.TrackPitchSelector = 5] = "TrackPitchSelector", t[t.InstrumentSelector = 6] = "InstrumentSelector", t[t.Select = 7] = "Select", t[t.Switch = 8] = "Switch", t[t.InputNumber = 9] = "InputNumber", t[t.MultiTrackSelector = 10] = "MultiTrackSelector", t[t.None = 11] = "None", t[t.FileSelector = 12] = "FileSelector", t[t.MultiSourceAudioSelector = 13] = "MultiSourceAudioSelector", t[t.AudioRecorder = 14] = "AudioRecorder", t[t.SelectList = 15] = "SelectList", t[t.Descriptions = 16] = "Descriptions", t[t.TextArea = 17] = "TextArea", t))(F || {});
 async function Oh(t) {
   return t.arrayBuffer();
 }
@@ -6759,14 +6766,14 @@ export {
   Jt as TrackType,
   bh as TuneflowPipeline,
   $n as TuneflowPlugin,
-  H as WidgetType,
+  F as WidgetType,
   bf as areTuneflowIdsEqual,
   wf as areTuneflowIdsEqualIgnoreVersion,
   kf as dbToVolumeValue,
   Ze as decodeAudioPluginTuneflowId,
   _h as gainToDb,
   Th as gainToVolumeValue,
-  Fi as getAudioPluginTuneflowId,
+  Vi as getAudioPluginTuneflowId,
   vf as getAudioPluginVersionlessTuneflowId,
   Oh as getFileContentFromFileSelector,
   Ah as maybeToRaw,

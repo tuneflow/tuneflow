@@ -71,6 +71,8 @@ describe('Skeleton Tuneflow', () => {
     // @ts-ignore
     pipeline.cloneSongFnInternal = (song: Song) => song;
     // @ts-ignore
+    pipeline.materializeSongFnInternal = () => {};
+    // @ts-ignore
     pipeline.readApisInternal = MOCK_READ_APIS;
     pipeline.addAsOrReplaceActivePlugin(new CreateTrackPlugin());
     expect(song.getTracks().length).toBe(1);

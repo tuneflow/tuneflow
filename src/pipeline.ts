@@ -9,7 +9,11 @@ export class TuneflowPipeline {
   private maxNumPluginsToKeep = 50;
   private originalSong?: Song;
   // @ts-ignore
-  private cloneSongFnInternal: Function;
+  private cloneSongFnInternal: (song: Song) => Promise<Song>;
+  // @ts-ignore
+  private materializeSongFnInternal: (song: Song, songId: string) => Promise<void>;
+  // @ts-ignore
+  private currentSongIdInternal: string;
   /** Provide additional APIs for plugins to read required data, e.g. read audio file content. */
   // @ts-ignore
   private readApisInternal: ReadAPIs;
@@ -131,6 +135,8 @@ export class TuneflowPipeline {
         await plugin.run(inputSong, plugin.getParamsInternal(), this.readApisInternal);
         // @ts-ignore
         inputSong.clearPluginContextInternal();
+        // Write temporary buffers to local files.
+        await this.materializeSongFnInternal(inputSong, this.currentSongIdInternal);
         // @ts-ignore
         plugin.isExecuting = false;
       } catch (e: any) {
