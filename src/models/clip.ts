@@ -32,6 +32,8 @@ export interface AudioClipData {
    * `audioFilePath` with the saved file path, and this field will be cleared afterwards.
    *
    * Can be omitted if `audioFilePath` is set.
+   *
+   * IMPORTANT: Only supported on desktop, requires desktop app version >= 1.8.9.
    */
   audioData?: AudioData;
 

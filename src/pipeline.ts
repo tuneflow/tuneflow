@@ -119,10 +119,7 @@ export class TuneflowPipeline {
       const plugin = this.plugins[i];
       // TODO: Revisit here to see if we need to set isRollbackable to false.
       // @ts-ignore
-      if (!plugin.enabledInternal) {
-        return inputSong;
-      }
-      if (!plugin.hasAllParamsSet()) {
+      if (!TuneflowPipeline.isPluginRunnable(plugin)) {
         return inputSong;
       }
 
@@ -275,5 +272,9 @@ export class TuneflowPipeline {
   private addPluginAt(plugin: TuneflowPlugin, index: number) {
     this.plugins.splice(index, 0, plugin);
     this.maintainPluginListSize();
+  }
+
+  static isPluginRunnable(plugin: TuneflowPlugin) {
+    return plugin.enabledInternal && plugin.hasAllParamsSet();
   }
 }
