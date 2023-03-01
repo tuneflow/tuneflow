@@ -1,3 +1,4 @@
+import type { ClipInfo } from './common';
 import type { LabelText } from './text';
 import type { WidgetDescriptor } from './widgets';
 
@@ -32,11 +33,9 @@ export interface ParamDescriptor {
   /**
    * Injects the value from the editor at the time the plugin runs.
    *
-   * If specified, the editor will inject the value specified by the `InjectSource`,
-   * if you want to overwrite the value provided by the editor,
-   * you can use initPluginInstance.
+   * If specified, the editor will inject the value specified by the `InjectSource` or `InjectConfig`.
    */
-  injectFrom?: InjectSource;
+  injectFrom?: InjectSource | InjectConfig;
 
   /**
    * If set to true, this param can still be adjusted
@@ -64,4 +63,24 @@ export enum InjectSource {
 
   /** A number that represents the start tick of the beat where the playhead is at. */
   TickAtPlayheadSnappedToBeat = 6,
+
+  /** A list of `AudioData` for specified clips. */
+  ClipAudioData = 7,
 }
+
+/** Inject config for when injection source is `InjectSource.ClipAudioData`. */
+export interface ClipAudioDataInjectOptions {
+  clips: 'selectedAudioClips' | ClipInfo[];
+}
+
+/** Inject config for when injection source is `InjectSource.SelectedClipInfos`. */
+export interface SelectedClipInfosInjectOptions {
+  /** Maximnum number of clip infos to include. Defaults to unlimited. */
+  maxNumClips?: number;
+}
+
+/** Used to specify a injection source when additional config is needed. */
+export type InjectConfig = {
+  type: InjectSource;
+  options: ClipAudioDataInjectOptions | SelectedClipInfosInjectOptions;
+};
