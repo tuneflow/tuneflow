@@ -15,7 +15,12 @@ export interface ReadAPIs {
   resolvePath: (path1: string, path2: string) => Promise<string>;
   translateLabel: (label: LabelText) => string;
   serializeSong: (song: Song) => Promise<string>;
+  serializeSongAsUint8Array: (song: Song) => Promise<Uint8Array>;
   deserializeSong: (encodedSong: string, keepPluginStates?: boolean) => Promise<Song>;
+  deserializeSongFromUint8Array: (
+    encodedSong: Uint8Array,
+    keepPluginStates?: boolean,
+  ) => Promise<Song>;
   getAvailableAudioPlugins: () => Promise<AudioPluginDescriptor[]>;
   getFilesInDirectory: (directoryPath: string) => Promise<string[]>;
 }

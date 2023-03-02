@@ -8,7 +8,9 @@ const MOCK_READ_APIS: ReadAPIs = {
   resolvePath: async (path1, path2) => `${path1}/${path2}`,
   translateLabel: (label: any) => label,
   serializeSong: async () => 'serializedSong',
+  serializeSongAsUint8Array: async () => new Uint8Array(),
   deserializeSong: async () => new Song(),
+  deserializeSongFromUint8Array: async () => new Song(),
   getAvailableAudioPlugins: async () => [],
   getFilesInDirectory: async () => [],
 };
