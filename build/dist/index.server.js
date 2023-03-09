@@ -448,8 +448,8 @@ var xn = /(.)^/, Tc = {
   "\n": "n",
   "\u2028": "u2028",
   "\u2029": "u2029"
-}, Pc = /\\|'|\r|\n|\u2028|\u2029/g;
-function Nc(t) {
+}, Nc = /\\|'|\r|\n|\u2028|\u2029/g;
+function Pc(t) {
   return "\\" + Tc[t];
 }
 var Ac = /^\s*(\w|\$)+\s*$/;
@@ -461,7 +461,7 @@ function Oc(t, e, n) {
     (e.evaluate || xn).source
   ].join("|") + "|$", "g"), i = 0, s = "__p+='";
   t.replace(r, function(l, d, f, g, m) {
-    return s += t.slice(i, m).replace(Pc, Nc), i = m + l.length, d ? s += `'+
+    return s += t.slice(i, m).replace(Nc, Pc), i = m + l.length, d ? s += `'+
 ((__t=(` + d + `))==null?'':_.escape(__t))+
 '` : f ? s += `'+
 ((__t=(` + f + `))==null?'':__t)+
@@ -793,13 +793,13 @@ function jc(t, e, n) {
   return r;
 }
 var Qc = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
-function Ps(t) {
+function Ns(t) {
   return t ? $t(t) ? we.call(t) : Yn(t) ? t.match(Qc) : Q(t) ? Vt(t, or) : re(t) : [];
 }
-function Ns(t, e, n) {
+function Ps(t, e, n) {
   if (e == null || n)
     return Q(t) || (t = re(t)), t[Un(t.length - 1)];
-  var r = Ps(t), i = X(r);
+  var r = Ns(t), i = X(r);
   e = Math.max(Math.min(e, i), 0);
   for (var s = i - 1, a = 0; a < e; a++) {
     var o = Un(a, s), u = r[a];
@@ -808,7 +808,7 @@ function Ns(t, e, n) {
   return r.slice(0, e);
 }
 function Yc(t) {
-  return Ns(t, 1 / 0);
+  return Ps(t, 1 / 0);
 }
 function Zc(t, e, n) {
   var r = 0;
@@ -872,7 +872,7 @@ const As = J(function(t, e) {
 function Os(t, e, n) {
   return we.call(t, 0, Math.max(0, t.length - (e == null || n ? 1 : e)));
 }
-function Pn(t, e, n) {
+function Nn(t, e, n) {
   return t == null || t.length < 1 ? e == null || n ? void 0 : [] : e == null || n ? t[0] : Os(t, t.length - e);
 }
 function Ge(t, e, n) {
@@ -1081,19 +1081,19 @@ const vu = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   max: Ts,
   min: jc,
   shuffle: Yc,
-  sample: Ns,
+  sample: Ps,
   sortBy: Zc,
   groupBy: tu,
   indexBy: eu,
   countBy: nu,
   partition: ru,
-  toArray: Ps,
+  toArray: Ns,
   size: iu,
   pick: As,
   omit: au,
-  first: Pn,
-  head: Pn,
-  take: Pn,
+  first: Nn,
+  head: Nn,
+  take: Nn,
   initial: Os,
   last: ou,
   rest: Ge,
@@ -1116,8 +1116,8 @@ const vu = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   mixin: Rs,
   default: _
 }, Symbol.toStringTag, { value: "Module" }));
-var P = Rs(vu);
-P._ = P;
+var N = Rs(vu);
+N._ = N;
 let sn = (t = 21) => crypto.getRandomValues(new Uint8Array(t)).reduce((e, n) => (n &= 63, n < 36 ? e += n.toString(36) : n < 62 ? e += (n - 26).toString(36).toUpperCase() : n > 62 ? e += "-" : e += "_", e), "");
 class $n {
   instanceIdInternal = $n.generatePluginIdInternal();
@@ -1128,6 +1128,7 @@ class $n {
   songCacheInternal;
   allowManualApplyAdjust = !1;
   allowReset = !1;
+  trigger = void 0;
   progress = null;
   isExecuting = !1;
   static providerId() {
@@ -1143,9 +1144,12 @@ class $n {
   }
   async run(e, n, r) {
   }
-  static async create(e, n, r) {
-    const i = new this();
-    return i.allowManualApplyAdjust = r.allowManualApplyAdjust, i.allowReset = r.allowReset, i.resetInternal(), await i.init(e, n), i;
+  static async create(e, n, r, i, s) {
+    const a = new this();
+    return a.allowManualApplyAdjust = r.allowManualApplyAdjust, a.allowReset = r.allowReset, a.trigger = i ? {
+      type: i,
+      entities: s
+    } : void 0, a.resetInternal(), await a.init(e, n), a;
   }
   get instanceId() {
     return this.instanceIdInternal;
@@ -1484,12 +1488,12 @@ var T = {
       p[++h] = w;
     }), p;
   }
-  var Pa = Array.prototype, Na = Function.prototype, Ie = Object.prototype, mn = ft["__core-js_shared__"], zr = function() {
+  var Na = Array.prototype, Pa = Function.prototype, Ie = Object.prototype, mn = ft["__core-js_shared__"], zr = function() {
     var c = /[^.]+$/.exec(mn && mn.keys && mn.keys.IE_PROTO || "");
     return c ? "Symbol(src)_1." + c : "";
-  }(), Kr = Na.toString, pt = Ie.hasOwnProperty, _e = Ie.toString, Aa = RegExp(
+  }(), Kr = Pa.toString, pt = Ie.hasOwnProperty, _e = Ie.toString, Aa = RegExp(
     "^" + Kr.call(pt).replace(pa, "\\$&").replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, "$1.*?") + "$"
-  ), qr = Sa ? ft.Buffer : void 0, Wr = ft.Symbol, Jr = ft.Uint8Array, Oa = pn(Object.getPrototypeOf, Object), ya = Object.create, Ra = Ie.propertyIsEnumerable, Ba = Pa.splice, Xr = Object.getOwnPropertySymbols, Fa = qr ? qr.isBuffer : void 0, Va = pn(Object.keys, Object), vn = Kt(ft, "DataView"), se = Kt(ft, "Map"), bn = Kt(ft, "Promise"), wn = Kt(ft, "Set"), kn = Kt(ft, "WeakMap"), ae = Kt(Object, "create"), Ua = Pt(vn), La = Pt(se), Ha = Pt(bn), $a = Pt(wn), Ga = Pt(kn), jr = Wr ? Wr.prototype : void 0, Qr = jr ? jr.valueOf : void 0;
+  ), qr = Sa ? ft.Buffer : void 0, Wr = ft.Symbol, Jr = ft.Uint8Array, Oa = pn(Object.getPrototypeOf, Object), ya = Object.create, Ra = Ie.propertyIsEnumerable, Ba = Na.splice, Xr = Object.getOwnPropertySymbols, Fa = qr ? qr.isBuffer : void 0, Va = pn(Object.keys, Object), vn = Kt(ft, "DataView"), se = Kt(ft, "Map"), bn = Kt(ft, "Promise"), wn = Kt(ft, "Set"), kn = Kt(ft, "WeakMap"), ae = Kt(Object, "create"), Ua = Nt(vn), La = Nt(se), Ha = Nt(bn), $a = Nt(wn), Ga = Nt(kn), jr = Wr ? Wr.prototype : void 0, Qr = jr ? jr.valueOf : void 0;
   function xt(c) {
     var h = -1, p = c ? c.length : 0;
     for (this.clear(); ++h < p; ) {
@@ -1605,7 +1609,7 @@ var T = {
   function co(c, h) {
     var p = In(c) || Ro(c) ? xa(c.length, String) : [], w = p.length, B = !!w;
     for (var L in c)
-      (h || pt.call(c, L)) && !(B && (L == "length" || No(L, w))) && p.push(L);
+      (h || pt.call(c, L)) && !(B && (L == "length" || Po(L, w))) && p.push(L);
     return p;
   }
   function Yr(c, h, p) {
@@ -1643,7 +1647,7 @@ var T = {
       } else {
         if (!x[qt])
           return L ? c : {};
-        K = Po(c, qt, Sn, h);
+        K = No(c, qt, Sn, h);
       }
     }
     Y || (Y = new zt());
@@ -1652,8 +1656,8 @@ var T = {
       return oi;
     if (Y.set(c, K), !si)
       var ci = p ? Eo(c) : _n(c);
-    return _a(ci || c, function(En, Pe) {
-      ci && (Pe = En, En = c[Pe]), Yr(K, Pe, Sn(En, h, p, w, Pe, c, Y));
+    return _a(ci || c, function(En, Ne) {
+      ci && (Ne = En, En = c[Ne]), Yr(K, Ne, Sn(En, h, p, w, Ne, c, Y));
     }), K;
   }
   function lo(c) {
@@ -1670,7 +1674,7 @@ var T = {
     if (!Te(c) || Oo(c))
       return !1;
     var h = ii(c) || Gr(c) ? Aa : va;
-    return h.test(Pt(c));
+    return h.test(Nt(c));
   }
   function po(c) {
     if (!ei(c))
@@ -1743,7 +1747,7 @@ var T = {
   }
   var ti = Xr ? pn(Xr, Object) : Lo, Tt = ho;
   (vn && Tt(new vn(new ArrayBuffer(1))) != ot || se && Tt(new se()) != g || bn && Tt(bn.resolve()) != v || wn && Tt(new wn()) != C || kn && Tt(new kn()) != S) && (Tt = function(c) {
-    var h = _e.call(c), p = h == b ? c.constructor : void 0, w = p ? Pt(p) : void 0;
+    var h = _e.call(c), p = h == b ? c.constructor : void 0, w = p ? Nt(p) : void 0;
     if (w)
       switch (w) {
         case Ua:
@@ -1766,7 +1770,7 @@ var T = {
   function To(c) {
     return typeof c.constructor == "function" && !ei(c) ? lo(Oa(c)) : {};
   }
-  function Po(c, h, p, w) {
+  function No(c, h, p, w) {
     var B = c.constructor;
     switch (h) {
       case A:
@@ -1799,7 +1803,7 @@ var T = {
         return So(c);
     }
   }
-  function No(c, h) {
+  function Po(c, h) {
     return h = h ?? i, !!h && (typeof c == "number" || ba.test(c)) && c > -1 && c % 1 == 0 && c < h;
   }
   function Ao(c) {
@@ -1813,7 +1817,7 @@ var T = {
     var h = c && c.constructor, p = typeof h == "function" && h.prototype || Ie;
     return c === p;
   }
-  function Pt(c) {
+  function Nt(c) {
     if (c != null) {
       try {
         return Kr.call(c);
@@ -1869,7 +1873,7 @@ var T = {
   t.exports = yo;
 })(Gn, Gn.exports);
 const ki = Gn.exports;
-class Ne {
+class Pe {
   ticks;
   bpm;
   time;
@@ -1933,10 +1937,10 @@ function _u(t, e) {
   return e ? (i) => !!n[i.toLowerCase()] : (i) => !!n[i];
 }
 function gr(t) {
-  if (N(t)) {
+  if (P(t)) {
     const e = {};
     for (let n = 0; n < t.length; n++) {
-      const r = t[n], i = at(r) ? Pu(r) : gr(r);
+      const r = t[n], i = at(r) ? Nu(r) : gr(r);
       if (i)
         for (const s in i)
           e[s] = i[s];
@@ -1950,7 +1954,7 @@ function gr(t) {
   }
 }
 const Eu = /;(?![^(]*\))/g, xu = /:([^]+)/, Tu = /\/\*.*?\*\//gs;
-function Pu(t) {
+function Nu(t) {
   const e = {};
   return t.replace(Tu, "").split(Eu).forEach((n) => {
     if (n) {
@@ -1963,7 +1967,7 @@ function dr(t) {
   let e = "";
   if (at(t))
     e = t;
-  else if (N(t))
+  else if (P(t))
     for (let n = 0; n < t.length; n++) {
       const r = dr(t[n]);
       r && (e += r + " ");
@@ -1976,10 +1980,10 @@ function dr(t) {
 const ut = process.env.NODE_ENV !== "production" ? Object.freeze({}) : {};
 process.env.NODE_ENV !== "production" && Object.freeze([]);
 const pr = () => {
-}, Nu = () => !1, Au = /^on[^a-z]/, Ou = (t) => Au.test(t), st = Object.assign, yu = (t, e) => {
+}, Pu = () => !1, Au = /^on[^a-z]/, Ou = (t) => Au.test(t), st = Object.assign, yu = (t, e) => {
   const n = t.indexOf(e);
   n > -1 && t.splice(n, 1);
-}, Ru = Object.prototype.hasOwnProperty, O = (t, e) => Ru.call(t, e), N = Array.isArray, Qt = (t) => an(t) === "[object Map]", Bu = (t) => an(t) === "[object Set]", D = (t) => typeof t == "function", at = (t) => typeof t == "string", mr = (t) => typeof t == "symbol", W = (t) => t !== null && typeof t == "object", Fu = (t) => W(t) && D(t.then) && D(t.catch), Vu = Object.prototype.toString, an = (t) => Vu.call(t), Fs = (t) => an(t).slice(8, -1), Uu = (t) => an(t) === "[object Object]", vr = (t) => at(t) && t !== "NaN" && t[0] !== "-" && "" + parseInt(t, 10) === t, Lu = (t) => {
+}, Ru = Object.prototype.hasOwnProperty, O = (t, e) => Ru.call(t, e), P = Array.isArray, Qt = (t) => an(t) === "[object Map]", Bu = (t) => an(t) === "[object Set]", D = (t) => typeof t == "function", at = (t) => typeof t == "string", mr = (t) => typeof t == "symbol", W = (t) => t !== null && typeof t == "object", Fu = (t) => W(t) && D(t.then) && D(t.catch), Vu = Object.prototype.toString, an = (t) => Vu.call(t), Fs = (t) => an(t).slice(8, -1), Uu = (t) => an(t) === "[object Object]", vr = (t) => at(t) && t !== "NaN" && t[0] !== "-" && "" + parseInt(t, 10) === t, Lu = (t) => {
   const e = /* @__PURE__ */ Object.create(null);
   return (n) => e[n] || (e[n] = t(n));
 }, wh = Lu((t) => t.charAt(0).toUpperCase() + t.slice(1)), We = (t, e) => !Object.is(t, e), Hu = (t, e, n) => {
@@ -2083,7 +2087,7 @@ function _t(t, e, n, r, i, s) {
   let o = [];
   if (e === "clear")
     o = [...a.values()];
-  else if (n === "length" && N(t)) {
+  else if (n === "length" && P(t)) {
     const l = $u(r);
     a.forEach((d, f) => {
       (f === "length" || f >= l) && o.push(d);
@@ -2091,10 +2095,10 @@ function _t(t, e, n, r, i, s) {
   } else
     switch (n !== void 0 && o.push(a.get(n)), e) {
       case "add":
-        N(t) ? vr(n) && o.push(a.get("length")) : (o.push(a.get(Ot)), Qt(t) && o.push(a.get(Kn)));
+        P(t) ? vr(n) && o.push(a.get("length")) : (o.push(a.get(Ot)), Qt(t) && o.push(a.get(Kn)));
         break;
       case "delete":
-        N(t) || (o.push(a.get(Ot)), Qt(t) && o.push(a.get(Kn)));
+        P(t) || (o.push(a.get(Ot)), Qt(t) && o.push(a.get(Kn)));
         break;
       case "set":
         Qt(t) && o.push(a.get(Ot));
@@ -2111,7 +2115,7 @@ function _t(t, e, n, r, i, s) {
   }
 }
 function Ae(t, e) {
-  const n = N(t) ? t : [...t];
+  const n = P(t) ? t : [...t];
   for (const r of n)
     r.computed && Ei(r, e);
   for (const r of n)
@@ -2151,7 +2155,7 @@ function br(t = !1, e = !1) {
       return e;
     if (i === "__v_raw" && s === (t ? e ? qs : Ks : e ? dl : zs).get(r))
       return r;
-    const a = N(r);
+    const a = P(r);
     if (!t && a && O(xi, i))
       return Reflect.get(xi, i, s);
     const o = Reflect.get(r, i, s);
@@ -2164,9 +2168,9 @@ function tl(t = !1) {
     let a = n[r];
     if (Ut(a) && G(a) && !G(i))
       return !1;
-    if (!t && (!qn(i) && !Ut(i) && (a = E(a), i = E(i)), !N(n) && G(a) && !G(i)))
+    if (!t && (!qn(i) && !Ut(i) && (a = E(a), i = E(i)), !P(n) && G(a) && !G(i)))
       return a.value = i, !0;
-    const o = N(n) && vr(r) ? Number(r) < n.length : O(n, r), u = Reflect.set(n, r, i, s);
+    const o = P(n) && vr(r) ? Number(r) < n.length : O(n, r), u = Reflect.set(n, r, i, s);
     return n === E(s) && (o ? We(i, a) && _t(n, "set", r, i, a) : _t(n, "add", r, i)), u;
   };
 }
@@ -2179,7 +2183,7 @@ function nl(t, e) {
   return (!mr(e) || !Gs.has(e)) && rt(t, "has", e), n;
 }
 function rl(t) {
-  return rt(t, "iterate", N(t) ? "length" : Ot), Reflect.ownKeys(t);
+  return rt(t, "iterate", P(t) ? "length" : Ot), Reflect.ownKeys(t);
 }
 const il = {
   get: Xu,
@@ -2221,7 +2225,7 @@ function Ti(t) {
   const e = E(this);
   return on(e).has.call(e, t) || (e.add(t), _t(e, "add", t, t)), this;
 }
-function Pi(t, e) {
+function Ni(t, e) {
   e = E(e);
   const n = E(this), { has: r, get: i } = on(n);
   let s = r.call(n, t);
@@ -2229,7 +2233,7 @@ function Pi(t, e) {
   const a = i.call(n, t);
   return n.set(t, e), s ? We(e, a) && _t(n, "set", t, e, a) : _t(n, "add", t, e), this;
 }
-function Ni(t) {
+function Pi(t) {
   const e = E(this), { has: n, get: r } = on(e);
   let i = n.call(e, t);
   i ? process.env.NODE_ENV !== "production" && Ds(e, n, t) : (t = E(t), i = n.call(e, t));
@@ -2281,8 +2285,8 @@ function al() {
     },
     has: ye,
     add: Ti,
-    set: Pi,
-    delete: Ni,
+    set: Ni,
+    delete: Pi,
     clear: Ai,
     forEach: Be(!1, !1)
   }, e = {
@@ -2294,8 +2298,8 @@ function al() {
     },
     has: ye,
     add: Ti,
-    set: Pi,
-    delete: Ni,
+    set: Ni,
+    delete: Pi,
     clear: Ai,
     forEach: Be(!1, !0)
   }, n = {
@@ -2584,8 +2588,8 @@ const Yt = [];
 let ct = null, bt = 0;
 const Ys = /* @__PURE__ */ Promise.resolve();
 let _r = null;
-const Pl = 100;
-function Nl(t) {
+const Nl = 100;
+function Pl(t) {
   const e = _r || Ys;
   return t ? e.then(this ? t.bind(this) : t) : e;
 }
@@ -2604,7 +2608,7 @@ function Zs() {
   !Xe && !Jn && (Jn = !0, _r = Ys.then(ea));
 }
 function ta(t) {
-  N(t) ? Yt.push(...t) : (!ct || !ct.includes(t, t.allowRecurse ? bt + 1 : bt)) && Yt.push(t), Zs();
+  P(t) ? Yt.push(...t) : (!ct || !ct.includes(t, t.allowRecurse ? bt + 1 : bt)) && Yt.push(t), Zs();
 }
 function Ol(t) {
   if (Yt.length) {
@@ -2649,7 +2653,7 @@ function na(t, e) {
     t.set(e, 1);
   else {
     const n = t.get(e);
-    if (n > Pl) {
+    if (n > Nl) {
       const r = e.ownerInstance, i = r && ca(r.type);
       return $(`Maximum recursive updates exceeded${i ? ` in component <${i}>` : ""}. This means you have a reactive effect that is mutating its own dependencies and thus recursively triggering itself. Possible sources include component template, render function, updated hook or watcher source function.`), !0;
     } else
@@ -2658,9 +2662,9 @@ function na(t, e) {
 }
 const ce = /* @__PURE__ */ new Set();
 process.env.NODE_ENV !== "production" && (Gu().__VUE_HMR_RUNTIME__ = {
-  createRecord: Nn(Rl),
-  rerender: Nn(Bl),
-  reload: Nn(Fl)
+  createRecord: Pn(Rl),
+  rerender: Pn(Bl),
+  reload: Pn(Fl)
 });
 const je = /* @__PURE__ */ new Map();
 function Rl(t, e) {
@@ -2698,7 +2702,7 @@ function Oi(t, e) {
   for (const n in t)
     n !== "__file" && !(n in e) && delete t[n];
 }
-function Nn(t) {
+function Pn(t) {
   return (e, n) => {
     try {
       return t(e, n);
@@ -2709,7 +2713,7 @@ function Nn(t) {
 let kt = null, Vl = null;
 const Ul = (t) => t.__isSuspense;
 function Ll(t, e) {
-  e && e.pendingBranch ? N(t) ? e.effects.push(...t) : e.effects.push(t) : ta(t);
+  e && e.pendingBranch ? P(t) ? e.effects.push(...t) : e.effects.push(t) : ta(t);
 }
 const Ue = {};
 function Hl(t, e, { immediate: n, deep: r, flush: i, onTrack: s, onTrigger: a } = ut) {
@@ -2718,7 +2722,7 @@ function Hl(t, e, { immediate: n, deep: r, flush: i, onTrack: s, onTrigger: a } 
     $("Invalid watch source: ", I, "A watch source can only be a getter/effect function, a ref, a reactive object, or an array of these types.");
   }, u = Zt;
   let l, d = !1, f = !1;
-  if (G(t) ? (l = () => t.value, d = qn(t)) : Rt(t) ? (l = () => t, r = !0) : N(t) ? (f = !0, d = t.some((I) => Rt(I) || qn(I)), l = () => t.map((I) => {
+  if (G(t) ? (l = () => t.value, d = qn(t)) : Rt(t) ? (l = () => t, r = !0) : P(t) ? (f = !0, d = t.some((I) => Rt(I) || qn(I)), l = () => t.map((I) => {
     if (G(I))
       return I.value;
     if (Rt(I))
@@ -2781,7 +2785,7 @@ function Xt(t, e) {
     return t;
   if (e.add(t), G(t))
     Xt(t.value, e);
-  else if (N(t))
+  else if (P(t))
     for (let n = 0; n < t.length; n++)
       Xt(t[n], e);
   else if (Bu(t) || Qt(t))
@@ -2806,7 +2810,7 @@ const Ml = Symbol(), Xn = (t) => t ? uf(t) ? lf(t) || t.proxy : Xn(t.parent) : n
   $emit: (t) => t.emit,
   $options: (t) => __VUE_OPTIONS_API__ ? ql(t) : t.type,
   $forceUpdate: (t) => t.f || (t.f = () => Er(t.update)),
-  $nextTick: (t) => t.n || (t.n = Nl.bind(t.proxy)),
+  $nextTick: (t) => t.n || (t.n = Pl.bind(t.proxy)),
   $watch: (t) => __VUE_OPTIONS_API__ ? $l.bind(t) : pr
 }), Dl = (t) => t === "_" || t === "$", An = (t, e) => t !== ut && !t.__isScriptSetup && O(t, e), zl = {
   get({ _: t }, e) {
@@ -2921,7 +2925,7 @@ function Jl(t, e) {
   return At(Ri(t), Ri(e));
 }
 function Ri(t) {
-  if (N(t)) {
+  if (P(t)) {
     const e = {};
     for (let n = 0; n < t.length; n++)
       e[t[n]] = t[n];
@@ -2949,7 +2953,7 @@ function jl() {
   return {
     app: null,
     config: {
-      isNativeTag: Nu,
+      isNativeTag: Pu,
       performance: !1,
       globalProperties: {},
       optionMergeStrategies: {},
@@ -3013,7 +3017,7 @@ function aa(t, e = null, n = null, r = 0, i = null, s = !1) {
   if (la(t) && (t = t.__vccOpts), e) {
     e = sf(e);
     let { class: o, style: u } = e;
-    o && !at(o) && (e.class = dr(o)), W(u) && (Je(u) && !N(u) && (u = st({}, u)), e.style = gr(u));
+    o && !at(o) && (e.class = dr(o)), W(u) && (Je(u) && !P(u) && (u = st({}, u)), e.style = gr(u));
   }
   const a = at(t) ? 1 : Ul(t) ? 128 : Ql(t) ? 64 : W(t) ? 4 : D(t) ? 2 : 0;
   return process.env.NODE_ENV !== "production" && a & 4 && Je(t) && (t = E(t), $("Vue received a Component which was made a reactive object. This can lead to unnecessary performance overhead, and should be avoided by marking the component with `markRaw` or using `shallowRef` instead of `ref`.", `
@@ -3030,10 +3034,10 @@ function Ye(t, e, n = !1) {
     type: t.type,
     props: o,
     key: o && sa(o),
-    ref: e && e.ref ? n && i ? N(i) ? i.concat(Me(e)) : [i, Me(e)] : Me(e) : i,
+    ref: e && e.ref ? n && i ? P(i) ? i.concat(Me(e)) : [i, Me(e)] : Me(e) : i,
     scopeId: t.scopeId,
     slotScopeIds: t.slotScopeIds,
-    children: process.env.NODE_ENV !== "production" && s === -1 && N(a) ? a.map(oa) : a,
+    children: process.env.NODE_ENV !== "production" && s === -1 && P(a) ? a.map(oa) : a,
     target: t.target,
     targetAnchor: t.targetAnchor,
     staticCount: t.staticCount,
@@ -3055,7 +3059,7 @@ function Ye(t, e, n = !1) {
 }
 function oa(t) {
   const e = Ye(t);
-  return N(t.children) && (e.children = t.children.map(oa)), e;
+  return P(t.children) && (e.children = t.children.map(oa)), e;
 }
 function af(t = " ", e = 0) {
   return rf(Yl, null, t, e);
@@ -3065,7 +3069,7 @@ function xr(t, e) {
   const { shapeFlag: r } = t;
   if (e == null)
     e = null;
-  else if (N(e))
+  else if (P(e))
     n = 16;
   else if (typeof e == "object")
     if (r & 65) {
@@ -3092,7 +3096,7 @@ function of(...t) {
         e.style = gr([e.style, r.style]);
       else if (Ou(i)) {
         const s = e[i], a = r[i];
-        a && s !== a && !(N(s) && s.includes(a)) && (e[i] = s ? [].concat(s, a) : a);
+        a && s !== a && !(P(s) && s.includes(a)) && (e[i] = s ? [].concat(s, a) : a);
       } else
         i !== "" && (e[i] = r[i]);
   }
@@ -3247,7 +3251,7 @@ function gf() {
   }
   function l(f, g, m) {
     const b = f[m];
-    if (N(b) && b.includes(g) || W(b) && g in b || f.extends && l(f.extends, g, m) || f.mixins && f.mixins.some((v) => l(v, g, m)))
+    if (P(b) && b.includes(g) || W(b) && g in b || f.extends && l(f.extends, g, m) || f.mixins && f.mixins.some((v) => l(v, g, m)))
       return !0;
   }
   function d(f) {
@@ -3341,9 +3345,9 @@ function wf(t, e) {
 }
 function kf(t, e) {
   const n = Ze(t), r = Ze(e);
-  if (P.keys(n).length !== P.keys(r).length)
+  if (N.keys(n).length !== N.keys(r).length)
     return !1;
-  for (const i of P.keys(n))
+  for (const i of N.keys(n))
     if (i !== "pluginVersion" && n[i] !== r[i])
       return !1;
   return !0;
@@ -3395,10 +3399,10 @@ function xh(t) {
 function Th(t) {
   return t > 0 ? Math.exp((20 * Math.log10(t) - 6) * (1 / 20)) : 0;
 }
-function Ph(t, e, n, r, i) {
+function Nh(t, e, n, r, i) {
   return (t - e) / (n - e) * (i - r) + r;
 }
-function Nh(t) {
+function Ph(t) {
   return 440 * Math.pow(2, (t - 69) / 12);
 }
 function Ah(t) {
@@ -3588,11 +3592,11 @@ class et {
         audioData: o.audioData && o.audioData.data ? {
           ...o.audioData
         } : void 0
-      }, r = P.isNumber(r) ? Math.max(r, o.startTick) : o.startTick;
+      }, r = N.isNumber(r) ? Math.max(r, o.startTick) : o.startTick;
       const u = this.getAudioEndTick();
-      (!P.isNumber(a) || u < a) && (a = u), this.clipStartTick = r, this.clipEndTick = a;
+      (!N.isNumber(a) || u < a) && (a = u), this.clipStartTick = r, this.clipEndTick = a;
     } else if (n === 1) {
-      if (this.clipStartTick = r, !P.isNumber(a))
+      if (this.clipStartTick = r, !N.isNumber(a))
         throw new Error("clip end tick must be provided when creating MIDI clip.");
       this.clipEndTick = a;
     }
@@ -3618,6 +3622,9 @@ class et {
   }
   getRawNotes() {
     return this.notes;
+  }
+  clearNotes() {
+    this.notes = [], this.nextNoteIdInternal = 1;
   }
   getDuration() {
     return this.song.tickToSeconds(this.clipEndTick) - this.song.tickToSeconds(this.clipStartTick);
@@ -3697,7 +3704,7 @@ class et {
   adjustClipRight(e, n = !0) {
     if (this.type === 2) {
       const r = this.getAudioEndTick();
-      P.isNumber(r) && (e = Math.min(e, r));
+      N.isNumber(r) && (e = Math.min(e, r));
     }
     e < this.clipStartTick || e < 0 ? this.deleteFromParent(!0) : (n && this.track && this.track.resolveClipConflictInternal(
       this.getId(),
@@ -3753,7 +3760,7 @@ class et {
     if (this.type !== 2 || !this.audioClipData)
       return;
     const e = this.getAudioDuration();
-    if (!P.isNumber(e))
+    if (!N.isNumber(e))
       return;
     const n = this.song.tickToSeconds(this.audioClipData.startTick);
     return this.song.secondsToTick(n + e);
@@ -4088,7 +4095,7 @@ class Tr {
     return this.getAutomationValueById(n);
   }
   addAutomation(e, n = 0) {
-    P.isNumber(n) || (n = 0), this.targets.splice(n, 0, e);
+    N.isNumber(n) || (n = 0), this.targets.splice(n, 0, e);
     const r = e.toTfAutomationTargetId();
     this.getAutomationValueById(r) || (this.targetValues[r] = new te());
   }
@@ -4103,17 +4110,17 @@ class Tr {
       const r = this.targets[n];
       r.getPluginInstanceId() === e && this.removeAutomation(r);
     }
-    for (const n of P.keys(this.targetValues)) {
+    for (const n of N.keys(this.targetValues)) {
       const r = tt.decodeAutomationTarget(n);
       r.getPluginInstanceId() === e && this.removeAutomation(r);
     }
   }
   removeAllPointsWithinRange(e, n) {
-    for (const r of P.keys(this.targetValues))
+    for (const r of N.keys(this.targetValues))
       this.targetValues[r].removePointsInRange(e, n);
   }
   moveAllPointsWithinRange(e, n, r, i) {
-    for (const s of P.keys(this.targetValues))
+    for (const s of N.keys(this.targetValues))
       this.targetValues[s].movePointsInRange(
         e,
         n,
@@ -4126,7 +4133,7 @@ class Tr {
     const e = new Tr();
     for (const n of this.targets)
       e.addAutomation(n.clone());
-    for (const n of P.keys(this.targetValues)) {
+    for (const n of N.keys(this.targetValues)) {
       const r = this.targetValues[n];
       e.targetValues[n] = r.clone();
     }
@@ -4254,7 +4261,7 @@ class nt {
     this.samplerPlugin = e, r && i && n && this.automation.removeAutomationOfPlugin(i.getInstanceId());
   }
   getAudioPluginCount() {
-    return P.keys(this.audioPlugins).length;
+    return N.keys(this.audioPlugins).length;
   }
   getAudioPluginAt(e) {
     return this.audioPlugins[e];
@@ -4275,7 +4282,7 @@ class nt {
     if (this.samplerPlugin && this.samplerPlugin.getInstanceId() === e)
       return this.samplerPlugin;
     if (this.audioPlugins)
-      for (const n of P.keys(this.audioPlugins)) {
+      for (const n of N.keys(this.audioPlugins)) {
         const r = this.audioPlugins[n];
         if (!!r && r.getInstanceId() === e)
           return r;
@@ -4318,7 +4325,7 @@ class nt {
     clipEndTick: n = void 0,
     insertClip: r = !0
   }) {
-    if (!P.isNumber(e))
+    if (!N.isNumber(e))
       throw new Error("clipStartTick must be specified when creating a clip.");
     const i = n ?? e + 1;
     if (i < e)
@@ -4341,7 +4348,7 @@ class nt {
     clipEndTick: r,
     insertClip: i = !0
   }) {
-    if (!P.isNumber(e))
+    if (!N.isNumber(e))
       throw new Error("clipStartTick must be specified when creating a clip.");
     const s = new et({
       id: et.generateClipIdInternal(),
@@ -4422,13 +4429,13 @@ class nt {
     this.automation = e.clone();
   }
   hasAnyAutomation() {
-    return this.automation.getAutomationTargets().length > 0 && !P.isEmpty(this.automation.getAutomationTargetValues());
+    return this.automation.getAutomationTargets().length > 0 && !N.isEmpty(this.automation.getAutomationTargetValues());
   }
   getAuxTrackData() {
     return this.auxTrackData;
   }
   getSendCount() {
-    return P.keys(this.sends).length;
+    return N.keys(this.sends).length;
   }
   getSendAt(e) {
     return this.sends[e];
@@ -4449,7 +4456,7 @@ class nt {
   setOutput({ type: e, trackId: n = void 0 }) {
     if (this.type === 3)
       throw new Error("Master track can only output to the default device.");
-    if (e !== Pr.Track)
+    if (e !== Nr.Track)
       throw new Error("Non-track output type is not supported yet.");
     if (n === this.getId())
       throw new Error("Cannot set output to the track itself.");
@@ -4497,7 +4504,7 @@ class tn {
     position: r = 2,
     muted: i = !1
   }) {
-    this.outputBusRank = e, this.gainLevel = tn.checkGainLevel(n), this.position = r, this.muted = P.isBoolean(i) ? i : !1;
+    this.outputBusRank = e, this.gainLevel = tn.checkGainLevel(n), this.position = r, this.muted = N.isBoolean(i) ? i : !1;
   }
   static checkGainLevel(e) {
     if (e < 0 || e > 1)
@@ -4563,7 +4570,7 @@ class _f {
     delete this.inputBusRank;
   }
 }
-var Pr = /* @__PURE__ */ ((t) => (t[t.Undefined = 0] = "Undefined", t[t.Device = 1] = "Device", t[t.Track = 2] = "Track", t))(Pr || {});
+var Nr = /* @__PURE__ */ ((t) => (t[t.Undefined = 0] = "Undefined", t[t.Device = 1] = "Device", t[t.Track = 2] = "Track", t))(Nr || {});
 class Ef {
   type;
   trackId;
@@ -4578,11 +4585,11 @@ class Ef {
   }
 }
 var xf = /* @__PURE__ */ ((t) => (t[t.AcousticGrandPiano = 0] = "AcousticGrandPiano", t[t.BrightAcousticPiano = 1] = "BrightAcousticPiano", t[t.ElectricGrandPiano = 2] = "ElectricGrandPiano", t[t.HonkyTonkPiano = 3] = "HonkyTonkPiano", t[t.ElectricPiano1 = 4] = "ElectricPiano1", t[t.ElectricPiano2 = 5] = "ElectricPiano2", t[t.Harpsichord = 6] = "Harpsichord", t[t.Clavinet = 7] = "Clavinet", t[t.Celesta = 8] = "Celesta", t[t.Glockenspiel = 9] = "Glockenspiel", t[t.Musicalbox = 10] = "Musicalbox", t[t.Vibraphone = 11] = "Vibraphone", t[t.Marimba = 12] = "Marimba", t[t.Xylophone = 13] = "Xylophone", t[t.TubularBell = 14] = "TubularBell", t[t.Dulcimer = 15] = "Dulcimer", t[t.DrawbarOrgan = 16] = "DrawbarOrgan", t[t.PercussiveOrgan = 17] = "PercussiveOrgan", t[t.RockOrgan = 18] = "RockOrgan", t[t.Churchorgan = 19] = "Churchorgan", t[t.Reedorgan = 20] = "Reedorgan", t[t.Accordion = 21] = "Accordion", t[t.Harmonica = 22] = "Harmonica", t[t.TangoAccordion = 23] = "TangoAccordion", t[t.AcousticGuitarNylon = 24] = "AcousticGuitarNylon", t[t.AcousticGuitarSteel = 25] = "AcousticGuitarSteel", t[t.ElectricGuitarJazz = 26] = "ElectricGuitarJazz", t[t.ElectricGuitarClean = 27] = "ElectricGuitarClean", t[t.ElectricGuitarMuted = 28] = "ElectricGuitarMuted", t[t.OverdrivenGuitar = 29] = "OverdrivenGuitar", t[t.DistortionGuitar = 30] = "DistortionGuitar", t[t.Guitarharmonics = 31] = "Guitarharmonics", t[t.AcousticBass = 32] = "AcousticBass", t[t.ElectricBassFinger = 33] = "ElectricBassFinger", t[t.ElectricBassPick = 34] = "ElectricBassPick", t[t.FretlessBass = 35] = "FretlessBass", t[t.SlapBass1 = 36] = "SlapBass1", t[t.SlapBass2 = 37] = "SlapBass2", t[t.SynthBass1 = 38] = "SynthBass1", t[t.SynthBass2 = 39] = "SynthBass2", t[t.Violin = 40] = "Violin", t[t.Viola = 41] = "Viola", t[t.Cello = 42] = "Cello", t[t.Contrabass = 43] = "Contrabass", t[t.TremoloStrings = 44] = "TremoloStrings", t[t.PizzicatoStrings = 45] = "PizzicatoStrings", t[t.OrchestralHarp = 46] = "OrchestralHarp", t[t.Timpani = 47] = "Timpani", t[t.StringEnsemble1 = 48] = "StringEnsemble1", t[t.StringEnsemble2 = 49] = "StringEnsemble2", t[t.SynthStrings1 = 50] = "SynthStrings1", t[t.SynthStrings2 = 51] = "SynthStrings2", t[t.VoiceAahs = 52] = "VoiceAahs", t[t.VoiceOohs = 53] = "VoiceOohs", t[t.SynthVoice = 54] = "SynthVoice", t[t.OrchestraHit = 55] = "OrchestraHit", t[t.Trumpet = 56] = "Trumpet", t[t.Trombone = 57] = "Trombone", t[t.Tuba = 58] = "Tuba", t[t.MutedTrumpet = 59] = "MutedTrumpet", t[t.Frenchhorn = 60] = "Frenchhorn", t[t.BrassSection = 61] = "BrassSection", t[t.SynthBrass1 = 62] = "SynthBrass1", t[t.SynthBrass2 = 63] = "SynthBrass2", t[t.SopranoSax = 64] = "SopranoSax", t[t.AltoSax = 65] = "AltoSax", t[t.TenorSax = 66] = "TenorSax", t[t.BaritoneSax = 67] = "BaritoneSax", t[t.Oboe = 68] = "Oboe", t[t.EnglishHorn = 69] = "EnglishHorn", t[t.Bassoon = 70] = "Bassoon", t[t.Clarinet = 71] = "Clarinet", t[t.Piccolo = 72] = "Piccolo", t[t.Flute = 73] = "Flute", t[t.Recorder = 74] = "Recorder", t[t.PanFlute = 75] = "PanFlute", t[t.BlownBottle = 76] = "BlownBottle", t[t.Shakuhachi = 77] = "Shakuhachi", t[t.Whistle = 78] = "Whistle", t[t.Ocarina = 79] = "Ocarina", t[t.Lead1Square = 80] = "Lead1Square", t[t.Lead2Sawtooth = 81] = "Lead2Sawtooth", t[t.Lead3Calliope = 82] = "Lead3Calliope", t[t.Lead4Chiff = 83] = "Lead4Chiff", t[t.Lead5Charang = 84] = "Lead5Charang", t[t.Lead6Voice = 85] = "Lead6Voice", t[t.Lead7Fifths = 86] = "Lead7Fifths", t[t.Lead8BassLead = 87] = "Lead8BassLead", t[t.Pad1NewAge = 88] = "Pad1NewAge", t[t.Pad2Warm = 89] = "Pad2Warm", t[t.Pad3PolySynth = 90] = "Pad3PolySynth", t[t.Pad4Choir = 91] = "Pad4Choir", t[t.Pad5Bowed = 92] = "Pad5Bowed", t[t.Pad6Metallic = 93] = "Pad6Metallic", t[t.Pad7Halo = 94] = "Pad7Halo", t[t.Pad8Sweep = 95] = "Pad8Sweep", t[t.FX1Rain = 96] = "FX1Rain", t[t.FX2Soundtrack = 97] = "FX2Soundtrack", t[t.FX3Crystal = 98] = "FX3Crystal", t[t.FX4Atmosphere = 99] = "FX4Atmosphere", t[t.FX5Brightness = 100] = "FX5Brightness", t[t.FX6Goblins = 101] = "FX6Goblins", t[t.FX7Echoes = 102] = "FX7Echoes", t[t.FX8SciFi = 103] = "FX8SciFi", t[t.Sitar = 104] = "Sitar", t[t.Banjo = 105] = "Banjo", t[t.Shamisen = 106] = "Shamisen", t[t.Guzheng = 107] = "Guzheng", t[t.Kalimba = 108] = "Kalimba", t[t.Bagpipe = 109] = "Bagpipe", t[t.Fiddle = 110] = "Fiddle", t[t.Shanai = 111] = "Shanai", t[t.TinkleBell = 112] = "TinkleBell", t[t.Agogo = 113] = "Agogo", t[t.SteelDrums = 114] = "SteelDrums", t[t.Woodblock = 115] = "Woodblock", t[t.TaikoDrum = 116] = "TaikoDrum", t[t.MelodicTom = 117] = "MelodicTom", t[t.SynthDrum = 118] = "SynthDrum", t[t.ReverseCymbal = 119] = "ReverseCymbal", t[t.GuitarFretNoise = 120] = "GuitarFretNoise", t[t.BreathNoise = 121] = "BreathNoise", t[t.Seashore = 122] = "Seashore", t[t.BirdTweet = 123] = "BirdTweet", t[t.TelephoneRing = 124] = "TelephoneRing", t[t.Helicopter = 125] = "Helicopter", t[t.Applause = 126] = "Applause", t[t.Gunshot = 127] = "Gunshot", t))(xf || {}), Tf = /* @__PURE__ */ ((t) => (t[t.BassDrum2 = 35] = "BassDrum2", t[t.BassDrum1 = 36] = "BassDrum1", t[t.SideStick = 37] = "SideStick", t[t.SnareDrum1 = 38] = "SnareDrum1", t[t.HandClap = 39] = "HandClap", t[t.SnareDrum2 = 40] = "SnareDrum2", t[t.LowTom2 = 41] = "LowTom2", t[t.ClosedHiHat = 42] = "ClosedHiHat", t[t.LowTom1 = 43] = "LowTom1", t[t.PedalHiHat = 44] = "PedalHiHat", t[t.MidTom2 = 45] = "MidTom2", t[t.OpenHiHat = 46] = "OpenHiHat", t[t.MidTom1 = 47] = "MidTom1", t[t.HighTom2 = 48] = "HighTom2", t[t.CrashCymbal1 = 49] = "CrashCymbal1", t[t.HighTom1 = 50] = "HighTom1", t[t.RideCymbal1 = 51] = "RideCymbal1", t[t.ChineseCymbal = 52] = "ChineseCymbal", t[t.RideBell = 53] = "RideBell", t[t.Tambourine = 54] = "Tambourine", t[t.SplashCymbal = 55] = "SplashCymbal", t[t.Cowbell = 56] = "Cowbell", t[t.CrashCymbal2 = 57] = "CrashCymbal2", t[t.VibraSlap = 58] = "VibraSlap", t[t.RideCymbal2 = 59] = "RideCymbal2", t[t.HighBongo = 60] = "HighBongo", t[t.LowBongo = 61] = "LowBongo", t[t.MuteHighConga = 62] = "MuteHighConga", t[t.OpenHighConga = 63] = "OpenHighConga", t[t.LowConga = 64] = "LowConga", t[t.HighTimbale = 65] = "HighTimbale", t[t.LowTimbale = 66] = "LowTimbale", t[t.HighAgogo = 67] = "HighAgogo", t[t.LowAgogo = 68] = "LowAgogo", t[t.Cabasa = 69] = "Cabasa", t[t.Maracas = 70] = "Maracas", t[t.ShortWhistle = 71] = "ShortWhistle", t[t.LongWhistle = 72] = "LongWhistle", t[t.ShortGuiro = 73] = "ShortGuiro", t[t.LongGuiro = 74] = "LongGuiro", t[t.Claves = 75] = "Claves", t[t.HighWoodBlock = 76] = "HighWoodBlock", t[t.LowWoodBlock = 77] = "LowWoodBlock", t[t.MuteCuica = 78] = "MuteCuica", t[t.OpenCuica = 79] = "OpenCuica", t[t.MuteTriangle = 80] = "MuteTriangle", t[t.OpenTriangle = 81] = "OpenTriangle", t[t.Shaker = 82] = "Shaker", t))(Tf || {}), fa = {}, un = {};
-function Pf(t) {
+function Nf(t) {
   var e = new z(t), n = e.readChunk();
   if (n.id != "MThd")
     throw "Bad MIDI file.  Expected 'MHdr', got: '" + n.id + "'";
-  for (var r = Nf(n.data), i = [], s = 0; !e.eof() && s < r.numTracks; s++) {
+  for (var r = Pf(n.data), i = [], s = 0; !e.eof() && s < r.numTracks; s++) {
     var a = e.readChunk();
     if (a.id != "MTrk")
       throw "Bad MIDI file.  Expected 'MTrk', got: '" + a.id + "'";
@@ -4594,7 +4601,7 @@ function Pf(t) {
     tracks: i
   };
 }
-function Nf(t) {
+function Pf(t) {
   var e = new z(t), n = e.readUInt16(), r = e.readUInt16(), i = {
     format: n,
     numTracks: r
@@ -4770,7 +4777,7 @@ z.prototype.readChunk = function() {
     data: n
   };
 };
-var Of = Pf;
+var Of = Nf;
 function yf(t, e) {
   if (typeof t != "object")
     throw "Invalid MIDI data";
@@ -5100,7 +5107,7 @@ Lt.insert = Uf;
   }();
   t.Header = r;
 })(en);
-var be = {}, Nr = {};
+var be = {}, Pr = {};
 (function(t) {
   Object.defineProperty(t, "__esModule", { value: !0 }), t.ControlChange = t.controlChangeIds = t.controlChangeNames = void 0, t.controlChangeNames = {
     1: "modulationWheel",
@@ -5156,11 +5163,11 @@ var be = {}, Nr = {};
     }, i;
   }();
   t.ControlChange = r;
-})(Nr);
+})(Pr);
 var ln = {};
 Object.defineProperty(ln, "__esModule", { value: !0 });
 ln.createControlChanges = void 0;
-var Le = Nr;
+var Le = Pr;
 function Lf() {
   return new Proxy({}, {
     get: function(t, e) {
@@ -5542,7 +5549,7 @@ var Df = function() {
 gn.Note = zf;
 Object.defineProperty(be, "__esModule", { value: !0 });
 be.Track = void 0;
-var Rn = Lt, Kf = Nr, qf = ln, Wf = fn, Li = hn, Jf = gn, $e = /* @__PURE__ */ new WeakMap(), Xf = function() {
+var Rn = Lt, Kf = Pr, qf = ln, Wf = fn, Li = hn, Jf = gn, $e = /* @__PURE__ */ new WeakMap(), Xf = function() {
   function t(e, n) {
     var r = this;
     if (this.name = "", this.notes = [], this.controlChanges = (0, qf.createControlChanges)(), this.pitchBends = [], $e.set(this, n), e) {
@@ -6211,7 +6218,7 @@ class Z {
     );
     for (const r of this.tracks) {
       const i = r.getOutput();
-      i && i.getType() === Pr.Track && i.getTrackId() === e && r.removeOutput();
+      i && i.getType() === Nr.Track && i.getTrackId() === e && r.removeOutput();
     }
     return n;
   }
@@ -6332,7 +6339,7 @@ class Z {
       throw new Error("Song resolution must be provided before creating tempo changes.");
     if (this.tempos.length === 0 && e !== 0)
       throw new Error("The first tempo event must be at tick 0");
-    const r = new Ne({ ticks: e, bpm: n, time: this.tickToSeconds(e) }), i = T.ge(
+    const r = new Pe({ ticks: e, bpm: n, time: this.tickToSeconds(e) }), i = T.ge(
       this.tempos,
       r,
       (s, a) => s.getTicks() - a.getTicks()
@@ -6355,7 +6362,7 @@ class Z {
     if (r.getTicks() > 0)
       throw new Error("The first tempo event needs to start from tick 0");
     this.tempos = [
-      new Ne({
+      new Pe({
         ticks: 0,
         time: 0,
         bpm: r.getBpm()
@@ -6607,7 +6614,7 @@ class Z {
       for (const f of s.header.timeSignatures)
         l.push(
           new Si({
-            ticks: a + Nt(f.ticks, o),
+            ticks: a + Pt(f.ticks, o),
             numerator: f.timeSignature[0],
             denominator: f.timeSignature[1]
           })
@@ -6615,7 +6622,7 @@ class Z {
       e.overwriteTimeSignatures(l);
       const d = [];
       a > 0 && d.push(
-        new Ne({
+        new Pe({
           ticks: 0,
           time: 0,
           bpm: 120
@@ -6623,8 +6630,8 @@ class Z {
       );
       for (const f of s.header.tempos)
         d.push(
-          new Ne({
-            ticks: a + Nt(f.ticks, o),
+          new Pe({
+            ticks: a + Pt(f.ticks, o),
             time: f.time,
             bpm: f.bpm
           })
@@ -6647,11 +6654,11 @@ class Z {
         f.createNote({
           pitch: v.midi,
           velocity: Math.round(v.velocity * 127),
-          startTick: a + Nt(v.ticks, o),
-          endTick: a + Nt(v.ticks + v.durationTicks, o)
+          startTick: a + Pt(v.ticks, o),
+          endTick: a + Pt(v.ticks + v.durationTicks, o)
         }), g = Math.min(
           g,
-          a + Nt(v.ticks, o)
+          a + Pt(v.ticks, o)
         );
       const m = l.controlChanges[7];
       if (m)
@@ -6663,7 +6670,7 @@ class Z {
           const k = d.getAutomation().getAutomationValueByTarget(v);
           for (const C of m)
             k.addPoint(
-              a + Nt(C.ticks, o),
+              a + Pt(C.ticks, o),
               C.value
             );
         }
@@ -6677,7 +6684,7 @@ class Z {
           d.getAutomation().addAutomation(v);
           const k = d.getAutomation().getAutomationValueByTarget(v);
           for (const C of b)
-            k.addPoint(a + Nt(C.ticks, o), C.value);
+            k.addPoint(a + Pt(C.ticks, o), C.value);
         }
       g !== Number.MAX_SAFE_INTEGER && f.adjustClipLeft(g);
     }
@@ -6714,7 +6721,7 @@ class Z {
       e.setTimeInternal(this.tickToSeconds(e.getTicks()));
   }
 }
-function Nt(t, e) {
+function Pt(t, e) {
   return Math.round(t * e);
 }
 class vh {
@@ -6758,12 +6765,12 @@ export {
   Z as Song,
   mh as StructureMarker,
   ph as StructureType,
-  Ne as TempoEvent,
+  Pe as TempoEvent,
   Ih as TickToSecondStepper,
   Si as TimeSignatureEvent,
   nt as Track,
   Ef as TrackOutput,
-  Pr as TrackOutputType,
+  Nr as TrackOutputType,
   tn as TrackSend,
   If as TrackSendPosition,
   Jt as TrackType,
@@ -6781,9 +6788,9 @@ export {
   Oh as getFileContentFromFileSelector,
   Ah as maybeToRaw,
   kh as midiNumberToPitch,
-  Nh as pitchToHz,
+  Ph as pitchToHz,
   Sh as pitchToMidiNumber,
-  Ph as remapRange,
+  Nh as remapRange,
   Ch as toVersionlessTfId,
   Eh as volumeValueToDb,
   xh as volumeValueToGain

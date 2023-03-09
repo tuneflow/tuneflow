@@ -18,3 +18,11 @@ export interface PluginInfo {
   /** If true, this plugin is in development stage and can only be accessed by its developer. */
   isInDevelopment?: boolean;
 }
+
+/** A universal id to identify an entity. */
+export interface EntityId {
+  type: 'song' | 'track' | 'clip' | 'note';
+  trackId?: string;
+  clipId?: string;
+  noteId?: number;
+}

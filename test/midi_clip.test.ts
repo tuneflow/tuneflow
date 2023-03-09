@@ -267,6 +267,13 @@ describe('MIDI Clip-related Tests', () => {
         ),
       );
     });
+
+    it('Clears notes correctly', async () => {
+      const clip1 = song.getTracks()[0].getClips()[0];
+      expect(clip1.getRawNotes().length).toBe(3);
+      clip1.clearNotes();
+      expect(clip1.getRawNotes().length).toBe(0);
+    });
   });
 
   describe('Create notes', () => {

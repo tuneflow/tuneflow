@@ -1,9 +1,13 @@
-import type { ParamDescriptor, LabelText, AudioPluginDescriptor } from './descriptors';
+import type { ParamDescriptor, LabelText, AudioPluginDescriptor, EntityId } from './descriptors';
 import type { Song } from './models/song';
 import * as _ from 'underscore';
 import { nanoid } from 'nanoid';
 import { WidgetType } from '.';
-import type { TuneflowPluginOptions } from './descriptors/plugin';
+import type {
+  TuneflowPluginOptions,
+  TuneflowPluginTriggerData,
+  TuneflowPluginTriggerType,
+} from './descriptors/plugin';
 
 type RunParameters = { [paramName: string]: any };
 
@@ -42,6 +46,8 @@ export class TuneflowPlugin {
   private songCacheInternal?: Song;
   readonly allowManualApplyAdjust = false;
   readonly allowReset = false;
+  // @ts-ignore
+  readonly trigger?: TuneflowPluginTriggerData = undefined;
   /** The execution progress. */
   private progress: number | null = null;
   private isExecuting = false;
@@ -119,12 +125,25 @@ export class TuneflowPlugin {
    * Creates a plugin instance and initializes it.
    * @param song The current version of the song.
    */
-  public static async create(song: Song, readApis: ReadAPIs, options: TuneflowPluginOptions) {
+  public static async create(
+    song: Song,
+    readApis: ReadAPIs,
+    options: TuneflowPluginOptions,
+    triggerType?: TuneflowPluginTriggerType,
+    triggeringEntities?: EntityId[] | null,
+  ) {
     const plugin = new this();
     // @ts-ignore
     plugin.allowManualApplyAdjust = options.allowManualApplyAdjust;
     // @ts-ignore
     plugin.allowReset = options.allowReset;
+    // @ts-ignore
+    plugin.trigger = triggerType
+      ? {
+          type: triggerType,
+          entities: triggeringEntities,
+        }
+      : undefined;
     plugin.resetInternal();
     await plugin.init(song, readApis);
     return plugin;

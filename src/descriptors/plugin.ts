@@ -1,3 +1,60 @@
+import type { EntityId } from './common';
+
+/** The type of the `triggers` field in the plugin's `bundle.json`. */
+export type TuneflowPluginTrigger = TuneflowPluginTriggerType | TuneflowPluginTriggerConfig;
+
+/** The type of data that is injected to the params of the plugins that have `triggers` specified. */
+export interface TuneflowPluginTriggerData {
+  type: TuneflowPluginTriggerType;
+  entities?: EntityId[];
+}
+
+/**
+ * The types of plugin triggers.
+ *
+ * * `song` The plugin will be available on the track and main editing area context menus.
+ *        When running, it will not receive additional trigger data..
+ * * `context-track-content` The plugin will be available on the **content** part(the "track" portion) of the context menu of the track.
+ *        When running, it will receive trigger data about the triggering track under cursor.
+ * * `context-track-control` The plugin will be available on the **control** part(the "knobs" portion) of the context menu of the track.
+ *        When running, it will receive trigger data about the triggering track under cursor.
+ * * `selected-clips` The plugin will be available on the clip context menu. When running, it will receive trigger data about the currently selected clips.
+ */
+export type TuneflowPluginTriggerType =
+  | 'song'
+  | 'context-track-content'
+  | 'context-track-control'
+  | 'selected-clips';
+
+export interface TuneflowPluginTriggerConfig {
+  type: TuneflowPluginTriggerType;
+  config?:
+    | ContextTrackContentTriggerConfig
+    | ContextTrackControlTriggerConfig
+    | SelectedClipTriggerConfig;
+}
+
+export type AllowedTrackType = 'midi' | 'audio' | 'aux';
+
+export interface ContextTrackContentTriggerConfig {
+  allowedTrackTypes?: AllowedTrackType[];
+}
+
+export interface ContextTrackControlTriggerConfig {
+  allowedTrackTypes?: AllowedTrackType[];
+}
+
+export type AllowedClipType = 'midi' | 'audio';
+export interface AllowedTrackInstrment {
+  program?: number;
+  isDrum?: boolean;
+}
+
+export interface SelectedClipTriggerConfig {
+  allowedClipTypes?: AllowedClipType[];
+  maxNumClips?: number;
+}
+
 export interface TuneflowPluginOptions {
   /**
    * Whether to allow users to reset all parameters of this plugin.

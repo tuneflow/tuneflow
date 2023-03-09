@@ -1,3 +1,4 @@
+import type { AudioData } from '../models/clip';
 import type { ClipInfo } from './common';
 import type { LabelText } from './text';
 import type { WidgetDescriptor } from './widgets';
@@ -71,6 +72,12 @@ export enum InjectSource {
 /** Inject config for when injection source is `InjectSource.ClipAudioData`. */
 export interface ClipAudioDataInjectOptions {
   clips: 'selectedAudioClips' | ClipInfo[];
+}
+
+/** Inject data type when injection source is `InjectSource.ClipAudioData`. */
+export interface ClipAudioDataInjectData {
+  clipInfo: ClipInfo;
+  audioData: AudioData;
 }
 
 /** Inject config for when injection source is `InjectSource.SelectedClipInfos`. */

@@ -184,6 +184,11 @@ export class Clip {
     return this.notes;
   }
 
+  clearNotes() {
+    this.notes = [];
+    this.nextNoteIdInternal = 1;
+  }
+
   getDuration() {
     return this.song.tickToSeconds(this.clipEndTick) - this.song.tickToSeconds(this.clipStartTick);
   }
