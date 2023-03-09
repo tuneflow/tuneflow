@@ -38,21 +38,57 @@ export type AllowedTrackType = 'midi' | 'audio' | 'aux';
 
 export interface ContextTrackContentTriggerConfig {
   allowedTrackTypes?: AllowedTrackType[];
+
+  /**
+   * When specified, the track's instrument must match one of the given instruments.
+   *
+   * NOTE: Use with caution since it blocks the plugin from running, and a lot of times you can simply
+   * update the tracks's instrument to what you want.
+   */
+  allowedTrackInstruments?: AllowedTrackInstrument[];
+
+  /** If true, allowed instruments flags will be ignored on desktop. */
+  skipAllowedInstrumentCheckOnDesktop?: boolean;
 }
 
 export interface ContextTrackControlTriggerConfig {
   allowedTrackTypes?: AllowedTrackType[];
+
+  /**
+   * When specified, the track's instrument must match one of the given instruments.
+   *
+   * NOTE: Use with caution since it blocks the plugin from running, and a lot of times you can simply
+   * update the tracks's instrument to what you want.
+   */
+  allowedTrackInstruments?: AllowedTrackInstrument[];
+
+  /** If true, allowed instruments flags will be ignored on desktop. */
+  skipAllowedInstrumentCheckOnDesktop?: boolean;
 }
 
 export type AllowedClipType = 'midi' | 'audio';
-export interface AllowedTrackInstrment {
+
+/** Allowed track instrument. Leave any field undefined to indicate it accepts anything. */
+export interface AllowedTrackInstrument {
   program?: number;
   isDrum?: boolean;
 }
 
 export interface SelectedClipTriggerConfig {
   allowedClipTypes?: AllowedClipType[];
+
   maxNumClips?: number;
+
+  /**
+   * When specified, the corresponding track's instrument must match one of the given instruments.
+   *
+   * NOTE: Use with caution since it blocks the plugin from running, and a lot of times you can simply
+   * update the tracks's instrument to what you want.
+   */
+  allowedTrackInstruments?: AllowedTrackInstrument[];
+
+  /** If true, allowed instruments flags will be ignored on desktop. */
+  skipAllowedInstrumentCheckOnDesktop?: boolean;
 }
 
 export interface TuneflowPluginOptions {
