@@ -74,11 +74,13 @@ export interface ClipAudioDataInjectOptions {
   clips: 'selectedAudioClips' | ClipInfo[];
 }
 
-/** Inject data type when injection source is `InjectSource.ClipAudioData`. */
-export interface ClipAudioDataInjectData {
+export interface ClipAudioDataInjectDataEntry {
   clipInfo: ClipInfo;
   audioData: AudioData;
 }
+
+/** Inject data type when injection source is `InjectSource.ClipAudioData`. */
+export type ClipAudioDataInjectData = ClipAudioDataInjectDataEntry[];
 
 /** Inject config for when injection source is `InjectSource.SelectedClipInfos`. */
 export interface SelectedClipInfosInjectOptions {
