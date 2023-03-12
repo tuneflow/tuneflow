@@ -71,14 +71,16 @@ describe('Skeleton Tuneflow', () => {
     const pipeline = new TuneflowPipeline();
     pipeline.setOriginalSong(song);
     // @ts-ignore
-    pipeline.cloneSongFnInternal = (song: Song) => song;
+    TuneflowPipeline.cloneSongFnInternal = (song: Song) => song;
     // @ts-ignore
-    pipeline.materializeSongFnInternal = () => {};
+    TuneflowPipeline.materializeSongFnInternal = () => {};
     // @ts-ignore
     pipeline.readApisInternal = MOCK_READ_APIS;
     pipeline.addAsOrReplaceActivePlugin(new CreateTrackPlugin());
     expect(song.getTracks().length).toBe(1);
-    await pipeline.run();
+    const prepareResult: any = await pipeline.prepareRun();
+    expect(prepareResult).toBeTruthy();
+    await TuneflowPipeline.run(prepareResult.inputSong, prepareResult?.plugins, 'songId123');
     expect(song.getTracks().length).toBe(2);
   });
 });
