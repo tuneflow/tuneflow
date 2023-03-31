@@ -1294,8 +1294,8 @@ class At {
       e.setPluginContextInternal(i);
       try {
         i.isExecuting = !0, i.setProgress(null), await i.run(e, i.getParamsInternal(), At.readApisInternal), e.clearPluginContextInternal(), await At.materializeSongFnInternal(e, r), i.isExecuting = !1;
-      } catch {
-        return e.clearPluginContextInternal(), i.isExecuting = !1, null;
+      } catch (s) {
+        throw e.clearPluginContextInternal(), i.isExecuting = !1, s;
       }
       i.songCacheInternal = await At.cloneSongFnInternal(e), i.isRollbackable = !0;
     }

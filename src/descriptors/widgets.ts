@@ -49,11 +49,14 @@ export interface WidgetDescriptor {
     | null;
 }
 
+export type SliderMarkerConfig = { [percentage: number]: LabelText };
+
 export interface SliderWidgetConfig {
   minValue: number;
   maxValue: number;
   step: number;
   unit?: string;
+  markers?: SliderMarkerConfig;
 }
 
 export interface InputWidgetConfig {
