@@ -9,6 +9,13 @@ export interface TuneflowPluginTriggerData {
   entities?: EntityId[];
 }
 
+export const TuneflowPluginCategory = {
+  Generate: 'generate',
+  Transcribe: 'transcribe',
+  SeparateSource: 'separate_source',
+  Import: 'import',
+};
+
 /**
  * The types of plugin triggers.
  *
