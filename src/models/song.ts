@@ -11,6 +11,7 @@ import { AutomationTarget, AutomationTargetType } from './automation';
 import type { AutomationValue } from './automation';
 import { AudioPlugin } from './audio_plugin';
 import { StructureMarker } from './marker';
+import { LyricLine, LyricWord } from './lyric';
 import type { StructureType } from './marker';
 
 export class Song {
@@ -28,6 +29,7 @@ export class Song {
   private pluginContext?: PluginContext;
   private nextTrackRank = 1;
   private buses: Bus[] = [];
+  private lyrics: LyricLine[];
 
   constructor() {
     this.tracks = [];
@@ -35,6 +37,7 @@ export class Song {
     this.tempos = [];
     this.timeSignatures = [];
     this.structures = [];
+    this.lyrics = [];
   }
 
   getBusByRank(rank: number) {
@@ -733,11 +736,11 @@ export class Song {
   }
 
   moveStructure(structureIndex: number, moveToTick: number) {
-    const structure = this.getStructures()[structureIndex];
-    if (!structure) {
+    if (structureIndex <= 0) {
       return;
     }
-    if (structureIndex <= 0) {
+    const structure = this.getStructures()[structureIndex];
+    if (!structure) {
       return;
     }
     const prevStructure = this.getStructures()[structureIndex - 1];
@@ -1141,6 +1144,127 @@ export class Song {
     for (const tempoEvent of this.tempos) {
       tempoEvent.setTimeInternal(this.tickToSeconds(tempoEvent.getTicks()));
     }
+  }
+
+  getLyrics() {
+    return this.lyrics;
+  }
+
+  getLyricLineIndexAtTick(tick: number) {
+    if (
+      this.lyrics.length <= 0 ||
+      tick < this.lyrics[0].getStartTick() ||
+      tick > this.lyrics[this.lyrics.length - 1].getEndTick()
+    ) {
+      return 0;
+    }
+    for (let index = 0; index < this.lyrics.length; index += 1) {
+      const lyric = this.lyrics[index];
+      if (tick >= lyric.getStartTick() && tick <= lyric.getEndTick()) {
+        return index;
+      }
+    }
+    return 0;
+  }
+
+  createLyricWord({
+    word,
+    startTick,
+    endTick,
+  }: {
+    word: string;
+    startTick: number;
+    endTick: number;
+  }) {
+    return new LyricWord({ word, start_tick: startTick, end_tick: endTick });
+  }
+
+  createLyricLine({ lyricWords }: { lyricWords: LyricWord[] }) {
+    const lyricLine = new LyricLine({ words: lyricWords });
+    this.lyrics.push(lyricLine);
+    this.lyrics.sort((a, b) => a.getStartTick() - b.getStartTick());
+  }
+
+  createLyricLineFromString({
+    words,
+    startTick,
+    endTick,
+  }: {
+    words: string;
+    startTick: number;
+    endTick: number;
+  }) {
+    const lyricWords: LyricWord[] = [];
+    const numWords = words.length;
+    const tickPerWord = (endTick - startTick) / numWords;
+    for (let index = 0; index < numWords; index += 1) {
+      const word = words[index];
+      const wordStartTick = startTick + tickPerWord * index;
+      const wordEndTick = startTick + tickPerWord * (index + 1);
+      lyricWords.push(new LyricWord({ word, start_tick: wordStartTick, end_tick: wordEndTick }));
+    }
+    this.createLyricLine({ lyricWords });
+  }
+
+  removeLyricLineAtIndex(index: number) {
+    if (index < 0 || index >= this.lyrics.length) {
+      return;
+    }
+    this.getLyrics().splice(index, /* deleteCount= */ 1);
+    this.lyrics.sort((a, b) => a.getStartTick() - b.getStartTick());
+  }
+
+  moveLyricLine(index: number, startTick: number, endTick: number) {
+    if (index <= 0 || startTick >= endTick) {
+      return;
+    }
+    const lyricLine = this.getLyrics()[index];
+    if (!lyricLine) {
+      return;
+    }
+
+    // Make sure the lyric line is not overlapping with the previous or next lyric line.
+    const previousLyricLine = this.getLyrics()[index - 1];
+    if (previousLyricLine) {
+      startTick = Math.max(startTick, previousLyricLine.getEndTick());
+    }
+    const nextLyricLine = this.getLyrics()[index + 1];
+    if (nextLyricLine) {
+      endTick = Math.min(endTick, nextLyricLine.getStartTick());
+    }
+
+    // Retain the duration ratio of each word
+    const lyricWords: LyricWord[] = [];
+    const lyricLineDuration = lyricLine.getEndTick() - lyricLine.getStartTick();
+    const newLyricLineDuration = endTick - startTick;
+    const wordDurationOffset = 0;
+    for (const lyricWord of lyricLine.getWords()) {
+      const wordDuration = lyricWord.getEndTick() - lyricWord.getStartTick();
+      const newWordDuration = Math.round((wordDuration * newLyricLineDuration) / lyricLineDuration);
+      const wordStartTick = startTick + wordDurationOffset + newWordDuration;
+      const wordEndTick = wordStartTick + wordDuration;
+      lyricWords.push(
+        new LyricWord({
+          word: lyricWord.getWord(),
+          start_tick: wordStartTick,
+          end_tick: wordEndTick,
+        }),
+      );
+    }
+    this.getLyrics().splice(index, 1);
+    this.createLyricLine({ lyricWords });
+  }
+
+  updateLyricLineAtIndex(index: number, words: string) {
+    if (index < 0 || index >= this.lyrics.length) {
+      return;
+    }
+    const [startTick, endTick] = [
+      this.lyrics[index].getStartTick(),
+      this.lyrics[index].getEndTick(),
+    ];
+    this.removeLyricLineAtIndex(index);
+    this.createLyricLineFromString({ words, startTick, endTick });
   }
 }
 
