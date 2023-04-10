@@ -202,11 +202,40 @@ describe('Song-related Tests', () => {
         type: StructureType.VERSE,
       });
 
+      song.createStructure({
+        tick: 960,
+        type: StructureType.CUSTOM,
+        customName: 'myStructure',
+      });
+
       expect(song.getStructureAtIndex(0).getTick()).toBe(0);
       expect(song.getStructureAtIndex(0).getType()).toBe(StructureType.INTRO);
 
       expect(song.getStructureAtIndex(1).getTick()).toBe(480);
       expect(song.getStructureAtIndex(1).getType()).toBe(StructureType.VERSE);
+
+      expect(song.getStructureAtIndex(2).getTick()).toBe(960);
+      expect(song.getStructureAtIndex(2).getType()).toBe(StructureType.CUSTOM);
+      expect(song.getStructureAtIndex(2).getCustomName()).toBe('myStructure');
+    });
+
+    it('updates structure correctly', async () => {
+      expect(song.getStructureAtIndex(0)).toBeUndefined();
+
+      song.createStructure({
+        tick: 0,
+        type: StructureType.INTRO,
+      });
+
+      expect(song.getStructureAtIndex(0).getTick()).toBe(0);
+      expect(song.getStructureAtIndex(0).getType()).toBe(StructureType.INTRO);
+      expect(song.getStructureAtIndex(0).getCustomName()).toBeUndefined();
+
+      song.getStructureAtIndex(0).setType(StructureType.CUSTOM);
+      song.getStructureAtIndex(0).setCustomName('myStructure');
+
+      expect(song.getStructureAtIndex(0).getType()).toBe(StructureType.CUSTOM);
+      expect(song.getStructureAtIndex(0).getCustomName()).toBe('myStructure');
     });
 
     it('Gets structure at tick correctly', async () => {
