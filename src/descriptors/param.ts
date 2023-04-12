@@ -69,8 +69,27 @@ export enum InjectSource {
   ClipAudioData = 7,
 }
 
+export interface Mp3DataConvertOptions {
+  /** Sample rate in Hz, default 44100. */
+  sampleRate?: number;
+}
+
+export interface AudioDataConvertOptions {
+  toFormat: 'ogg' | 'wav';
+  options?: Mp3DataConvertOptions;
+}
+
+export interface AudioDataInjectOptions {
+  /**
+   * When enabled, only the visible portion of the clip will be converted to the given format.
+   *
+   * The converted audio data will start from the clip start and end at the clip end.
+   */
+  convert?: AudioDataConvertOptions;
+}
+
 /** Inject config for when injection source is `InjectSource.ClipAudioData`. */
-export interface ClipAudioDataInjectOptions {
+export interface ClipAudioDataInjectOptions extends AudioDataInjectOptions {
   clips: 'selectedAudioClips' | ClipInfo[];
 }
 

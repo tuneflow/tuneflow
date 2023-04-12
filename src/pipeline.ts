@@ -147,12 +147,11 @@ export class TuneflowPipeline {
         // @ts-ignore
         plugin.isExecuting = false;
       } catch (e: any) {
-        console.error(e);
         // @ts-ignore
         inputSong.clearPluginContextInternal();
         // @ts-ignore
         plugin.isExecuting = false;
-        return null;
+        throw e;
       }
 
       // @ts-ignore

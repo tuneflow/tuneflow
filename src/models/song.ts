@@ -722,10 +722,19 @@ export class Song {
     return structures[index];
   }
 
-  createStructure({ tick, type }: { tick: number; type: StructureType }) {
+  createStructure({
+    tick,
+    type,
+    customName,
+  }: {
+    tick: number;
+    type: StructureType;
+    customName?: string;
+  }) {
     const structure = new StructureMarker({
       tick,
       type,
+      customName,
     });
     this.structures.push(structure);
     if (this.structures.length === 1) {

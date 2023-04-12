@@ -51,6 +51,7 @@ export class TuneflowPlugin {
   /** The execution progress. */
   private progress: number | null = null;
   private isExecuting = false;
+  private isPreparingForRunInternal = false;
 
   // ============ PUBLIC OVERWRITABLE ================
 
@@ -277,6 +278,11 @@ export class TuneflowPlugin {
     return this.isExecuting;
   }
 
+  /** Whether the plugin's params and other data is being prepared. */
+  public getIsPreparingForRun() {
+    return this.isPreparingForRunInternal;
+  }
+
   // ============ INTERNAL BELOW ================
 
   /**
@@ -307,6 +313,9 @@ export class TuneflowPlugin {
   public resetParamsInternal() {
     for (const key of _.keys(this.params())) {
       const paramDescriptor = this.params()[key];
+      if (paramDescriptor.injectFrom && this.isParamProvided(key)) {
+        continue;
+      }
       this.paramsResultInternal[key] = paramDescriptor.defaultValue;
     }
     this.maybeSyncEnabledWithParamsReadiness();
