@@ -132,6 +132,108 @@ describe('Audio Clip-related Tests', () => {
       expect(clip1.getAudioEndTick()).toBe(1440);
       expect(clip1.getAudioClipData()).toEqual(TEST_AUDIO_CLIP_DATA);
     });
+
+    it('Set and get audio pitch offset correctly', async () => {
+      const clip1 = audioTrack.createAudioClip({
+        clipStartTick: 960,
+        clipEndTick: 1000,
+        audioClipData: TEST_AUDIO_CLIP_DATA,
+      });
+      expect(clip1.getAudioPitchOffset()).toBe(0);
+      clip1.setAudioPitchOffset(24);
+      expect(clip1.getAudioPitchOffset()).toBe(24);
+      expect(() => clip1.setAudioPitchOffset(-99)).toThrowError();
+      expect(() => clip1.setAudioPitchOffset(99)).toThrowError();
+    });
+
+    it('Rejects out of range audio speed ratio', async () => {
+      const clip1 = audioTrack.createAudioClip({
+        clipStartTick: 960,
+        clipEndTick: 1440,
+        audioClipData: {
+          startTick: 480,
+          audioFilePath: 'file1',
+          duration: 1,
+        },
+      });
+      expect(() => clip1.timeStretchFromClipRight(9999999)).toThrowError();
+      expect(() => clip1.timeStretchFromClipRight(961)).toThrowError();
+      expect(() => clip1.timeStretchFromClipLeft(1439)).toThrowError();
+      expect(() => clip1.timeStretchFromClipLeft(-999999)).toThrowError();
+    });
+
+    it('Time-stretch from left correctly', async () => {
+      const clip1 = audioTrack.createAudioClip({
+        clipStartTick: 960,
+        clipEndTick: 1440,
+        audioClipData: {
+          startTick: 480,
+          audioFilePath: 'file1',
+          duration: 1,
+        },
+      });
+      expect(clip1.getRawAudioDuration()).toBe(1);
+      expect(clip1.getAudioDuration()).toBe(1);
+      expect(clip1.getAudioStartTick()).toBe(480);
+      expect(clip1.getAudioEndTick()).toBe(1440);
+      expect(clip1.getClipStartTick()).toBe(960);
+      expect(clip1.getClipEndTick()).toBe(1440);
+      expect(clip1.getAudioSpeedRatio()).toBe(1);
+
+      clip1.timeStretchFromClipLeft(480);
+      expect(clip1.getRawAudioDuration()).toBe(1);
+      expect(clip1.getAudioDuration()).toBeCloseTo(2);
+      expect(clip1.getAudioStartTick()).toBe(-480);
+      expect(clip1.getAudioEndTick()).toBe(1440);
+      expect(clip1.getClipStartTick()).toBe(480);
+      expect(clip1.getClipEndTick()).toBe(1440);
+      expect(clip1.getAudioSpeedRatio()).toBeCloseTo(0.5);
+
+      clip1.timeStretchFromClipLeft(1200);
+      expect(clip1.getRawAudioDuration()).toBe(1);
+      expect(clip1.getAudioDuration()).toBe(0.5);
+      expect(clip1.getAudioStartTick()).toBe(960);
+      expect(clip1.getAudioEndTick()).toBe(1440);
+      expect(clip1.getClipStartTick()).toBe(1200);
+      expect(clip1.getClipEndTick()).toBe(1440);
+      expect(clip1.getAudioSpeedRatio()).toBeCloseTo(2);
+    });
+
+    it('Time-stretch from right correctly', async () => {
+      const clip1 = audioTrack.createAudioClip({
+        clipStartTick: 960,
+        clipEndTick: 1440,
+        audioClipData: {
+          startTick: 480,
+          audioFilePath: 'file1',
+          duration: 1,
+        },
+      });
+      expect(clip1.getRawAudioDuration()).toBe(1);
+      expect(clip1.getAudioDuration()).toBe(1);
+      expect(clip1.getAudioStartTick()).toBe(480);
+      expect(clip1.getAudioEndTick()).toBe(1440);
+      expect(clip1.getClipStartTick()).toBe(960);
+      expect(clip1.getClipEndTick()).toBe(1440);
+      expect(clip1.getAudioSpeedRatio()).toBe(1);
+
+      clip1.timeStretchFromClipRight(1200);
+      expect(clip1.getAudioDuration()).toBe(0.5);
+      expect(clip1.getAudioStartTick()).toBe(720);
+      expect(clip1.getAudioEndTick()).toBe(1200);
+      expect(clip1.getClipStartTick()).toBe(960);
+      expect(clip1.getClipEndTick()).toBe(1200);
+      expect(clip1.getAudioSpeedRatio()).toBeCloseTo(2.0);
+
+      clip1.timeStretchFromClipRight(1680);
+      expect(clip1.getRawAudioDuration()).toBe(1);
+      expect(clip1.getAudioDuration()).toBe(2);
+      expect(clip1.getAudioStartTick()).toBe(0);
+      expect(clip1.getAudioEndTick()).toBe(1680);
+      expect(clip1.getClipStartTick()).toBe(960);
+      expect(clip1.getClipEndTick()).toBe(1680);
+      expect(clip1.getAudioSpeedRatio()).toBeCloseTo(0.5);
+    });
   }); // end of basic set and get operations.
 
   describe('Trim left and trim right', () => {

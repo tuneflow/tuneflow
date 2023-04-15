@@ -54,9 +54,16 @@ export interface AudioClipData {
    * by using `readApis.readAudioBuffer` to read the audio file content as `AudioBuffer`, and then
    * get the duration from `audioBuffer.duration`.
    *
-   * Duration needs to be updated whenever audio file (path or content) changes.
+   * Duration updates whenever audio file (path or content) changes, it DOES NOT change
+   * when speed ratio changes.
    */
   duration: number;
+
+  /** How fast this audio plays, time-stretch is applied when this ratio is set and not 1, default to 1. */
+  speedRatio?: number;
+
+  /** Pitch offset in semitones, ranging from -48 to 48, default to 0. */
+  pitchOffset?: number;
 }
 
 /**
@@ -79,6 +86,11 @@ export class Clip {
   private type: ClipType;
   /** Audio related data if the clip type is AUDIO_CLIP. */
   private audioClipData?: AudioClipData;
+
+  public static MIN_AUDIO_SPEED_RATIO = 0.05;
+  public static MAX_AUDIO_SPEED_RATIO = 20;
+  public static MIN_AUDIO_PITCH_OFFSET = -24;
+  public static MAX_AUDIO_PITCH_OFFSET = 24;
 
   /**
    * IMPORTANT: Do not use the constructor directly, call `createClip` from tracks instead.
@@ -122,6 +134,8 @@ export class Clip {
                 ...audioClipData.audioData,
               }
             : undefined,
+        pitchOffset: audioClipData.pitchOffset,
+        speedRatio: audioClipData.speedRatio,
       };
 
       clipStartTick = _.isNumber(clipStartTick)
@@ -166,6 +180,8 @@ export class Clip {
       this.audioClipData.audioFilePath = filePath;
       this.audioClipData.startTick = startTick;
       this.audioClipData.duration = duration;
+      this.audioClipData.speedRatio = 1;
+      this.audioClipData.pitchOffset = 0;
     }
   }
 
@@ -189,12 +205,16 @@ export class Clip {
     this.nextNoteIdInternal = 1;
   }
 
+  /**
+   *
+   * @returns Duration from the clip start to clip end, in seconds.
+   */
   getDuration() {
     return this.song.tickToSeconds(this.clipEndTick) - this.song.tickToSeconds(this.clipStartTick);
   }
 
   /**
-   * Gets the audio's duration if the clip is AUDIO_CLIP.
+   * Gets the STRETCHED, FULL audio duration if the clip is AUDIO_CLIP, this takes speed ratio into consideration.
    *
    * Returns undefined if the clip is not AUDIO_CLIP or audio clip data is missing.
    */
@@ -202,7 +222,206 @@ export class Clip {
     if (this.type !== ClipType.AUDIO_CLIP || !this.audioClipData) {
       return undefined;
     }
+    return this.audioClipData.duration / this.getAudioSpeedRatio();
+  }
+
+  /**
+   * Gets the UNSTRETCHED, FULL audio duration if the clip is AUDIO_CLIP, this DOES NOT consider speed ratio.
+   *
+   * Returns undefined if the clip is not AUDIO_CLIP or audio clip data is missing.
+   */
+  getRawAudioDuration() {
+    if (this.type !== ClipType.AUDIO_CLIP || !this.audioClipData) {
+      return undefined;
+    }
     return this.audioClipData.duration;
+  }
+
+  /**
+   *
+   * @returns How fast this audio is played back comparing to its original speed.
+   */
+  getAudioSpeedRatio() {
+    if (
+      this.type !== ClipType.AUDIO_CLIP ||
+      !this.audioClipData ||
+      !this.audioClipData.speedRatio
+    ) {
+      return 1;
+    }
+    return this.audioClipData.speedRatio;
+  }
+
+  /**
+   * Time-stretch the clip by adjusting the start tick of the clip.
+   *
+   * NOTE: This could delete the clip if the range becomes empty after
+   * this call.
+   * @param toLeftTick The new start tick to stretch the clip to.
+   */
+  timeStretchFromClipLeft(toLeftTick: number, resolveClipConflict = true) {
+    if (toLeftTick >= this.clipEndTick) {
+      this.deleteFromParent(/* deleteAssociatedTrackAutomation= */ true);
+      return;
+    }
+    const stretchFactor = (this.clipEndTick - toLeftTick) / (this.clipEndTick - this.clipStartTick);
+    // Resolve conflict before changing the clip's range
+    // to preserve the current order of clips.
+    if (resolveClipConflict && this.track) {
+      // @ts-ignore
+      this.track.resolveClipConflictInternal(
+        this.getId(),
+        Math.min(this.clipStartTick, toLeftTick),
+        this.clipEndTick,
+      );
+    }
+    if (this.getType() === ClipType.MIDI_CLIP) {
+      this.timeStretchMidiClipImpl(stretchFactor, /* referenceTick= */ this.clipEndTick);
+      this.moveClipTo(toLeftTick, /* moveAssociatedTrackAutomationPoints= */ false);
+    } else if (this.getType() === ClipType.AUDIO_CLIP) {
+      this.timeStretchAudioClipImpl(toLeftTick, this.clipEndTick, this.clipEndTick);
+    }
+    // TODO: Scale the associated automation points accordingly.
+  }
+
+  /**
+   * Time-stretch the clip by adjusting the end tick of the clip.
+   *
+   * NOTE: This could delete the clip if the range becomes empty after
+   * this call.
+   * @param toRightTick The new end tick to stretch the clip to.
+   */
+  timeStretchFromClipRight(toRightTick: number, resolveClipConflict = true) {
+    if (toRightTick <= this.clipStartTick) {
+      this.deleteFromParent(/* deleteAssociatedTrackAutomation= */ true);
+      return;
+    }
+    // Resolve conflict before changing the clip's range
+    // to preserve the current order of clips.
+    if (resolveClipConflict && this.track) {
+      // @ts-ignore
+      this.track.resolveClipConflictInternal(
+        this.getId(),
+        this.clipStartTick,
+        Math.max(this.clipEndTick, toRightTick),
+      );
+    }
+    if (this.getType() === ClipType.MIDI_CLIP) {
+      const stretchFactor =
+        (toRightTick - this.clipStartTick) / (this.clipEndTick - this.clipStartTick);
+      this.timeStretchMidiClipImpl(stretchFactor, /* referenceTick= */ this.clipStartTick);
+    } else if (this.getType() === ClipType.AUDIO_CLIP) {
+      this.timeStretchAudioClipImpl(this.clipStartTick, toRightTick, this.clipStartTick);
+    }
+    // TODO: Scale the associated automation points accordingly.
+  }
+
+  private timeStretchMidiClipImpl(stretchFactor: number, referenceTick: number) {
+    for (const note of this.getRawNotes()) {
+      note.setStartTick(
+        Clip.calculateScaledNewTick(note.getStartTick(), referenceTick, stretchFactor),
+      );
+      note.setEndTick(Clip.calculateScaledNewTick(note.getEndTick(), referenceTick, stretchFactor));
+    }
+    this.clipStartTick = Clip.calculateScaledNewTick(
+      this.clipStartTick,
+      referenceTick,
+      stretchFactor,
+    );
+    this.clipEndTick = Clip.calculateScaledNewTick(this.clipEndTick, referenceTick, stretchFactor);
+  }
+
+  private timeStretchAudioClipImpl(
+    newLeftTick: number,
+    newRightTick: number,
+    referenceTick: number,
+  ) {
+    if (this.type !== ClipType.AUDIO_CLIP) {
+      return;
+    }
+    const audioClipData = this.audioClipData as AudioClipData;
+    const oldSpeedRatio =
+      _.isNumber(audioClipData.speedRatio) && audioClipData.speedRatio
+        ? audioClipData.speedRatio
+        : 1;
+    const oldDuratoin =
+      this.song.tickToSeconds(this.clipEndTick) - this.song.tickToSeconds(this.clipStartTick);
+    const newDuration =
+      this.song.tickToSeconds(newRightTick) - this.song.tickToSeconds(newLeftTick);
+    const timeStretchFactor = newDuration / oldDuratoin;
+    const speedRatio = oldSpeedRatio / timeStretchFactor;
+    Clip.validateAudioSpeedRatio(speedRatio);
+    const oldAudioStartTime = this.song.tickToSeconds(audioClipData.startTick);
+    const referenceTickTime = this.song.tickToSeconds(referenceTick);
+    const newAudioStartToReferenceDistanceInTime =
+      (referenceTickTime - oldAudioStartTime) * timeStretchFactor;
+    const newAudioStartTime = referenceTickTime - newAudioStartToReferenceDistanceInTime;
+    const newAudioStartTick = this.song.secondsToTick(newAudioStartTime);
+    audioClipData.speedRatio = speedRatio;
+    audioClipData.startTick = newAudioStartTick;
+    this.clipStartTick = newLeftTick;
+    this.clipEndTick = newRightTick;
+  }
+
+  public static validateAudioSpeedRatio(speedRatio: number) {
+    if (
+      !_.isNumber(speedRatio) ||
+      speedRatio < Clip.MIN_AUDIO_SPEED_RATIO ||
+      speedRatio > Clip.MAX_AUDIO_SPEED_RATIO
+    ) {
+      throw new Error(
+        `Speed ratio must be >= ${Clip.MIN_AUDIO_SPEED_RATIO} and <= ${Clip.MAX_AUDIO_SPEED_RATIO}, you are changing to ${speedRatio}`,
+      );
+    }
+  }
+
+  private static calculateScaledNewTick(
+    oldTick: number,
+    referenceTick: number,
+    scaleFactor: number,
+  ) {
+    const distance = (referenceTick - oldTick) * scaleFactor;
+    return referenceTick - distance;
+  }
+
+  /**
+   *
+   * @returns The pitch offset of this audio in semitones, comparing to the raw audio.
+   */
+  getAudioPitchOffset() {
+    if (
+      this.type !== ClipType.AUDIO_CLIP ||
+      !this.audioClipData ||
+      !_.isNumber(this.audioClipData.pitchOffset)
+    ) {
+      return 0;
+    }
+    return this.audioClipData.pitchOffset;
+  }
+
+  /**
+   * Sets the pitch offset of this audio in semitones, the offset is compared to the raw audio.
+   * @param offsetInSemitones Ranging from `Clip.MIN_AUDIO_PITCH_OFFSET` to `Clip.MAX_AUDIO_PITCH_OFFSET`, step 1, inclusive.
+   * @returns
+   */
+  setAudioPitchOffset(offsetInSemitones: number) {
+    if (this.type !== ClipType.AUDIO_CLIP) {
+      return;
+    }
+    Clip.validateAudioPitchOffset(offsetInSemitones);
+    (this.audioClipData as AudioClipData).pitchOffset = offsetInSemitones;
+  }
+
+  public static validateAudioPitchOffset(offsetInSemitones: number) {
+    if (
+      !_.isNumber(offsetInSemitones) ||
+      offsetInSemitones < Clip.MIN_AUDIO_PITCH_OFFSET ||
+      offsetInSemitones > Clip.MAX_AUDIO_PITCH_OFFSET
+    ) {
+      throw new Error(
+        `Pitch offset must be >= ${Clip.MIN_AUDIO_PITCH_OFFSET} and <= ${Clip.MAX_AUDIO_PITCH_OFFSET}, you are setting to ${offsetInSemitones}`,
+      );
+    }
   }
 
   getClipStartTick() {
@@ -508,6 +727,21 @@ export class Clip {
   }
 
   /**
+   * Gets the current clip audio's start tick.
+   *
+   * Note that this differs from the clip's start tick in that the user can trim
+   * the clip to only play part of the audio.
+   *
+   * Returns undefined if the clip is not audio clip or audio clip data is missing.
+   */
+  getAudioStartTick() {
+    if (this.type !== ClipType.AUDIO_CLIP || !this.audioClipData) {
+      return undefined;
+    }
+    return this.audioClipData.startTick;
+  }
+
+  /**
    * Gets the current clip audio's end tick.
    *
    * Returns undefined if the clip is not audio clip or audio clip data is missing.
@@ -635,10 +869,7 @@ export class Clip {
         break;
       }
       const noteEndTick = noteToEndTickFn(note);
-      if (
-        (noteStartTick >= startTick && noteStartTick <= endTick) ||
-        (noteEndTick >= startTick && noteEndTick <= endTick)
-      ) {
+      if (noteEndTick > startTick && noteStartTick < endTick) {
         candidates.push(note);
       }
     }

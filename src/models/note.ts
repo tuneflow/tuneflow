@@ -67,11 +67,11 @@ export class Note {
   }
 
   setStartTick(startTick: number) {
-    this.startTick = startTick;
+    this.startTick = Math.round(startTick);
   }
 
   setEndTick(endTick: number) {
-    this.endTick = endTick;
+    this.endTick = Math.round(endTick);
   }
 
   /**
