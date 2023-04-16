@@ -381,7 +381,7 @@ export class Clip {
     scaleFactor: number,
   ) {
     const distance = (referenceTick - oldTick) * scaleFactor;
-    return referenceTick - distance;
+    return Math.round(referenceTick - distance);
   }
 
   /**

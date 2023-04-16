@@ -3703,7 +3703,7 @@ class x {
   }
   static calculateScaledNewTick(e, n, r) {
     const i = (n - e) * r;
-    return n - i;
+    return Math.round(n - i);
   }
   getAudioPitchOffset() {
     return this.type !== 2 || !this.audioClipData || !A.isNumber(this.audioClipData.pitchOffset) ? 0 : this.audioClipData.pitchOffset;
