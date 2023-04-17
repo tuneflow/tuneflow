@@ -1,4 +1,5 @@
 import type { EntityId } from './common';
+import type { LabelText } from './text';
 
 /** The type of the `triggers` field in the plugin's `bundle.json`. */
 export type TuneflowPluginTrigger = TuneflowPluginTriggerType | TuneflowPluginTriggerConfig;
@@ -117,3 +118,18 @@ export interface TuneflowPluginOptions {
    */
   allowManualApplyAdjust?: boolean;
 }
+
+/** Specification for a single popup to show to the user when they run the plugin. */
+export interface TuneflowPluginNotice {
+  /** Title of the popup, optional. */
+  title?: LabelText;
+  /** Content of the popup, required. */
+  content: LabelText;
+  /** Whether this notice is shown to the user when they run the plugin. */
+  showPopup?: boolean;
+  /** Whether the popup needs user to explicitly say OK in order to continue. */
+  requiresPopupConsent?: boolean;
+}
+
+/** Format of the "nitices" field in the `bundle.json` file. */
+export type TuneflowPluginNoticeConfig = { [key: string]: TuneflowPluginNotice };
