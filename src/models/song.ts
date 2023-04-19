@@ -1015,18 +1015,15 @@ export class Song {
           }),
         );
       }
-      song.overwriteTimeSignatures(newTimeSignatureEvents);
-      const newTempoEvents = [];
-      if (insertOffset > 0) {
-        // Insert a default tempo event at the beginning.
-        newTempoEvents.push(
-          new TempoEvent({
-            ticks: 0,
-            time: 0,
-            bpm: 120,
-          }),
-        );
+      if (newTimeSignatureEvents.length > 0) {
+        if (insertOffset > 0) {
+          // Move the first time signature to the beginning.
+          newTimeSignatureEvents[0].setTicks(0);
+        }
+        song.overwriteTimeSignatures(newTimeSignatureEvents);
       }
+
+      const newTempoEvents = [];
       for (const rawTempoEvent of midi.header.tempos) {
         newTempoEvents.push(
           new TempoEvent({
@@ -1036,7 +1033,13 @@ export class Song {
           }),
         );
       }
-      song.overwriteTempoChanges(newTempoEvents);
+      if (newTempoEvents.length > 0) {
+        if (insertOffset > 0) {
+          // @ts-ignore
+          newTempoEvents[0].ticks = 0;
+        }
+        song.overwriteTempoChanges(newTempoEvents);
+      }
     }
 
     // Add tracks and notes.
