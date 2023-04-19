@@ -985,12 +985,17 @@ export class Song {
     return Math.round(baseTempoInfo.tick + timeDelta * ticksPerSecondSinceLastTempoChange);
   }
 
-  /** Import a midi file into the song, returns the newly created tracks. */
+  /**
+   * Import a midi file into the song, returns the updated or newly created tracks.
+   *
+   * @param insertAtIndex If >= 0, the new midi clips will be inserted to tracks starting from the given index, one clip per track.
+   */
   static importMIDI(
     song: Song,
     fileBuffer: ArrayBuffer,
     insertAtTick = 0,
     overwriteTemposAndTimeSignatures = false,
+    insertAtIndex = -1,
   ) {
     const midi = new Midi(fileBuffer);
     const insertOffset = insertAtTick;
@@ -1035,13 +1040,22 @@ export class Song {
     }
 
     // Add tracks and notes.
-    const createdTracks = [];
+    if (insertAtIndex < 0) {
+      insertAtIndex = song.getTracks().length;
+    }
+    const createdOrUpdatedTracks = [];
     for (const track of midi.tracks) {
-      const songTrack = song.createTrack({
-        type: TrackType.MIDI_TRACK,
-        assignDefaultSamplerPlugin: true,
-      });
-      createdTracks.push(songTrack);
+      let songTrack: Track;
+      if (insertAtIndex < song.getTracks().length) {
+        songTrack = song.getTracks()[insertAtIndex];
+      } else {
+        songTrack = song.createTrack({
+          type: TrackType.MIDI_TRACK,
+          assignDefaultSamplerPlugin: true,
+        });
+      }
+      createdOrUpdatedTracks.push(songTrack);
+      insertAtIndex += 1;
       songTrack.setInstrument({
         program: track.instrument.number,
         isDrum: track.instrument.percussion,
@@ -1101,7 +1115,7 @@ export class Song {
         trackClip.adjustClipLeft(minStartTick);
       }
     }
-    return createdTracks;
+    return createdOrUpdatedTracks;
   }
 
   protected setPluginContextInternal(plugin: TuneflowPlugin) {

@@ -334,3 +334,5 @@ export enum DrumPitch {
   OpenTriangle = 81,
   Shaker = 82,
 }
+
+export const SUPPORTED_AUDIO_FORMATS = ['wav', 'mp3', 'aiff', 'flac', 'ogg'];
