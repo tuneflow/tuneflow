@@ -1249,26 +1249,29 @@ export class Song {
       return;
     }
 
-    // Make sure the lyric line is not overlapping with the previous or next lyric line.
-    const previousLyricLine = this.getLyrics()[index - 1];
-    if (previousLyricLine) {
-      startTick = Math.max(startTick, previousLyricLine.getEndTick());
+    if (index === 0) {
+      startTick = Math.max(startTick, 0);
+    } else {
+      const prevLine = this.getLyrics()[index - 1];
+      startTick = Math.max(startTick, prevLine.getEndTick());
     }
-    const nextLyricLine = this.getLyrics()[index + 1];
-    if (nextLyricLine) {
-      endTick = Math.min(endTick, nextLyricLine.getStartTick());
+    if (index === this.getLyrics().length - 1) {
+      endTick = Math.min(endTick, this.getLastTick());
+    } else {
+      const nextLine = this.getLyrics()[index + 1];
+      endTick = Math.min(endTick, nextLine.getStartTick());
     }
+    console.log('index', index, 'startTick', startTick, 'endTick', endTick);
 
     // Retain the duration ratio of each word
     const lyricWords: LyricWord[] = [];
-    const lyricLineDuration = lyricLine.getEndTick() - lyricLine.getStartTick();
-    const newLyricLineDuration = endTick - startTick;
-    const wordDurationOffset = 0;
+    const oldLineDuration = lyricLine.getEndTick() - lyricLine.getStartTick();
+    const newLineDuration = endTick - startTick;
     for (const lyricWord of lyricLine.getWords()) {
-      const wordDuration = lyricWord.getEndTick() - lyricWord.getStartTick();
-      const newWordDuration = Math.round((wordDuration * newLyricLineDuration) / lyricLineDuration);
-      const wordStartTick = startTick + wordDurationOffset + newWordDuration;
-      const wordEndTick = wordStartTick + wordDuration;
+      const oldWordDuration = lyricWord.getEndTick() - lyricWord.getStartTick();
+      const newWordDuration = Math.round((oldWordDuration * newLineDuration) / oldLineDuration);
+      const wordStartTick = startTick + newWordDuration;
+      const wordEndTick = wordStartTick + oldWordDuration;
       lyricWords.push(
         new LyricWord({
           word: lyricWord.getWord(),
