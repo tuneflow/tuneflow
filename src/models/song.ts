@@ -1261,17 +1261,18 @@ export class Song {
       const nextLine = this.getLyrics()[index + 1];
       endTick = Math.min(endTick, nextLine.getStartTick());
     }
-    console.log('index', index, 'startTick', startTick, 'endTick', endTick);
 
     // Retain the duration ratio of each word
     const lyricWords: LyricWord[] = [];
     const oldLineDuration = lyricLine.getEndTick() - lyricLine.getStartTick();
     const newLineDuration = endTick - startTick;
+    let durationOffset = 0;
     for (const lyricWord of lyricLine.getWords()) {
       const oldWordDuration = lyricWord.getEndTick() - lyricWord.getStartTick();
       const newWordDuration = Math.round((oldWordDuration * newLineDuration) / oldLineDuration);
-      const wordStartTick = startTick + newWordDuration;
-      const wordEndTick = wordStartTick + oldWordDuration;
+      const wordStartTick = startTick + durationOffset;
+      const wordEndTick = wordStartTick + newWordDuration;
+      durationOffset += newWordDuration;
       lyricWords.push(
         new LyricWord({
           word: lyricWord.getWord(),
@@ -1280,6 +1281,7 @@ export class Song {
         }),
       );
     }
+    lyricWords[lyricWords.length - 1].setEndTick(endTick);
     this.getLyrics().splice(index, 1);
     this.createLyricLine({ lyricWords });
   }
