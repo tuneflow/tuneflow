@@ -1241,7 +1241,7 @@ export class Song {
   }
 
   moveLyricLine(index: number, startTick: number, endTick: number) {
-    if (index <= 0 || startTick >= endTick) {
+    if (index < 0 || startTick >= endTick) {
       return;
     }
     const lyricLine = this.getLyrics()[index];
