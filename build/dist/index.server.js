@@ -2069,7 +2069,7 @@ function Gs() {
   const t = Ds.pop();
   Bt = t === void 0 ? !0 : t;
 }
-function rt(t, e, n) {
+function it(t, e, n) {
   if (Bt && q) {
     let r = Kn.get(t);
     r || Kn.set(t, r = /* @__PURE__ */ new Map());
@@ -2136,7 +2136,7 @@ function el() {
     t[e] = function(...n) {
       const r = E(this);
       for (let s = 0, a = this.length; s < a; s++)
-        rt(r, "get", s + "");
+        it(r, "get", s + "");
       const i = r[e](...n);
       return i === -1 || i === !1 ? r[e](...n.map(E)) : i;
     };
@@ -2162,7 +2162,7 @@ function Cr(t = !1, e = !1) {
     if (!t && a && R(Ni, i))
       return Reflect.get(Ni, i, s);
     const o = Reflect.get(r, i, s);
-    return (wr(i) ? Ws.has(i) : Qu(i)) || (t || rt(r, "get", i), e) ? o : M(o) ? a && br(i) ? o : o.value : X(o) ? t ? Qs(o) : js(o) : o;
+    return (wr(i) ? Ws.has(i) : Qu(i)) || (t || it(r, "get", i), e) ? o : M(o) ? a && br(i) ? o : o.value : X(o) ? t ? Qs(o) : js(o) : o;
   };
 }
 const nl = /* @__PURE__ */ rl();
@@ -2183,10 +2183,10 @@ function il(t, e) {
 }
 function sl(t, e) {
   const n = Reflect.has(t, e);
-  return (!wr(e) || !Ws.has(e)) && rt(t, "has", e), n;
+  return (!wr(e) || !Ws.has(e)) && it(t, "has", e), n;
 }
 function al(t) {
-  return rt(t, "iterate", N(t) ? "length" : Ft), Reflect.ownKeys(t);
+  return it(t, "iterate", N(t) ? "length" : Ft), Reflect.ownKeys(t);
 }
 const ol = {
   get: Yu,
@@ -2208,7 +2208,7 @@ const ol = {
 function Re(t, e, n = !1, r = !1) {
   t = t.__v_raw;
   const i = E(t), s = E(e);
-  n || (e !== s && rt(i, "get", e), rt(i, "get", s));
+  n || (e !== s && it(i, "get", e), it(i, "get", s));
   const { has: a } = un(i), o = r ? Ir : n ? Pr : _r;
   if (a.call(i, e))
     return o(t.get(e));
@@ -2218,10 +2218,10 @@ function Re(t, e, n = !1, r = !1) {
 }
 function Fe(t, e = !1) {
   const n = this.__v_raw, r = E(n), i = E(t);
-  return e || (t !== i && rt(r, "has", t), rt(r, "has", i)), t === i ? n.has(t) : n.has(t) || n.has(i);
+  return e || (t !== i && it(r, "has", t), it(r, "has", i)), t === i ? n.has(t) : n.has(t) || n.has(i);
 }
 function Be(t, e = !1) {
-  return t = t.__v_raw, !e && rt(E(t), "iterate", Ft), Reflect.get(t, "size", t);
+  return t = t.__v_raw, !e && it(E(t), "iterate", Ft), Reflect.get(t, "size", t);
 }
 function Oi(t) {
   t = E(t);
@@ -2250,13 +2250,13 @@ function Fi() {
 function Ue(t, e) {
   return function(r, i) {
     const s = this, a = s.__v_raw, o = E(a), u = e ? Ir : t ? Pr : _r;
-    return !t && rt(o, "iterate", Ft), a.forEach((l, g) => r.call(i, u(l), u(g), s));
+    return !t && it(o, "iterate", Ft), a.forEach((l, g) => r.call(i, u(l), u(g), s));
   };
 }
 function Ve(t, e, n) {
   return function(...r) {
     const i = this.__v_raw, s = E(i), a = te(s), o = t === "entries" || t === Symbol.iterator && a, u = t === "keys" && a, l = i[t](...r), g = n ? Ir : e ? Pr : _r;
-    return !e && rt(s, "iterate", u ? Xn : Ft), {
+    return !e && it(s, "iterate", u ? Xn : Ft), {
       next() {
         const { value: f, done: h } = l.next();
         return h ? { value: f, done: h } : {
@@ -2849,7 +2849,7 @@ const zl = Symbol(), Yn = (t) => t ? hf(t) ? df(t) || t.proxy : Yn(t.parent) : n
     const g = pe[e];
     let f, h;
     if (g)
-      return e === "$attrs" && (rt(t, "get", e), process.env.NODE_ENV !== "production" && void 0), g(t);
+      return e === "$attrs" && (it(t, "get", e), process.env.NODE_ENV !== "production" && void 0), g(t);
     if ((f = o.__cssModules) && (f = f[e]))
       return f;
     if (n !== lt && R(n, e))
@@ -4229,7 +4229,7 @@ class Or {
   }
 }
 var Qt = /* @__PURE__ */ ((t) => (t[t.MIDI_TRACK = 1] = "MIDI_TRACK", t[t.AUDIO_TRACK = 2] = "AUDIO_TRACK", t[t.MASTER_TRACK = 3] = "MASTER_TRACK", t[t.AUX_TRACK = 4] = "AUX_TRACK", t))(Qt || {});
-class nt {
+class rt {
   static MAX_NUM_EFFECTS_PLUGINS = 5;
   static MAX_NUM_SENDS = 5;
   insturment;
@@ -4252,7 +4252,7 @@ class nt {
   constructor({
     type: e,
     song: n,
-    uuid: r = nt.generateTrackIdInternal(),
+    uuid: r = rt.generateTrackIdInternal(),
     clips: i = [],
     instrument: s,
     suggestedInstruments: a = [],
@@ -4355,9 +4355,9 @@ class nt {
     return this.audioPlugins[e];
   }
   setAudioPluginAt(e, n, r = !0) {
-    if (e > nt.MAX_NUM_EFFECTS_PLUGINS - 1)
+    if (e > rt.MAX_NUM_EFFECTS_PLUGINS - 1)
       throw new Error(
-        `The maximum number of effects plugin per track is ${nt.MAX_NUM_EFFECTS_PLUGINS}`
+        `The maximum number of effects plugin per track is ${rt.MAX_NUM_EFFECTS_PLUGINS}`
       );
     const i = this.audioPlugins ? this.audioPlugins[e] : void 0, s = !i && !!n || !n && !!i || !!n && !!i && !n.matchesTfId(i.getTuneflowId());
     this.audioPlugins[e] = n, s && i && r && this.automation.removeAutomationOfPlugin(i.getInstanceId());
@@ -4532,8 +4532,8 @@ class nt {
     delete this.sends[e];
   }
   setSendAt(e, n) {
-    if (e >= nt.MAX_NUM_SENDS)
-      throw new Error(`Maximum of supported sends is ${nt.MAX_NUM_SENDS}`);
+    if (e >= rt.MAX_NUM_SENDS)
+      throw new Error(`Maximum of supported sends is ${rt.MAX_NUM_SENDS}`);
     if (this.type === 3)
       throw new Error("Cannot add send for master track");
     this.sends[e] = n;
@@ -6215,23 +6215,23 @@ class wh {
     return -1;
   }
   createLine({ startTick: e, resolveOrder: n = !0 }) {
-    const r = new it({ lyrics: this, startTick: e });
+    const r = new nt({ lyrics: this, startTick: e });
     return this.lines.push(r), n && this.sortLinesInternal(), r;
   }
   async createLineFromString({
     input: e,
     startTick: n,
     endTick: r,
-    tokenizer: i = it.DEFAULT_TOKENIZER
+    tokenizer: i = nt.DEFAULT_TOKENIZER
   }) {
     const s = this.createLine({ startTick: n });
-    return e && await it.createWordsFromString(s, e, n, r, i), s;
+    return e && await nt.createWordsFromString(s, e, n, r, i), s;
   }
   removeLineAtIndex(e) {
     e < 0 || e >= this.lines.length || this.lines.splice(e, 1);
   }
   cloneLine(e) {
-    const n = new it({
+    const n = new nt({
       lyrics: this,
       startTick: e.getStartTick()
     });
@@ -6247,7 +6247,7 @@ class wh {
     this.lines.sort((e, n) => e.getStartTick() - n.getStartTick());
   }
 }
-class it {
+class nt {
   lyrics;
   words;
   constructor({ lyrics: e, startTick: n }) {
@@ -6268,7 +6268,10 @@ class it {
   getEndTick() {
     if (this.words.length === 0)
       throw new Error("Words cannot be empty");
-    return _.max(this.words, (e) => e.getEndTick()).getEndTick();
+    return nt.getLineEndTickImpl(this.words, (e) => e.getEndTick());
+  }
+  static getLineEndTickImpl(e, n) {
+    return n(_.max(e, n));
   }
   getWords() {
     return this.words;
@@ -6281,7 +6284,7 @@ class it {
     const s = (n - e) / (i - r);
     for (const a of this.getWords())
       a.setStartTick(
-        it.relativeMovePoint(
+        nt.relativeMovePoint(
           a.getStartTick(),
           r,
           e,
@@ -6289,7 +6292,7 @@ class it {
         ),
         !1
       ), a.setEndTick(
-        it.relativeMovePoint(a.getEndTick(), r, e, s),
+        nt.relativeMovePoint(a.getEndTick(), r, e, s),
         !1
       );
     this.lyrics.sortLinesInternal();
@@ -6297,9 +6300,9 @@ class it {
   clear() {
     this.words = [this.createPlaceholderWord()];
   }
-  async replaceWithString(e, n = it.DEFAULT_TOKENIZER) {
+  async replaceWithString(e, n = nt.DEFAULT_TOKENIZER) {
     const r = this.getStartTick(), i = this.getEndTick();
-    this.words = [this.createPlaceholderWord()], e && await it.createWordsFromString(this, e, r, i, n);
+    this.words = [this.createPlaceholderWord()], e && await nt.createWordsFromString(this, e, r, i, n);
   }
   static async createWordsFromString(e, n, r, i, s) {
     if (!n)
@@ -6336,10 +6339,10 @@ class it {
     return null;
   }
   getSentence() {
-    return this.isEmpty() ? "" : it.getSentenceImpl(this.words, (e) => e.getWord());
+    return this.isEmpty() ? "" : nt.getSentenceImpl(this.words, (e) => e.getWord());
   }
   isEmpty() {
-    return it.hasOnlyPlaceholderImpl(this.words, (e) => e.getWord());
+    return nt.hasOnlyPlaceholderImpl(this.words, (e) => e.getWord());
   }
   cloneWord(e) {
     return new St({
@@ -6453,10 +6456,10 @@ class tt {
     this.buses[r] ? this.buses[r].setName(n) : this.buses[r] = new bh({ rank: e, name: n });
   }
   getMasterTrack() {
-    return this.masterTrack || (this.masterTrack = new nt({
+    return this.masterTrack || (this.masterTrack = new rt({
       type: Qt.MASTER_TRACK,
       song: this,
-      uuid: nt.generateTrackIdInternal()
+      uuid: rt.generateTrackIdInternal()
     })), this.masterTrack;
   }
   getTracks() {
@@ -6481,7 +6484,7 @@ class tt {
     assignDefaultSamplerPlugin: i = !1
   }) {
     r == null || r === null ? r = this.getNextTrackRank() : this.nextTrackRank = Math.max(r + 1, this.nextTrackRank);
-    const s = new nt({
+    const s = new rt({
       type: e,
       song: this,
       uuid: this.getNextTrackId(),
@@ -6510,7 +6513,7 @@ class tt {
       const a = e.getSamplerPlugin();
       a && r.setSamplerPlugin(a.clone(r));
     }
-    for (let s = 0; s < nt.MAX_NUM_EFFECTS_PLUGINS; s += 1) {
+    for (let s = 0; s < rt.MAX_NUM_EFFECTS_PLUGINS; s += 1) {
       const a = e.getAudioPluginAt(s);
       !a || r.setAudioPluginAt(s, a.clone(r));
     }
@@ -6522,7 +6525,7 @@ class tt {
     i && rr(i.getInputBusRank()) && i.getInputBusRank() > 0 && r.getAuxTrackData().setInputBusRank(
       i.getInputBusRank()
     );
-    for (let s = 0; s < nt.MAX_NUM_SENDS; s += 1) {
+    for (let s = 0; s < rt.MAX_NUM_SENDS; s += 1) {
       const a = e.getSendAt(s);
       !a || r.setSendAt(
         s,
@@ -7038,7 +7041,7 @@ class tt {
   getNextTrackId() {
     const e = this.pluginContext, n = e.plugin.generatedTrackIdsInternal;
     if (e.numTracksCreatedByPlugin === n.length)
-      n.push(nt.generateTrackIdInternal());
+      n.push(rt.generateTrackIdInternal());
     else if (e.numTracksCreatedByPlugin > n.length)
       throw new Error("Plugin generated track ids out of sync.");
     const r = n[e.numTracksCreatedByPlugin];
@@ -7106,7 +7109,7 @@ export {
   Nf as DrumInstrumentType,
   Ef as DrumPitch,
   Ch as InjectSource,
-  it as LyricLine,
+  nt as LyricLine,
   St as LyricWord,
   wh as Lyrics,
   xf as MelodicInstrumentType,
@@ -7118,7 +7121,7 @@ export {
   On as TempoEvent,
   Ph as TickToSecondStepper,
   Ei as TimeSignatureEvent,
-  nt as Track,
+  rt as Track,
   Af as TrackOutput,
   yr as TrackOutputType,
   nn as TrackSend,

@@ -139,7 +139,11 @@ export class LyricLine {
     if (this.words.length === 0) {
       throw new Error('Words cannot be empty');
     }
-    return (_.max(this.words, item => item.getEndTick()) as LyricWord).getEndTick();
+    return LyricLine.getLineEndTickImpl(this.words, item => item.getEndTick());
+  }
+
+  static getLineEndTickImpl<T>(words: T[], wordToEndTickFn: (word: T) => number) {
+    return wordToEndTickFn(_.max(words, wordToEndTickFn) as T);
   }
 
   getWords() {
