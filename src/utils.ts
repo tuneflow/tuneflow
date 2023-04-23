@@ -336,3 +336,5 @@ export enum DrumPitch {
 }
 
 export const SUPPORTED_AUDIO_FORMATS = ['wav', 'mp3', 'aiff', 'flac', 'ogg'];
+
+export const DEFAULT_PPQ = 480;

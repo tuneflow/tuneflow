@@ -11,11 +11,13 @@ import { AutomationTarget, AutomationTargetType } from './automation';
 import type { AutomationValue } from './automation';
 import { AudioPlugin } from './audio_plugin';
 import { StructureMarker } from './marker';
+import { Lyrics } from './lyric';
 import type { StructureType } from './marker';
+import { DEFAULT_PPQ } from '../utils';
 
 export class Song {
   /** The default PPQ used in TuneFlow. */
-  static DEFAULT_PPQ = 480;
+  static DEFAULT_PPQ = DEFAULT_PPQ;
 
   static NUM_BUSES = 32;
 
@@ -28,6 +30,7 @@ export class Song {
   private pluginContext?: PluginContext;
   private nextTrackRank = 1;
   private buses: Bus[] = [];
+  private lyrics: Lyrics;
 
   constructor() {
     this.tracks = [];
@@ -35,6 +38,7 @@ export class Song {
     this.tempos = [];
     this.timeSignatures = [];
     this.structures = [];
+    this.lyrics = new Lyrics({ song: this });
   }
 
   getBusByRank(rank: number) {
@@ -742,11 +746,11 @@ export class Song {
   }
 
   moveStructure(structureIndex: number, moveToTick: number) {
-    const structure = this.getStructures()[structureIndex];
-    if (!structure) {
+    if (structureIndex <= 0) {
       return;
     }
-    if (structureIndex <= 0) {
+    const structure = this.getStructures()[structureIndex];
+    if (!structure) {
       return;
     }
     const prevStructure = this.getStructures()[structureIndex - 1];
@@ -1167,6 +1171,10 @@ export class Song {
     for (const tempoEvent of this.tempos) {
       tempoEvent.setTimeInternal(this.tickToSeconds(tempoEvent.getTicks()));
     }
+  }
+
+  getLyrics() {
+    return this.lyrics;
   }
 }
 

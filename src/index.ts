@@ -18,6 +18,7 @@ export { Clip, ClipType } from './models/clip';
 export type { AudioClipData } from './models/clip';
 export { Note } from './models/note';
 export { StructureMarker, StructureType } from './models/marker';
+export { Lyrics, LyricLine, LyricWord } from './models/lyric';
 export {
   AutomationTarget,
   AutomationTargetType,
