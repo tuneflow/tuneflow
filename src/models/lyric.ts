@@ -132,7 +132,7 @@ export class LyricLine {
     if (this.words.length === 0) {
       throw new Error('Words cannot be empty');
     }
-    return this.words[0].getStartTick();
+    return LyricLine.getLineStartTickImpl(this.words, item => item.getStartTick());
   }
 
   getEndTick() {
@@ -140,6 +140,13 @@ export class LyricLine {
       throw new Error('Words cannot be empty');
     }
     return LyricLine.getLineEndTickImpl(this.words, item => item.getEndTick());
+  }
+
+  static getLineStartTickImpl<T>(words: T[], wordToStartTickFn: (word: T) => number) {
+    if (!words || words.length === 0) {
+      return 0;
+    }
+    return wordToStartTickFn(words[0]);
   }
 
   static getLineEndTickImpl<T>(words: T[], wordToEndTickFn: (word: T) => number) {

@@ -539,7 +539,7 @@ const bs = J(function(t, e, n) {
     return ws(t, r, e, this, n.concat(i));
   });
   return r;
-}), Y = es(j);
+}), Z = es(j);
 function Wt(t, e, n, r) {
   if (r = r || [], !e && e !== 0)
     e = 1 / 0;
@@ -547,7 +547,7 @@ function Wt(t, e, n, r) {
     return r.concat(t);
   for (var i = r.length, s = 0, a = j(t); s < a; s++) {
     var o = t[s];
-    if (Y(o) && (Gt(o) || sr(o)))
+    if (Z(o) && (Gt(o) || sr(o)))
       if (e > 1)
         Wt(o, e - 1, n, r), i = r.length;
       else
@@ -677,7 +677,7 @@ function As(t, e, n) {
 }
 const xs = As(1, ie, Ps), Xc = As(-1, _s);
 function Xe(t, e, n) {
-  var r = Y(t) ? ie : Ts, i = r(t, e, n);
+  var r = Z(t) ? ie : Ts, i = r(t, e, n);
   if (i !== void 0 && i !== -1)
     return t[i];
 }
@@ -687,7 +687,7 @@ function Jc(t, e) {
 function pt(t, e, n) {
   e = Ee(e, n);
   var r, i;
-  if (Y(t))
+  if (Z(t))
     for (r = 0, i = t.length; r < i; r++)
       e(t[r], r, t);
   else {
@@ -699,7 +699,7 @@ function pt(t, e, n) {
 }
 function Ht(t, e, n) {
   e = Q(e, n);
-  for (var r = !Y(t) && F(t), i = (r || t).length, s = Array(i), a = 0; a < i; a++) {
+  for (var r = !Z(t) && F(t), i = (r || t).length, s = Array(i), a = 0; a < i; a++) {
     var o = r ? r[a] : a;
     s[a] = e(t[o], o, t);
   }
@@ -707,7 +707,7 @@ function Ht(t, e, n) {
 }
 function Ns(t) {
   var e = function(n, r, i, s) {
-    var a = !Y(n) && F(n), o = (a || n).length, u = t > 0 ? 0 : o - 1;
+    var a = !Z(n) && F(n), o = (a || n).length, u = t > 0 ? 0 : o - 1;
     for (s || (i = n[a ? a[u] : u], u += t); u >= 0 && u < o; u += t) {
       var l = a ? a[u] : u;
       i = r(i, n[l], l, n);
@@ -731,7 +731,7 @@ function jc(t, e, n) {
 }
 function Ci(t, e, n) {
   e = Q(e, n);
-  for (var r = !Y(t) && F(t), i = (r || t).length, s = 0; s < i; s++) {
+  for (var r = !Z(t) && F(t), i = (r || t).length, s = 0; s < i; s++) {
     var a = r ? r[s] : s;
     if (!e(t[a], a, t))
       return !1;
@@ -740,7 +740,7 @@ function Ci(t, e, n) {
 }
 function Ii(t, e, n) {
   e = Q(e, n);
-  for (var r = !Y(t) && F(t), i = (r || t).length, s = 0; s < i; s++) {
+  for (var r = !Z(t) && F(t), i = (r || t).length, s = 0; s < i; s++) {
     var a = r ? r[s] : s;
     if (e(t[a], a, t))
       return !0;
@@ -748,7 +748,7 @@ function Ii(t, e, n) {
   return !1;
 }
 function gt(t, e, n, r) {
-  return Y(t) || (t = ae(t)), (typeof n != "number" || r) && (n = 0), xs(t, e, n) >= 0;
+  return Z(t) || (t = ae(t)), (typeof n != "number" || r) && (n = 0), xs(t, e, n) >= 0;
 }
 const Qc = J(function(t, e, n) {
   var r, i;
@@ -771,7 +771,7 @@ function Yc(t, e) {
 function Os(t, e, n) {
   var r = -1 / 0, i = -1 / 0, s, a;
   if (e == null || typeof e == "number" && typeof t[0] != "object" && t != null) {
-    t = Y(t) ? t : ae(t);
+    t = Z(t) ? t : ae(t);
     for (var o = 0, u = t.length; o < u; o++)
       s = t[o], s != null && s > r && (r = s);
   } else
@@ -783,7 +783,7 @@ function Os(t, e, n) {
 function Zc(t, e, n) {
   var r = 1 / 0, i = 1 / 0, s, a;
   if (e == null || typeof e == "number" && typeof t[0] != "object" && t != null) {
-    t = Y(t) ? t : ae(t);
+    t = Z(t) ? t : ae(t);
     for (var o = 0, u = t.length; o < u; o++)
       s = t[o], s != null && s < r && (r = s);
   } else
@@ -794,11 +794,11 @@ function Zc(t, e, n) {
 }
 var tu = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
 function ys(t) {
-  return t ? Gt(t) ? Ce.call(t) : nr(t) ? t.match(tu) : Y(t) ? Ht(t, fr) : ae(t) : [];
+  return t ? Gt(t) ? Ce.call(t) : nr(t) ? t.match(tu) : Z(t) ? Ht(t, fr) : ae(t) : [];
 }
 function Rs(t, e, n) {
   if (e == null || n)
-    return Y(t) || (t = ae(t)), t[$n(t.length - 1)];
+    return Z(t) || (t = ae(t)), t[$n(t.length - 1)];
   var r = ys(t), i = j(r);
   e = Math.max(Math.min(e, i), 0);
   for (var s = i - 1, a = 0; a < e; a++) {
@@ -848,7 +848,7 @@ const ru = an(function(t, e, n) {
   t[n ? 0 : 1].push(e);
 }, !0);
 function ou(t) {
-  return t == null ? 0 : Y(t) ? t.length : F(t).length;
+  return t == null ? 0 : Z(t) ? t.length : F(t).length;
 }
 function cu(t, e, n) {
   return e in n;
@@ -1628,9 +1628,9 @@ var x = {
   function ho(c, d) {
     return c && ri(d, _n(d), c);
   }
-  function In(c, d, p, S, U, H, Z) {
+  function In(c, d, p, S, U, H, tt) {
     var K;
-    if (S && (K = H ? S(c, U, H, Z) : S(c)), K !== void 0)
+    if (S && (K = H ? S(c, U, H, tt) : S(c)), K !== void 0)
       return K;
     if (!Ne(c))
       return c;
@@ -1653,14 +1653,14 @@ var x = {
         K = Oo(c, Jt, In, d);
       }
     }
-    Z || (Z = new qt());
-    var fi = Z.get(c);
+    tt || (tt = new qt());
+    var fi = tt.get(c);
     if (fi)
       return fi;
-    if (Z.set(c, K), !ui)
+    if (tt.set(c, K), !ui)
       var hi = p ? Ao(c) : _n(c);
     return Pa(hi || c, function(Pn, Oe) {
-      hi && (Oe = Pn, Pn = c[Oe]), ni(K, Oe, In(Pn, d, p, S, Oe, c, Z));
+      hi && (Oe = Pn, Pn = c[Oe]), ni(K, Oe, In(Pn, d, p, S, Oe, c, tt));
     }), K;
   }
   function go(c) {
@@ -1729,8 +1729,8 @@ var x = {
   function ri(c, d, p, S) {
     p || (p = {});
     for (var U = -1, H = d.length; ++U < H; ) {
-      var Z = d[U], K = S ? S(p[Z], c[Z], Z, p, c) : void 0;
-      ni(p, Z, K === void 0 ? c[Z] : K);
+      var tt = d[U], K = S ? S(p[tt], c[tt], tt, p, c) : void 0;
+      ni(p, tt, K === void 0 ? c[tt] : K);
     }
     return p;
   }
@@ -3972,7 +3972,7 @@ class A {
   }
 }
 var tr = /* @__PURE__ */ ((t) => (t[t.UNDEFINED = 0] = "UNDEFINED", t[t.VOLUME = 1] = "VOLUME", t[t.PAN = 2] = "PAN", t[t.AUDIO_PLUGIN = 3] = "AUDIO_PLUGIN", t))(tr || {});
-class et {
+class nt {
   type;
   pluginInstanceId;
   paramId;
@@ -3998,7 +3998,7 @@ class et {
     this.paramId = e;
   }
   equals(e) {
-    return et.areAutomationTargetsEqual(
+    return nt.areAutomationTargetsEqual(
       this.getType(),
       e.getType(),
       this.getPluginInstanceId(),
@@ -4008,13 +4008,13 @@ class et {
     );
   }
   clone() {
-    return new et(this.type, this.pluginInstanceId, this.paramId);
+    return new nt(this.type, this.pluginInstanceId, this.paramId);
   }
   toTfAutomationTargetId() {
-    return et.encodeAutomationTarget(this.type, this.pluginInstanceId, this.paramId);
+    return nt.encodeAutomationTarget(this.type, this.pluginInstanceId, this.paramId);
   }
   static fromTfAutomationTargetId(e) {
-    return et.decodeAutomationTarget(e);
+    return nt.decodeAutomationTarget(e);
   }
   static encodeAutomationTarget(e, n, r) {
     return e === 3 ? `${e}^^${n}^^${r}` : `${e}`;
@@ -4024,10 +4024,10 @@ class et {
     if (n.length === 0)
       throw new Error(`Invalid automation target id: ${e}`);
     const r = Number(n[0]);
-    return n.length > 2 ? new et(r, n[1], n[2]) : new et(r);
+    return n.length > 2 ? new nt(r, n[1], n[2]) : new nt(r);
   }
   static areAutomationTargetsEqual(e, n, r, i, s, a) {
-    return et.encodeAutomationTarget(e, r, s) === et.encodeAutomationTarget(n, i, a);
+    return nt.encodeAutomationTarget(e, r, s) === nt.encodeAutomationTarget(n, i, a);
   }
 }
 class re {
@@ -4199,7 +4199,7 @@ class Or {
       r.getPluginInstanceId() === e && this.removeAutomation(r);
     }
     for (const n of _.keys(this.targetValues)) {
-      const r = et.decodeAutomationTarget(n);
+      const r = nt.decodeAutomationTarget(n);
       r.getPluginInstanceId() === e && this.removeAutomation(r);
     }
   }
@@ -6215,23 +6215,23 @@ class wh {
     return -1;
   }
   createLine({ startTick: e, resolveOrder: n = !0 }) {
-    const r = new nt({ lyrics: this, startTick: e });
+    const r = new Y({ lyrics: this, startTick: e });
     return this.lines.push(r), n && this.sortLinesInternal(), r;
   }
   async createLineFromString({
     input: e,
     startTick: n,
     endTick: r,
-    tokenizer: i = nt.DEFAULT_TOKENIZER
+    tokenizer: i = Y.DEFAULT_TOKENIZER
   }) {
     const s = this.createLine({ startTick: n });
-    return e && await nt.createWordsFromString(s, e, n, r, i), s;
+    return e && await Y.createWordsFromString(s, e, n, r, i), s;
   }
   removeLineAtIndex(e) {
     e < 0 || e >= this.lines.length || this.lines.splice(e, 1);
   }
   cloneLine(e) {
-    const n = new nt({
+    const n = new Y({
       lyrics: this,
       startTick: e.getStartTick()
     });
@@ -6247,7 +6247,7 @@ class wh {
     this.lines.sort((e, n) => e.getStartTick() - n.getStartTick());
   }
 }
-class nt {
+class Y {
   lyrics;
   words;
   constructor({ lyrics: e, startTick: n }) {
@@ -6263,12 +6263,15 @@ class nt {
   getStartTick() {
     if (this.words.length === 0)
       throw new Error("Words cannot be empty");
-    return this.words[0].getStartTick();
+    return Y.getLineStartTickImpl(this.words, (e) => e.getStartTick());
   }
   getEndTick() {
     if (this.words.length === 0)
       throw new Error("Words cannot be empty");
-    return nt.getLineEndTickImpl(this.words, (e) => e.getEndTick());
+    return Y.getLineEndTickImpl(this.words, (e) => e.getEndTick());
+  }
+  static getLineStartTickImpl(e, n) {
+    return !e || e.length === 0 ? 0 : n(e[0]);
   }
   static getLineEndTickImpl(e, n) {
     return n(_.max(e, n));
@@ -6284,7 +6287,7 @@ class nt {
     const s = (n - e) / (i - r);
     for (const a of this.getWords())
       a.setStartTick(
-        nt.relativeMovePoint(
+        Y.relativeMovePoint(
           a.getStartTick(),
           r,
           e,
@@ -6292,7 +6295,7 @@ class nt {
         ),
         !1
       ), a.setEndTick(
-        nt.relativeMovePoint(a.getEndTick(), r, e, s),
+        Y.relativeMovePoint(a.getEndTick(), r, e, s),
         !1
       );
     this.lyrics.sortLinesInternal();
@@ -6300,9 +6303,9 @@ class nt {
   clear() {
     this.words = [this.createPlaceholderWord()];
   }
-  async replaceWithString(e, n = nt.DEFAULT_TOKENIZER) {
+  async replaceWithString(e, n = Y.DEFAULT_TOKENIZER) {
     const r = this.getStartTick(), i = this.getEndTick();
-    this.words = [this.createPlaceholderWord()], e && await nt.createWordsFromString(this, e, r, i, n);
+    this.words = [this.createPlaceholderWord()], e && await Y.createWordsFromString(this, e, r, i, n);
   }
   static async createWordsFromString(e, n, r, i, s) {
     if (!n)
@@ -6339,10 +6342,10 @@ class nt {
     return null;
   }
   getSentence() {
-    return this.isEmpty() ? "" : nt.getSentenceImpl(this.words, (e) => e.getWord());
+    return this.isEmpty() ? "" : Y.getSentenceImpl(this.words, (e) => e.getWord());
   }
   isEmpty() {
-    return nt.hasOnlyPlaceholderImpl(this.words, (e) => e.getWord());
+    return Y.hasOnlyPlaceholderImpl(this.words, (e) => e.getWord());
   }
   cloneWord(e) {
     return new St({
@@ -6430,7 +6433,7 @@ class St {
   }
   static PLACEHOLDER_WORD = "^%%^";
 }
-class tt {
+class et {
   static DEFAULT_PPQ = Zn;
   static NUM_BUSES = 32;
   masterTrack;
@@ -6450,8 +6453,8 @@ class tt {
     return this.buses[e - 1];
   }
   setBus(e, n) {
-    if (e > tt.NUM_BUSES)
-      throw new Error(`Only ${tt.NUM_BUSES} buses are supported.`);
+    if (e > et.NUM_BUSES)
+      throw new Error(`Only ${et.NUM_BUSES} buses are supported.`);
     const r = e - 1;
     this.buses[r] ? this.buses[r].setName(n) : this.buses[r] = new bh({ rank: e, name: n });
   }
@@ -6601,7 +6604,7 @@ class tt {
     return r >= n.length - 1 ? n[r] : Math.abs(n[r].tick - e) > Math.abs(n[r + 1].tick - e) ? n[r + 1] : n[r];
   }
   getBarBeats(e) {
-    return tt.getBarBeatsImpl(
+    return et.getBarBeatsImpl(
       e,
       this.PPQ,
       this.timeSignatures,
@@ -6652,7 +6655,7 @@ class tt {
     return this.tempos;
   }
   getTempoAtTick(e) {
-    return tt.getTempoAtTickImpl(
+    return et.getTempoAtTickImpl(
       e,
       this.tempos,
       (n) => ({
@@ -6791,7 +6794,7 @@ class tt {
     return this.structures[e];
   }
   getStructureAtTick(e) {
-    return tt.getStructureAtTickImpl(
+    return et.getStructureAtTickImpl(
       e,
       this.structures,
       (n) => ({ getTick: () => n }),
@@ -6856,7 +6859,7 @@ class tt {
     return this.getResolution() * (4 / n.getDenominator());
   }
   getTimeSignatureAtTick(e) {
-    return tt.getTimeSignatureAtTickImpl(
+    return et.getTimeSignatureAtTickImpl(
       e,
       this.timeSignatures,
       (n) => ({
@@ -6874,7 +6877,7 @@ class tt {
     return s < 0 && (s = 0), s >= n.length && (s = n.length - 1), n[s];
   }
   tickToSeconds(e) {
-    return tt.tickToSecondsImpl(
+    return et.tickToSecondsImpl(
       e,
       this.getTempoChanges(),
       this.getResolution(),
@@ -6898,14 +6901,14 @@ class tt {
       (h, m) => s(h) - s(m)
     );
     o == -1 && (o = 0);
-    const u = n[o], l = a(u), g = e - l.tick, f = tt.tempoBPMToTicksPerSecond(
+    const u = n[o], l = a(u), g = e - l.tick, f = et.tempoBPMToTicksPerSecond(
       l.bpm,
       r
     );
     return l.time + g / f;
   }
   secondsToTick(e) {
-    return tt.secondsToTickImpl(
+    return et.secondsToTickImpl(
       e,
       this.PPQ,
       this.tempos,
@@ -6946,14 +6949,14 @@ class tt {
       (h, m) => s(h) - s(m)
     );
     o == -1 && (o = 0);
-    const u = r[o], l = a(u), g = e - l.time, f = tt.tempoBPMToTicksPerSecond(
+    const u = r[o], l = a(u), g = e - l.time, f = et.tempoBPMToTicksPerSecond(
       l.bpm,
       n
     );
     return Math.round(l.tick + g * f);
   }
   static importMIDI(e, n, r = 0, i = !1, s = -1) {
-    const a = new ga.Midi(n), o = r, u = tt.DEFAULT_PPQ / a.header.ppq;
+    const a = new ga.Midi(n), o = r, u = et.DEFAULT_PPQ / a.header.ppq;
     if (i) {
       const g = [];
       for (const h of a.header.timeSignatures)
@@ -7004,7 +7007,7 @@ class tt {
         if (v.length === 1)
           f.setVolume(v[0].value);
         else {
-          const k = new et(tr.VOLUME);
+          const k = new nt(tr.VOLUME);
           f.getAutomation().addAutomation(k);
           const C = f.getAutomation().getAutomationValueByTarget(k);
           for (const O of v)
@@ -7019,7 +7022,7 @@ class tt {
           const k = Math.round(w[0].value * 127 - 64);
           f.setPan(k);
         } else {
-          const k = new et(tr.PAN);
+          const k = new nt(tr.PAN);
           f.getAutomation().addAutomation(k);
           const C = f.getAutomation().getAutomationValueByTarget(k);
           for (const O of w)
@@ -7099,7 +7102,7 @@ const Vh = {
 export {
   ln as AudioPlugin,
   Or as AutomationData,
-  et as AutomationTarget,
+  nt as AutomationTarget,
   tr as AutomationTargetType,
   re as AutomationValue,
   Pf as AuxTrackData,
@@ -7109,13 +7112,13 @@ export {
   Nf as DrumInstrumentType,
   Ef as DrumPitch,
   Ch as InjectSource,
-  nt as LyricLine,
+  Y as LyricLine,
   St as LyricWord,
   wh as Lyrics,
   xf as MelodicInstrumentType,
   It as Note,
   Bh as SUPPORTED_AUDIO_FORMATS,
-  tt as Song,
+  et as Song,
   Sh as StructureMarker,
   kh as StructureType,
   On as TempoEvent,
