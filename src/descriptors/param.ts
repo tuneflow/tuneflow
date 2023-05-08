@@ -67,6 +67,9 @@ export enum InjectSource {
 
   /** A list of `AudioData` for specified clips. */
   ClipAudioData = 7,
+
+  /** The current user language. */
+  Language = 8,
 }
 
 export interface Mp3DataConvertOptions {

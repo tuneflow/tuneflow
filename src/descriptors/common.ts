@@ -21,8 +21,15 @@ export interface PluginInfo {
 
 /** A universal id to identify an entity. */
 export interface EntityId {
-  type: 'song' | 'track' | 'clip' | 'note';
+  type: 'song' | 'track' | 'clip' | 'note' | 'lyrics-line' | 'lyrics-structure';
+  /** Required when type is `track` | `clip` | `note` */
   trackId?: string;
+  /** Required when type is `clip` | `note` */
   clipId?: string;
+  /** Required when type is `note` */
   noteId?: number;
+  /** Required when type is `lyrics-line` */
+  lyricsLineIndex?: number;
+  /** Required when type is `lyrics-structure` */
+  lyricsStructureIndex?: number;
 }

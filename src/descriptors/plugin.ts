@@ -27,12 +27,18 @@ export const TuneflowPluginCategory = {
  * * `context-track-control` The plugin will be available on the **control** part(the "knobs" portion) of the context menu of the track.
  *        When running, it will receive trigger data about the triggering track under cursor.
  * * `selected-clips` The plugin will be available on the clip context menu. When running, it will receive trigger data about the currently selected clips.
+ * * `lyrics-generate` The plugin will be available on the lyrics editor general context menu. It should focus on the lyrics as a whole.
+ * * `lyrics-structure` The plugin will be available on the context menu of a single structure within the lyrics editor. When running, it will receive trigger data about the structure being edited.
+ * * `lyrics-line` The plugin will be available on the context menu of a single lyrics line within the lyrics editor. When running, it will receive trigger data about the line being edited.
  */
 export type TuneflowPluginTriggerType =
   | 'song'
   | 'context-track-content'
   | 'context-track-control'
-  | 'selected-clips';
+  | 'selected-clips'
+  | 'lyrics-generate'
+  | 'lyrics-structure'
+  | 'lyrics-line';
 
 export interface TuneflowPluginTriggerConfig {
   type: TuneflowPluginTriggerType;
