@@ -120,6 +120,13 @@ export class TuneflowPlugin {
     readApis: ReadAPIs,
   ): Promise<void> {}
 
+  /**
+   * Called when the plugin execution is cancelled.
+   */
+  onCancel() {
+    // Do nothing by default.
+  }
+
   // ============ PUBLIC NO OVERWRITE ================
 
   /**
@@ -335,7 +342,16 @@ export class TuneflowPlugin {
   }
 
   public setEnabledInternal(enabled: boolean) {
+    const prevEnabled = this.enabledInternal;
     this.enabledInternal = enabled;
+    if (prevEnabled && !enabled) {
+      // Disabled.
+      try {
+        this.onCancel();
+      } catch (e: any) {
+        console.error(e);
+      }
+    }
   }
 
   /**
