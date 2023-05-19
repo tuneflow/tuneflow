@@ -524,7 +524,10 @@ export class Song {
     sortedTempoEvents.sort((a: any, b: any) => a.getTicks() - b.getTicks());
     const firstTempoEvent = sortedTempoEvents[0];
     if (firstTempoEvent.getTicks() > 0) {
-      throw new Error('The first tempo event needs to start from tick 0');
+      console.warn('The first tempo event needs to start from tick 0');
+      // @ts-ignore
+      firstTempoEvent.ticks = 0;
+      firstTempoEvent.setTimeInternal(0);
     }
     this.tempos = [
       new TempoEvent({
