@@ -23,6 +23,17 @@ describe('Song-related Tests', () => {
     song.createTimeSignature({ ticks: 0, numerator: 4, denominator: 4 });
     song.createTimeSignature({ ticks: 2880, numerator: 7, denominator: 8 });
   });
+  describe('Creates song correctly', () => {
+    const newSong = Song.create();
+    expect(newSong.getResolution()).toBe(480);
+    expect(newSong.getTempoChanges().length).toBe(1);
+    expect(newSong.getTempoChanges()[0].getBpm()).toBe(120);
+    expect(newSong.getTempoChanges()[0].getTicks()).toBe(0);
+    expect(newSong.getTimeSignatures().length).toBe(1);
+    expect(newSong.getTimeSignatures()[0].getNumerator()).toBe(4);
+    expect(newSong.getTimeSignatures()[0].getDenominator()).toBe(4);
+    expect(newSong.getTimeSignatures()[0].getTicks()).toBe(0);
+  });
 
   describe('Works with tempos correctly', () => {
     it('Gets tempo at tick correctly', async () => {

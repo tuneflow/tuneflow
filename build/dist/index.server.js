@@ -6,7 +6,7 @@ var Gi = "1.13.6", gi = typeof self == "object" && self.self === self && self ||
   "hasOwnProperty",
   "toLocaleString"
 ], Jo = Math.pow(2, 53) - 1;
-function J(t, e) {
+function j(t, e) {
   return e = e == null ? t.length - 1 : +e, function() {
     for (var n = Math.max(arguments.length - e, 0), r = Array(n), i = 0; i < n; i++)
       r[i] = arguments[i + e];
@@ -94,7 +94,7 @@ var ac = /\[object ((I|Ui)nt(8|16|32)|Float(32|64)|Uint8Clamped|Big(I|Ui)nt64)Ar
 function oc(t) {
   return vi ? vi(t) && !ze(t) : sc(t) && ac.test(ve.call(t));
 }
-const rs = Wi ? oc : ts(!1), j = ns("length");
+const rs = Wi ? oc : ts(!1), Q = ns("length");
 function cc(t) {
   for (var e = {}, n = t.length, r = 0; r < n; ++r)
     e[t[r]] = !0;
@@ -126,8 +126,8 @@ function F(t) {
 function uc(t) {
   if (t == null)
     return !0;
-  var e = j(t);
-  return typeof e == "number" && (Gt(t) || nr(t) || sr(t)) ? e === 0 : j(F(t)) === 0;
+  var e = Q(t);
+  return typeof e == "number" && (Gt(t) || nr(t) || sr(t)) ? e === 0 : Q(F(t)) === 0;
 }
 function ss(t, e) {
   var n = F(e), r = n.length;
@@ -246,12 +246,12 @@ function Ie(t) {
   return zi && is(t, e), e;
 }
 function ar(t) {
-  var e = j(t);
+  var e = Q(t);
   return function(n) {
     if (n == null)
       return !1;
     var r = Ie(n);
-    if (j(r))
+    if (Q(r))
       return !1;
     for (var i = 0; i < e; i++)
       if (!G(n[t[i]]))
@@ -390,11 +390,11 @@ function gr(t, e) {
   return ms(t, e, 1 / 0);
 }
 T.iteratee = gr;
-function Q(t, e, n) {
+function Y(t, e, n) {
   return T.iteratee !== gr ? T.iteratee(t, e) : ms(t, e, n);
 }
 function Ic(t, e, n) {
-  e = Q(e, n);
+  e = Y(e, n);
   for (var r = F(t), i = r.length, s = {}, a = 0; a < i; a++) {
     var o = r[a];
     s[o] = e(t[o], o, t);
@@ -521,7 +521,7 @@ function ws(t, e, n, r, i) {
   var s = gs(t.prototype), a = t.apply(s, i);
   return Mt(a) ? a : s;
 }
-var oe = J(function(t, e) {
+var oe = j(function(t, e) {
   var n = oe.placeholder, r = function() {
     for (var i = 0, s = e.length, a = Array(s), o = 0; o < s; o++)
       a[o] = e[o] === n ? arguments[i++] : e[o];
@@ -532,22 +532,22 @@ var oe = J(function(t, e) {
   return r;
 });
 oe.placeholder = T;
-const bs = J(function(t, e, n) {
+const bs = j(function(t, e, n) {
   if (!G(t))
     throw new TypeError("Bind must be called on a function");
-  var r = J(function(i) {
+  var r = j(function(i) {
     return ws(t, r, e, this, n.concat(i));
   });
   return r;
-}), Z = es(j);
+}), tt = es(Q);
 function Wt(t, e, n, r) {
   if (r = r || [], !e && e !== 0)
     e = 1 / 0;
   else if (e <= 0)
     return r.concat(t);
-  for (var i = r.length, s = 0, a = j(t); s < a; s++) {
+  for (var i = r.length, s = 0, a = Q(t); s < a; s++) {
     var o = t[s];
-    if (Z(o) && (Gt(o) || sr(o)))
+    if (tt(o) && (Gt(o) || sr(o)))
       if (e > 1)
         Wt(o, e - 1, n, r), i = r.length;
       else
@@ -558,7 +558,7 @@ function Wt(t, e, n, r) {
   }
   return r;
 }
-const Hc = J(function(t, e) {
+const Hc = j(function(t, e) {
   e = Wt(e, !1, !1);
   var n = e.length;
   if (n < 1)
@@ -576,7 +576,7 @@ function $c(t, e) {
   };
   return n.cache = {}, n;
 }
-const Cs = J(function(t, e, n) {
+const Cs = j(function(t, e, n) {
   return setTimeout(function() {
     return t.apply(null, n);
   }, e);
@@ -600,7 +600,7 @@ function Gc(t, e, n) {
   var r, i, s, a, o, u = function() {
     var d = Se() - i;
     e > d ? r = setTimeout(u, e - d) : (r = null, n || (a = t.apply(o, s)), r || (s = o = null));
-  }, l = J(function(d) {
+  }, l = j(function(d) {
     return o = this, s = d, i = Se(), r || (r = setTimeout(u, e), n && (a = t.apply(o, s))), a;
   });
   return l.cancel = function() {
@@ -637,15 +637,15 @@ function Is(t, e) {
 }
 const qc = oe(Is, 2);
 function Ts(t, e, n) {
-  e = Q(e, n);
+  e = Y(e, n);
   for (var r = F(t), i, s = 0, a = r.length; s < a; s++)
     if (i = r[s], e(t[i], i, t))
       return i;
 }
 function Es(t) {
   return function(e, n, r) {
-    n = Q(n, r);
-    for (var i = j(e), s = t > 0 ? 0 : i - 1; s >= 0 && s < i; s += t)
+    n = Y(n, r);
+    for (var i = Q(e), s = t > 0 ? 0 : i - 1; s >= 0 && s < i; s += t)
       if (n(e[s], s, e))
         return s;
     return -1;
@@ -653,8 +653,8 @@ function Es(t) {
 }
 const ie = Es(1), _s = Es(-1);
 function Ps(t, e, n, r) {
-  n = Q(n, r, 1);
-  for (var i = n(e), s = 0, a = j(t); s < a; ) {
+  n = Y(n, r, 1);
+  for (var i = n(e), s = 0, a = Q(t); s < a; ) {
     var o = Math.floor((s + a) / 2);
     n(t[o]) < i ? s = o + 1 : a = o;
   }
@@ -662,7 +662,7 @@ function Ps(t, e, n, r) {
 }
 function As(t, e, n) {
   return function(r, i, s) {
-    var a = 0, o = j(r);
+    var a = 0, o = Q(r);
     if (typeof s == "number")
       t > 0 ? a = s >= 0 ? s : Math.max(s + o, a) : o = s >= 0 ? Math.min(s + 1, o) : s + o + 1;
     else if (n && s && o)
@@ -677,7 +677,7 @@ function As(t, e, n) {
 }
 const xs = As(1, ie, Ps), Xc = As(-1, _s);
 function Xe(t, e, n) {
-  var r = Z(t) ? ie : Ts, i = r(t, e, n);
+  var r = tt(t) ? ie : Ts, i = r(t, e, n);
   if (i !== void 0 && i !== -1)
     return t[i];
 }
@@ -687,7 +687,7 @@ function Jc(t, e) {
 function pt(t, e, n) {
   e = Ee(e, n);
   var r, i;
-  if (Z(t))
+  if (tt(t))
     for (r = 0, i = t.length; r < i; r++)
       e(t[r], r, t);
   else {
@@ -698,8 +698,8 @@ function pt(t, e, n) {
   return t;
 }
 function Ht(t, e, n) {
-  e = Q(e, n);
-  for (var r = !Z(t) && F(t), i = (r || t).length, s = Array(i), a = 0; a < i; a++) {
+  e = Y(e, n);
+  for (var r = !tt(t) && F(t), i = (r || t).length, s = Array(i), a = 0; a < i; a++) {
     var o = r ? r[a] : a;
     s[a] = e(t[o], o, t);
   }
@@ -707,7 +707,7 @@ function Ht(t, e, n) {
 }
 function Ns(t) {
   var e = function(n, r, i, s) {
-    var a = !Z(n) && F(n), o = (a || n).length, u = t > 0 ? 0 : o - 1;
+    var a = !tt(n) && F(n), o = (a || n).length, u = t > 0 ? 0 : o - 1;
     for (s || (i = n[a ? a[u] : u], u += t); u >= 0 && u < o; u += t) {
       var l = a ? a[u] : u;
       i = r(i, n[l], l, n);
@@ -722,16 +722,16 @@ function Ns(t) {
 const xn = Ns(1), bi = Ns(-1);
 function se(t, e, n) {
   var r = [];
-  return e = Q(e, n), pt(t, function(i, s, a) {
+  return e = Y(e, n), pt(t, function(i, s, a) {
     e(i, s, a) && r.push(i);
   }), r;
 }
 function jc(t, e, n) {
-  return se(t, dr(Q(e)), n);
+  return se(t, dr(Y(e)), n);
 }
 function Ci(t, e, n) {
-  e = Q(e, n);
-  for (var r = !Z(t) && F(t), i = (r || t).length, s = 0; s < i; s++) {
+  e = Y(e, n);
+  for (var r = !tt(t) && F(t), i = (r || t).length, s = 0; s < i; s++) {
     var a = r ? r[s] : s;
     if (!e(t[a], a, t))
       return !1;
@@ -739,8 +739,8 @@ function Ci(t, e, n) {
   return !0;
 }
 function Ii(t, e, n) {
-  e = Q(e, n);
-  for (var r = !Z(t) && F(t), i = (r || t).length, s = 0; s < i; s++) {
+  e = Y(e, n);
+  for (var r = !tt(t) && F(t), i = (r || t).length, s = 0; s < i; s++) {
     var a = r ? r[s] : s;
     if (e(t[a], a, t))
       return !0;
@@ -748,9 +748,9 @@ function Ii(t, e, n) {
   return !1;
 }
 function dt(t, e, n, r) {
-  return Z(t) || (t = ae(t)), (typeof n != "number" || r) && (n = 0), xs(t, e, n) >= 0;
+  return tt(t) || (t = ae(t)), (typeof n != "number" || r) && (n = 0), xs(t, e, n) >= 0;
 }
-const Qc = J(function(t, e, n) {
+const Qc = j(function(t, e, n) {
   var r, i;
   return G(e) ? i = e : (e = Te(e), r = e.slice(0, -1), e = e[e.length - 1]), Ht(t, function(s) {
     var a = i;
@@ -771,11 +771,11 @@ function Yc(t, e) {
 function Os(t, e, n) {
   var r = -1 / 0, i = -1 / 0, s, a;
   if (e == null || typeof e == "number" && typeof t[0] != "object" && t != null) {
-    t = Z(t) ? t : ae(t);
+    t = tt(t) ? t : ae(t);
     for (var o = 0, u = t.length; o < u; o++)
       s = t[o], s != null && s > r && (r = s);
   } else
-    e = Q(e, n), pt(t, function(l, d, f) {
+    e = Y(e, n), pt(t, function(l, d, f) {
       a = e(l, d, f), (a > i || a === -1 / 0 && r === -1 / 0) && (r = l, i = a);
     });
   return r;
@@ -783,23 +783,23 @@ function Os(t, e, n) {
 function Zc(t, e, n) {
   var r = 1 / 0, i = 1 / 0, s, a;
   if (e == null || typeof e == "number" && typeof t[0] != "object" && t != null) {
-    t = Z(t) ? t : ae(t);
+    t = tt(t) ? t : ae(t);
     for (var o = 0, u = t.length; o < u; o++)
       s = t[o], s != null && s < r && (r = s);
   } else
-    e = Q(e, n), pt(t, function(l, d, f) {
+    e = Y(e, n), pt(t, function(l, d, f) {
       a = e(l, d, f), (a < i || a === 1 / 0 && r === 1 / 0) && (r = l, i = a);
     });
   return r;
 }
 var tu = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
 function ys(t) {
-  return t ? Gt(t) ? Ce.call(t) : nr(t) ? t.match(tu) : Z(t) ? Ht(t, fr) : ae(t) : [];
+  return t ? Gt(t) ? Ce.call(t) : nr(t) ? t.match(tu) : tt(t) ? Ht(t, fr) : ae(t) : [];
 }
 function Rs(t, e, n) {
   if (e == null || n)
-    return Z(t) || (t = ae(t)), t[$n(t.length - 1)];
-  var r = ys(t), i = j(r);
+    return tt(t) || (t = ae(t)), t[$n(t.length - 1)];
+  var r = ys(t), i = Q(r);
   e = Math.max(Math.min(e, i), 0);
   for (var s = i - 1, a = 0; a < e; a++) {
     var o = $n(a, s), u = r[a];
@@ -812,7 +812,7 @@ function eu(t) {
 }
 function nu(t, e, n) {
   var r = 0;
-  return e = Q(e, n), pr(Ht(t, function(i, s, a) {
+  return e = Y(e, n), pr(Ht(t, function(i, s, a) {
     return {
       value: i,
       index: r++,
@@ -832,7 +832,7 @@ function nu(t, e, n) {
 function an(t, e) {
   return function(n, r, i) {
     var s = e ? [[], []] : {};
-    return r = Q(r, i), pt(n, function(a, o) {
+    return r = Y(r, i), pt(n, function(a, o) {
       var u = r(a, o, n);
       t(s, a, u);
     }), s;
@@ -848,12 +848,12 @@ const ru = an(function(t, e, n) {
   t[n ? 0 : 1].push(e);
 }, !0);
 function ou(t) {
-  return t == null ? 0 : Z(t) ? t.length : F(t).length;
+  return t == null ? 0 : tt(t) ? t.length : F(t).length;
 }
 function cu(t, e, n) {
   return e in n;
 }
-const Fs = J(function(t, e) {
+const Fs = j(function(t, e) {
   var n = {}, r = e[0];
   if (t == null)
     return n;
@@ -863,7 +863,7 @@ const Fs = J(function(t, e) {
     r(o, a, t) && (n[a] = o);
   }
   return n;
-}), uu = J(function(t, e) {
+}), uu = j(function(t, e) {
   var n = e[0], r;
   return G(n) ? (n = dr(n), e.length > 1 && (r = e[1])) : (e = Ht(Wt(e, !1, !1), String), n = function(i, s) {
     return !dt(e, s);
@@ -887,26 +887,26 @@ function fu(t) {
 function hu(t, e) {
   return Wt(t, e, !1);
 }
-const Bs = J(function(t, e) {
+const Bs = j(function(t, e) {
   return e = Wt(e, !0, !0), se(t, function(n) {
     return !dt(e, n);
   });
-}), gu = J(function(t, e) {
+}), gu = j(function(t, e) {
   return Bs(t, e);
 });
 function Dn(t, e, n, r) {
-  qi(e) || (r = n, n = e, e = !1), n != null && (n = Q(n, r));
-  for (var i = [], s = [], a = 0, o = j(t); a < o; a++) {
+  qi(e) || (r = n, n = e, e = !1), n != null && (n = Y(n, r));
+  for (var i = [], s = [], a = 0, o = Q(t); a < o; a++) {
     var u = t[a], l = n ? n(u, a, t) : u;
     e && !n ? ((!a || s !== l) && i.push(u), s = l) : n ? dt(s, l) || (s.push(l), i.push(u)) : dt(i, u) || i.push(u);
   }
   return i;
 }
-const du = J(function(t) {
+const du = j(function(t) {
   return Dn(Wt(t, !0, !0));
 });
 function pu(t) {
-  for (var e = [], n = arguments.length, r = 0, i = j(t); r < i; r++) {
+  for (var e = [], n = arguments.length, r = 0, i = Q(t); r < i; r++) {
     var s = t[r];
     if (!dt(e, s)) {
       var a;
@@ -918,13 +918,13 @@ function pu(t) {
   return e;
 }
 function Mn(t) {
-  for (var e = t && Os(t, j).length || 0, n = Array(e), r = 0; r < e; r++)
+  for (var e = t && Os(t, Q).length || 0, n = Array(e), r = 0; r < e; r++)
     n[r] = pr(t, r);
   return n;
 }
-const mu = J(Mn);
+const mu = j(Mn);
 function vu(t, e) {
-  for (var n = {}, r = 0, i = j(t); r < i; r++)
+  for (var n = {}, r = 0, i = Q(t); r < i; r++)
     e ? n[t[r]] = e[r] : n[t[r][0]] = t[r][1];
   return n;
 }
@@ -970,7 +970,7 @@ pt(["concat", "join", "slice"], function(t) {
 const wu = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   VERSION: Gi,
-  restArguments: J,
+  restArguments: j,
   isObject: Mt,
   isNull: jo,
   isUndefined: Ki,
@@ -1635,9 +1635,9 @@ var x = {
   function ho(c, g) {
     return c && ri(g, _n(g), c);
   }
-  function In(c, g, p, S, B, H, tt) {
+  function In(c, g, p, S, B, H, et) {
     var K;
-    if (S && (K = H ? S(c, B, H, tt) : S(c)), K !== void 0)
+    if (S && (K = H ? S(c, B, H, et) : S(c)), K !== void 0)
       return K;
     if (!Ne(c))
       return c;
@@ -1660,14 +1660,14 @@ var x = {
         K = Oo(c, Jt, In, g);
       }
     }
-    tt || (tt = new qt());
-    var fi = tt.get(c);
+    et || (et = new qt());
+    var fi = et.get(c);
     if (fi)
       return fi;
-    if (tt.set(c, K), !ui)
+    if (et.set(c, K), !ui)
       var hi = p ? Ao(c) : _n(c);
     return Pa(hi || c, function(Pn, Oe) {
-      hi && (Oe = Pn, Pn = c[Oe]), ni(K, Oe, In(Pn, g, p, S, Oe, c, tt));
+      hi && (Oe = Pn, Pn = c[Oe]), ni(K, Oe, In(Pn, g, p, S, Oe, c, et));
     }), K;
   }
   function go(c) {
@@ -1736,8 +1736,8 @@ var x = {
   function ri(c, g, p, S) {
     p || (p = {});
     for (var B = -1, H = g.length; ++B < H; ) {
-      var tt = g[B], K = S ? S(p[tt], c[tt], tt, p, c) : void 0;
-      ni(p, tt, K === void 0 ? c[tt] : K);
+      var et = g[B], K = S ? S(p[et], c[et], et, p, c) : void 0;
+      ni(p, et, K === void 0 ? c[et] : K);
     }
     return p;
   }
@@ -1959,7 +1959,7 @@ function vr(t) {
   } else {
     if (ot(t))
       return t;
-    if (X(t))
+    if (J(t))
       return t;
   }
 }
@@ -1982,7 +1982,7 @@ function kr(t) {
       const r = kr(t[n]);
       r && (e += r + " ");
     }
-  else if (X(t))
+  else if (J(t))
     for (const n in t)
       t[n] && (e += n + " ");
   return e.trim();
@@ -1993,7 +1993,7 @@ const Sr = () => {
 }, yu = () => !1, Ru = /^on[^a-z]/, Fu = (t) => Ru.test(t), at = Object.assign, Uu = (t, e) => {
   const n = t.indexOf(e);
   n > -1 && t.splice(n, 1);
-}, Bu = Object.prototype.hasOwnProperty, R = (t, e) => Bu.call(t, e), N = Array.isArray, te = (t) => cn(t) === "[object Map]", Vu = (t) => cn(t) === "[object Set]", W = (t) => typeof t == "function", ot = (t) => typeof t == "string", wr = (t) => typeof t == "symbol", X = (t) => t !== null && typeof t == "object", Lu = (t) => X(t) && W(t.then) && W(t.catch), Hu = Object.prototype.toString, cn = (t) => Hu.call(t), Ls = (t) => cn(t).slice(8, -1), $u = (t) => cn(t) === "[object Object]", br = (t) => ot(t) && t !== "NaN" && t[0] !== "-" && "" + parseInt(t, 10) === t, Du = (t) => {
+}, Bu = Object.prototype.hasOwnProperty, R = (t, e) => Bu.call(t, e), N = Array.isArray, te = (t) => cn(t) === "[object Map]", Vu = (t) => cn(t) === "[object Set]", W = (t) => typeof t == "function", ot = (t) => typeof t == "string", wr = (t) => typeof t == "symbol", J = (t) => t !== null && typeof t == "object", Lu = (t) => J(t) && W(t.then) && W(t.catch), Hu = Object.prototype.toString, cn = (t) => Hu.call(t), Ls = (t) => cn(t).slice(8, -1), $u = (t) => cn(t) === "[object Object]", br = (t) => ot(t) && t !== "NaN" && t[0] !== "-" && "" + parseInt(t, 10) === t, Du = (t) => {
   const e = /* @__PURE__ */ Object.create(null);
   return (n) => e[n] || (e[n] = t(n));
 }, Th = Du((t) => t.charAt(0).toUpperCase() + t.slice(1)), Je = (t, e) => !Object.is(t, e), Mu = (t, e, n) => {
@@ -2034,7 +2034,7 @@ const zn = (t) => {
 }, Kn = /* @__PURE__ */ new WeakMap();
 let he = 0, Et = 1;
 const qn = 30;
-let q;
+let X;
 const Ft = Symbol(process.env.NODE_ENV !== "production" ? "iterate" : ""), Xn = Symbol(process.env.NODE_ENV !== "production" ? "Map key iterate" : "");
 class Ju {
   constructor(e, n = null, r) {
@@ -2043,20 +2043,20 @@ class Ju {
   run() {
     if (!this.active)
       return this.fn();
-    let e = q, n = Ut;
+    let e = X, n = Ut;
     for (; e; ) {
       if (e === this)
         return;
       e = e.parent;
     }
     try {
-      return this.parent = q, q = this, Ut = !0, Et = 1 << ++he, he <= qn ? qu(this) : Ai(this), this.fn();
+      return this.parent = X, X = this, Ut = !0, Et = 1 << ++he, he <= qn ? qu(this) : Ai(this), this.fn();
     } finally {
-      he <= qn && Xu(this), Et = 1 << --he, q = this.parent, Ut = n, this.parent = void 0, this.deferStop && this.stop();
+      he <= qn && Xu(this), Et = 1 << --he, X = this.parent, Ut = n, this.parent = void 0, this.deferStop && this.stop();
     }
   }
   stop() {
-    q === this ? this.deferStop = !0 : this.active && (Ai(this), this.onStop && this.onStop(), this.active = !1);
+    X === this ? this.deferStop = !0 : this.active && (Ai(this), this.onStop && this.onStop(), this.active = !1);
   }
 }
 function Ai(t) {
@@ -2077,18 +2077,18 @@ function Gs() {
   Ut = t === void 0 ? !0 : t;
 }
 function it(t, e, n) {
-  if (Ut && q) {
+  if (Ut && X) {
     let r = Kn.get(t);
     r || Kn.set(t, r = /* @__PURE__ */ new Map());
     let i = r.get(n);
     i || r.set(n, i = zn());
-    const s = process.env.NODE_ENV !== "production" ? { effect: q, target: t, type: e, key: n } : void 0;
+    const s = process.env.NODE_ENV !== "production" ? { effect: X, target: t, type: e, key: n } : void 0;
     ju(i, s);
   }
 }
 function ju(t, e) {
   let n = !1;
-  he <= qn ? $s(t) || (t.n |= Et, n = !Hs(t)) : n = !t.has(q), n && (t.add(q), q.deps.push(t), process.env.NODE_ENV !== "production" && q.onTrack && q.onTrack(Object.assign({ effect: q }, e)));
+  he <= qn ? $s(t) || (t.n |= Et, n = !Hs(t)) : n = !t.has(X), n && (t.add(X), X.deps.push(t), process.env.NODE_ENV !== "production" && X.onTrack && X.onTrack(Object.assign({ effect: X }, e)));
 }
 function _t(t, e, n, r, i, s) {
   const a = Kn.get(t);
@@ -2132,7 +2132,7 @@ function ye(t, e) {
     r.computed || xi(r, e);
 }
 function xi(t, e) {
-  (t !== q || t.allowRecurse) && (process.env.NODE_ENV !== "production" && t.onTrigger && t.onTrigger(at({ effect: t }, e)), t.scheduler ? t.scheduler() : t.run());
+  (t !== X || t.allowRecurse) && (process.env.NODE_ENV !== "production" && t.onTrigger && t.onTrigger(at({ effect: t }, e)), t.scheduler ? t.scheduler() : t.run());
 }
 const Qu = /* @__PURE__ */ Pu("__proto__,__v_isRef,__isVue"), Ws = new Set(
   /* @__PURE__ */ Object.getOwnPropertyNames(Symbol).filter((t) => t !== "arguments" && t !== "caller").map((t) => Symbol[t]).filter(wr)
@@ -2169,7 +2169,7 @@ function Cr(t = !1, e = !1) {
     if (!t && a && R(Ni, i))
       return Reflect.get(Ni, i, s);
     const o = Reflect.get(r, i, s);
-    return (wr(i) ? Ws.has(i) : Qu(i)) || (t || it(r, "get", i), e) ? o : M(o) ? a && br(i) ? o : o.value : X(o) ? t ? Qs(o) : js(o) : o;
+    return (wr(i) ? Ws.has(i) : Qu(i)) || (t || it(r, "get", i), e) ? o : M(o) ? a && br(i) ? o : o.value : J(o) ? t ? Qs(o) : js(o) : o;
   };
 }
 const nl = /* @__PURE__ */ rl();
@@ -2398,7 +2398,7 @@ function Le(t) {
   return Er(t, !0, cl, ml, Js);
 }
 function Er(t, e, n, r, i) {
-  if (!X(t))
+  if (!J(t))
     return process.env.NODE_ENV, t;
   if (t.__v_raw && !(e && t.__v_isReactive))
     return t;
@@ -2430,7 +2430,7 @@ function E(t) {
 function wl(t) {
   return Mu(t, "__v_skip", !0), t;
 }
-const _r = (t) => X(t) ? js(t) : t, Pr = (t) => X(t) ? Qs(t) : t;
+const _r = (t) => J(t) ? js(t) : t, Pr = (t) => J(t) ? Qs(t) : t;
 function M(t) {
   return !!(t && t.__v_isRef === !0);
 }
@@ -2791,7 +2791,7 @@ function Wl(t, e) {
   };
 }
 function Yt(t, e) {
-  if (!X(t) || t.__v_skip || (e = e || /* @__PURE__ */ new Set(), e.has(t)))
+  if (!J(t) || t.__v_skip || (e = e || /* @__PURE__ */ new Set(), e.has(t)))
     return t;
   if (e.add(t), M(t))
     Yt(t.value, e);
@@ -2886,7 +2886,7 @@ let Xl = !0;
 function Jl(t) {
   const e = t.type, { mixins: n, extends: r } = e, { mixins: i, optionsCache: s, config: { optionMergeStrategies: a } } = t.appContext, o = s.get(e);
   let u;
-  return o ? u = o : !i.length && !n && !r ? u = e : (u = {}, i.length && i.forEach((l) => Ze(u, l, a, !0)), Ze(u, e, a)), X(e) && s.set(e, u), u;
+  return o ? u = o : !i.length && !n && !r ? u = e : (u = {}, i.length && i.forEach((l) => Ze(u, l, a, !0)), Ze(u, e, a)), J(e) && s.set(e, u), u;
 }
 function Ze(t, e, n, r = !1) {
   const { mixins: i, extends: s } = e;
@@ -3027,9 +3027,9 @@ function ua(t, e = null, n = null, r = 0, i = null, s = !1) {
   if (ga(t) && (t = t.__vccOpts), e) {
     e = cf(e);
     let { class: o, style: u } = e;
-    o && !ot(o) && (e.class = kr(o)), X(u) && (je(u) && !N(u) && (u = at({}, u)), e.style = vr(u));
+    o && !ot(o) && (e.class = kr(o)), J(u) && (je(u) && !N(u) && (u = at({}, u)), e.style = vr(u));
   }
-  const a = ot(t) ? 1 : $l(t) ? 128 : tf(t) ? 64 : X(t) ? 4 : W(t) ? 2 : 0;
+  const a = ot(t) ? 1 : $l(t) ? 128 : tf(t) ? 64 : J(t) ? 4 : W(t) ? 2 : 0;
   return process.env.NODE_ENV !== "production" && a & 4 && je(t) && (t = E(t), D("Vue received a Component which was made a reactive object. This can lead to unnecessary performance overhead, and should be avoided by marking the component with `markRaw` or using `shallowRef` instead of `ref`.", `
 Component that was made reactive: `, t)), af(t, e, n, r, i, a, s, !0);
 }
@@ -3168,7 +3168,7 @@ function mf() {
     return;
   const t = { style: "color:#3ba776" }, e = { style: "color:#0b1bc9" }, n = { style: "color:#b62e24" }, r = { style: "color:#9d288c" }, i = {
     header(f) {
-      return X(f) ? f.__isVue ? ["div", t, "VueInstance"] : M(f) ? [
+      return J(f) ? f.__isVue ? ["div", t, "VueInstance"] : M(f) ? [
         "div",
         {},
         ["span", t, d(f)],
@@ -3248,7 +3248,7 @@ function mf() {
     ] : ["span", {}];
   }
   function o(f, h = !0) {
-    return typeof f == "number" ? ["span", e, f] : typeof f == "string" ? ["span", n, JSON.stringify(f)] : typeof f == "boolean" ? ["span", r, f] : X(f) ? ["object", { object: h ? E(f) : f }] : ["span", n, String(f)];
+    return typeof f == "number" ? ["span", e, f] : typeof f == "string" ? ["span", n, JSON.stringify(f)] : typeof f == "boolean" ? ["span", r, f] : J(f) ? ["object", { object: h ? E(f) : f }] : ["span", n, String(f)];
   }
   function u(f, h) {
     const m = f.type;
@@ -3261,7 +3261,7 @@ function mf() {
   }
   function l(f, h, m) {
     const v = f[m];
-    if (N(v) && v.includes(h) || X(v) && h in v || f.extends && l(f.extends, h, m) || f.mixins && f.mixins.some((w) => l(w, h, m)))
+    if (N(v) && v.includes(h) || J(v) && h in v || f.extends && l(f.extends, h, m) || f.mixins && f.mixins.some((w) => l(w, h, m)))
       return !0;
   }
   function d(f) {
@@ -6222,23 +6222,23 @@ class bh {
     return -1;
   }
   createLine({ startTick: e, resolveOrder: n = !0 }) {
-    const r = new Y({ lyrics: this, startTick: e });
+    const r = new Z({ lyrics: this, startTick: e });
     return this.lines.push(r), n && this.sortLinesInternal(), r;
   }
   async createLineFromString({
     input: e,
     startTick: n,
     endTick: r,
-    tokenizer: i = Y.DEFAULT_TOKENIZER
+    tokenizer: i = Z.DEFAULT_TOKENIZER
   }) {
     const s = this.createLine({ startTick: n });
-    return e && await Y.createWordsFromString(s, e, n, r, i), s;
+    return e && await Z.createWordsFromString(s, e, n, r, i), s;
   }
   removeLineAtIndex(e) {
     e < 0 || e >= this.lines.length || this.lines.splice(e, 1);
   }
   cloneLine(e) {
-    const n = new Y({
+    const n = new Z({
       lyrics: this,
       startTick: e.getStartTick()
     });
@@ -6254,7 +6254,7 @@ class bh {
     this.lines.sort((e, n) => e.getStartTick() - n.getStartTick());
   }
 }
-class Y {
+class Z {
   lyrics;
   words;
   constructor({ lyrics: e, startTick: n }) {
@@ -6270,12 +6270,12 @@ class Y {
   getStartTick() {
     if (this.words.length === 0)
       throw new Error("Words cannot be empty");
-    return Y.getLineStartTickImpl(this.words, (e) => e.getStartTick());
+    return Z.getLineStartTickImpl(this.words, (e) => e.getStartTick());
   }
   getEndTick() {
     if (this.words.length === 0)
       throw new Error("Words cannot be empty");
-    return Y.getLineEndTickImpl(this.words, (e) => e.getEndTick());
+    return Z.getLineEndTickImpl(this.words, (e) => e.getEndTick());
   }
   static getLineStartTickImpl(e, n) {
     return !e || e.length === 0 ? 0 : n(e[0]);
@@ -6294,7 +6294,7 @@ class Y {
     const s = (n - e) / (i - r);
     for (const a of this.getWords())
       a.setStartTick(
-        Y.relativeMovePoint(
+        Z.relativeMovePoint(
           a.getStartTick(),
           r,
           e,
@@ -6302,7 +6302,7 @@ class Y {
         ),
         !1
       ), a.setEndTick(
-        Y.relativeMovePoint(a.getEndTick(), r, e, s),
+        Z.relativeMovePoint(a.getEndTick(), r, e, s),
         !1
       );
     this.lyrics.sortLinesInternal();
@@ -6310,9 +6310,9 @@ class Y {
   clear() {
     this.words = [this.createPlaceholderWord()];
   }
-  async replaceWithString(e, n = Y.DEFAULT_TOKENIZER) {
+  async replaceWithString(e, n = Z.DEFAULT_TOKENIZER) {
     const r = this.getStartTick(), i = this.getEndTick();
-    this.words = [this.createPlaceholderWord()], e && await Y.createWordsFromString(this, e, r, i, n);
+    this.words = [this.createPlaceholderWord()], e && await Z.createWordsFromString(this, e, r, i, n);
   }
   static async createWordsFromString(e, n, r, i, s) {
     if (!n)
@@ -6349,10 +6349,10 @@ class Y {
     return null;
   }
   getSentence() {
-    return this.isEmpty() ? "" : Y.getSentenceImpl(this.words, (e) => e.getWord());
+    return this.isEmpty() ? "" : Z.getSentenceImpl(this.words, (e) => e.getWord());
   }
   isEmpty() {
-    return Y.hasOnlyPlaceholderImpl(this.words, (e) => e.getWord());
+    return Z.hasOnlyPlaceholderImpl(this.words, (e) => e.getWord());
   }
   cloneWord(e) {
     return new St({
@@ -6440,7 +6440,7 @@ class St {
   }
   static PLACEHOLDER_WORD = "^%%^";
 }
-class et {
+class q {
   static DEFAULT_PPQ = Zn;
   static NUM_BUSES = 32;
   masterTrack;
@@ -6456,12 +6456,16 @@ class et {
   constructor() {
     this.tracks = [], this.PPQ = 0, this.tempos = [], this.timeSignatures = [], this.structures = [], this.lyrics = new bh({ song: this });
   }
+  static create() {
+    const e = new q();
+    return e.setResolution(q.DEFAULT_PPQ), e.createTempoChange({ ticks: 0, bpm: 120 }), e.createTimeSignature({ ticks: 0, numerator: 4, denominator: 4 }), e;
+  }
   getBusByRank(e) {
     return this.buses[e - 1];
   }
   setBus(e, n) {
-    if (e > et.NUM_BUSES)
-      throw new Error(`Only ${et.NUM_BUSES} buses are supported.`);
+    if (e > q.NUM_BUSES)
+      throw new Error(`Only ${q.NUM_BUSES} buses are supported.`);
     const r = e - 1;
     this.buses[r] ? this.buses[r].setName(n) : this.buses[r] = new Ch({ rank: e, name: n });
   }
@@ -6611,7 +6615,7 @@ class et {
     return r >= n.length - 1 ? n[r] : Math.abs(n[r].tick - e) > Math.abs(n[r + 1].tick - e) ? n[r + 1] : n[r];
   }
   getBarBeats(e) {
-    return et.getBarBeatsImpl(
+    return q.getBarBeatsImpl(
       e,
       this.PPQ,
       this.timeSignatures,
@@ -6662,7 +6666,7 @@ class et {
     return this.tempos;
   }
   getTempoAtTick(e) {
-    return et.getTempoAtTickImpl(
+    return q.getTempoAtTickImpl(
       e,
       this.tempos,
       (n) => ({
@@ -6799,7 +6803,7 @@ class et {
     return this.structures[e];
   }
   getStructureAtTick(e) {
-    return et.getStructureAtTickImpl(
+    return q.getStructureAtTickImpl(
       e,
       this.structures,
       (n) => ({ getTick: () => n }),
@@ -6864,7 +6868,7 @@ class et {
     return this.getResolution() * (4 / n.getDenominator());
   }
   getTimeSignatureAtTick(e) {
-    return et.getTimeSignatureAtTickImpl(
+    return q.getTimeSignatureAtTickImpl(
       e,
       this.timeSignatures,
       (n) => ({
@@ -6882,7 +6886,7 @@ class et {
     return s < 0 && (s = 0), s >= n.length && (s = n.length - 1), n[s];
   }
   tickToSeconds(e) {
-    return et.tickToSecondsImpl(
+    return q.tickToSecondsImpl(
       e,
       this.getTempoChanges(),
       this.getResolution(),
@@ -6906,14 +6910,14 @@ class et {
       (h, m) => s(h) - s(m)
     );
     o == -1 && (o = 0);
-    const u = n[o], l = a(u), d = e - l.tick, f = et.tempoBPMToTicksPerSecond(
+    const u = n[o], l = a(u), d = e - l.tick, f = q.tempoBPMToTicksPerSecond(
       l.bpm,
       r
     );
     return l.time + d / f;
   }
   secondsToTick(e) {
-    return et.secondsToTickImpl(
+    return q.secondsToTickImpl(
       e,
       this.PPQ,
       this.tempos,
@@ -6954,14 +6958,14 @@ class et {
       (h, m) => s(h) - s(m)
     );
     o == -1 && (o = 0);
-    const u = r[o], l = a(u), d = e - l.time, f = et.tempoBPMToTicksPerSecond(
+    const u = r[o], l = a(u), d = e - l.time, f = q.tempoBPMToTicksPerSecond(
       l.bpm,
       n
     );
     return Math.round(l.tick + d * f);
   }
   static importMIDI(e, n, r = 0, i = !1, s = -1) {
-    const a = new da.Midi(n), o = r, u = et.DEFAULT_PPQ / a.header.ppq;
+    const a = new da.Midi(n), o = r, u = q.DEFAULT_PPQ / a.header.ppq;
     if (i) {
       const d = [];
       for (const h of a.header.timeSignatures)
@@ -7117,14 +7121,14 @@ export {
   Of as DrumInstrumentType,
   Ef as DrumPitch,
   Ih as InjectSource,
-  Y as LyricLine,
+  Z as LyricLine,
   St as LyricWord,
   bh as Lyrics,
   Nf as MelodicInstrumentType,
   It as Note,
   _f as SUPPORTED_AUDIO_FORMATS,
   Bh as SUPPORTED_IMPORT_FILE_FORMATS,
-  et as Song,
+  q as Song,
   wh as StructureMarker,
   Sh as StructureType,
   On as TempoEvent,

@@ -41,6 +41,14 @@ export class Song {
     this.lyrics = new Lyrics({ song: this });
   }
 
+  static create() {
+    const newSong = new Song();
+    newSong.setResolution(Song.DEFAULT_PPQ);
+    newSong.createTempoChange({ ticks: 0, bpm: 120 });
+    newSong.createTimeSignature({ ticks: 0, numerator: 4, denominator: 4 });
+    return newSong;
+  }
+
   getBusByRank(rank: number) {
     return this.buses[rank - 1];
   }
