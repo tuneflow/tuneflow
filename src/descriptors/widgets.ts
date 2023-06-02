@@ -47,6 +47,7 @@ export interface WidgetDescriptor {
     | MultiSourceAudioSelectorWidgetConfig
     | DescriptionsWidgetConfig
     | TextAreaWidgetConfig
+    | MarkdownWidgetConfig
     | undefined
     | null;
 }
