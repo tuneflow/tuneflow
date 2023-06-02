@@ -23,6 +23,8 @@ export enum WidgetType {
   /** Read-only table of descriptions. */
   Descriptions = 16,
   TextArea = 17,
+  /** Display a markdown block. Does not produce any value. */
+  Markdown = 18,
 }
 
 /**
@@ -188,6 +190,10 @@ export interface TextAreaWidgetConfig {
   maxLength?: number;
   allowClear?: boolean;
   autoSize?: boolean;
+}
+
+export interface MarkdownWidgetConfig {
+  markdown: string;
 }
 
 export async function getFileContentFromFileSelector(file: File) {
