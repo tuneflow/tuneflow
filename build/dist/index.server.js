@@ -1132,6 +1132,7 @@ class Gn {
   progress = null;
   isExecuting = !1;
   isPreparingForRunInternal = !1;
+  hasInjectedDataInternal = !1;
   static providerId() {
     throw new Error("providerId() should be overwritten.");
   }

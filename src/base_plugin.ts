@@ -52,6 +52,8 @@ export class TuneflowPlugin {
   private progress: number | null = null;
   private isExecuting = false;
   private isPreparingForRunInternal = false;
+  // @ts-ignore
+  private hasInjectedDataInternal = false;
 
   // ============ PUBLIC OVERWRITABLE ================
 
