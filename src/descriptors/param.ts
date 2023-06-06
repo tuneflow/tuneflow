@@ -93,7 +93,7 @@ export interface AudioDataInjectOptions {
 
 /** Inject config for when injection source is `InjectSource.ClipAudioData`. */
 export interface ClipAudioDataInjectOptions extends AudioDataInjectOptions {
-  clips: 'selectedAudioClips' | ClipInfo[];
+  clips: 'selectedAudioClips' | 'triggeredAudioClips' | ClipInfo[];
 }
 
 export interface ClipAudioDataInjectDataEntry {
